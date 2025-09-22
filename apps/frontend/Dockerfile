@@ -44,4 +44,4 @@ USER node
 EXPOSE 3000
 
 # Iniciar servidor
-CMD ["http-server", "dist", "-p", "3000", "--proxy", "http://localhost:3000?"] 
+CMD ["http-server", "dist", "-p", "3000", "--proxy", "http://localhost:3000?"]

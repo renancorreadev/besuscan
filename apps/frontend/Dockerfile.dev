@@ -18,16 +18,21 @@ COPY --from=deps /app/package.json ./package.json
 # Copiar arquivos do projeto
 COPY . .
 
+# Criar diretórios necessários e ajustar permissões ANTES de trocar usuário
+RUN mkdir -p /app/node_modules/.vite && \
+    mkdir -p /app/dist && \
+    chown -R node:node /app
+
 # Limpar cache e arquivos desnecessários
 RUN yarn cache clean && \
     rm -rf /root/.npm && \
     rm -rf /root/.yarn
 
-# Usuário não-root para segurança
+# Usuário não-root para segurança (DEPOIS de ajustar permissões)
 USER node
 
 # Expor porta do Vite
 EXPOSE 5173
 
 # Iniciar em modo de desenvolvimento
-CMD ["yarn", "dev", "--host"] 
+CMD ["yarn", "dev", "--host"]

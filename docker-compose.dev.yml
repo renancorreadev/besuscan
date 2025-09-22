@@ -2,7 +2,7 @@ services:
   # Serviços de infraestrutura
   postgres:
     image: postgres:15
-    container_name: explorer-postgres-dev
+    container_name: besuscan-postgres
     restart: always
     environment:
       POSTGRES_USER: explorer
@@ -17,7 +17,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:3-management
-    container_name: explorer-rabbit-dev
+    container_name: besuscan-rabbit
     ports:
       - "5673:5672"
       - "15673:15672"
@@ -29,7 +29,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: explorer-redis-dev
+    container_name: besuscan-redis
     restart: always
     ports:
       - "6380:6379"
@@ -43,20 +43,21 @@ services:
     build:
       context: ./apps/indexer
       dockerfile: Dockerfile.dev
-    container_name: explorer-indexer-dev
+    container_name: besuscan-indexer
     volumes:
       - ./apps/indexer:/app
       - go-modules:/go/pkg/mod
     depends_on:
       - rabbitmq
+      - redis
     environment:
       - AIR_WORKDIR=/app
       - AIR_BUILD_CMD="go build -o /tmp/main ./cmd/main.go"
       - AIR_BIN="main"
       - AIR_CMD="./main"
       # Variáveis de ambiente para conexão com os serviços
-      - ETH_WS_URL=ws://144.22.179.183/ws
-      - ETH_RPC_URL=http://144.22.179.183
+      - ETH_WS_URL=ws://144.22.179.183:80/node2/ws
+      - ETH_RPC_URL=http://144.22.179.183:80/node2
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
       - RABBITMQ_EXCHANGE=blockchain_events
       - SYNC_INTERVAL=5
@@ -73,7 +74,7 @@ services:
     build:
       context: ./apps/api
       dockerfile: Dockerfile.dev
-    container_name: explorer-api-dev
+    container_name: besuscan-api
     volumes:
       - ./apps/api:/app
       - go-modules:/go/pkg/mod
@@ -90,12 +91,14 @@ services:
       - DATABASE_URL=postgres://explorer:explorer@postgres:5432/blockexplorer?sslmode=disable
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
       - RABBITMQ_EXCHANGE=blockchain_events
-      - BESU_RPC_URL=http://144.22.179.183
+      - BESU_RPC_URL=http://144.22.179.183:80/node2
       - REDIS_URL=redis://redis:6379
       - CHAIN_ID=1337
       - PORT=8080
       # WebSocket desabilitado por padrão para melhor performance
       - ENABLE_WEBSOCKET=false
+      # JWT Secret para autenticação (mude em produção!)
+      - JWT_SECRET=besuscan-dev-secret-key-change-in-production
     ports:
       - "8080:8080"
     networks:
@@ -107,14 +110,12 @@ services:
     build:
       context: ./apps/worker
       dockerfile: Dockerfile.dev
-    container_name: explorer-worker-dev
+    container_name: besuscan-worker
     volumes:
       - ./apps/worker:/app
       - go-modules:/go/pkg/mod
     depends_on:
-      - rabbitmq
-      - postgres
-      - redis
+      - indexer
     environment:
       - AIR_WORKDIR=/app
       - AIR_BUILD_CMD="go build -o /tmp/worker ./cmd/main.go"
@@ -122,10 +123,10 @@ services:
       - AIR_CMD="./worker"
       # Variáveis de ambiente para conexão com os serviços
       - DATABASE_URL=postgres://explorer:explorer@postgres:5432/blockexplorer?sslmode=disable
-      - ETH_RPC_URL=http://144.22.179.183
-      - ETH_WS_URL=ws://144.22.179.183/ws
-      - ETHEREUM_RPC_URL=http://144.22.179.183
-      - BESU_RPC_URL=http://144.22.179.183
+      - ETH_RPC_URL=http://144.22.179.183:80/node2
+      - ETH_WS_URL=ws://144.22.179.183:80/node2/ws
+      - ETHEREUM_RPC_URL=http://144.22.179.183:80/node2
+      - BESU_RPC_URL=http://144.22.179.183:80/node2
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
       - RABBITMQ_EXCHANGE=blockchain_events
       - REDIS_URL=redis://redis:6379
@@ -139,15 +140,15 @@ services:
     build:
       context: ./apps/frontend
       dockerfile: Dockerfile.dev
-    container_name: explorer-frontend-dev
+    container_name: besuscan-frontend
     user: "node"
     ports:
-      - "3000:3000"
-      - "24678:24678" # Porta para HMR
+      - "3002:3000"
+      - "24678:24678"
     volumes:
       - ./apps/frontend:/app:delegated
-      - /app/node_modules
       - vite-cache:/app/node_modules/.vite
+      - frontend-node-modules:/app/node_modules
     depends_on:
       - api
     environment:
@@ -159,13 +160,12 @@ services:
       - WATCHPACK_POLLING=true
       - FAST_REFRESH=true
       - HMR=true
-      # Configuração RPC - FORÇAR USO DO PROXY LOCAL
       - VITE_USE_LOCAL_RPC=true
       - VITE_CHAIN_ID=1337
       - VITE_NETWORK_NAME=HubWeb3 Besu Network
     networks:
       - explorer-network
-    command: yarn dev --host 0.0.0.0 --port 3000
+    command: sh -c "yarn install && yarn dev --host 0.0.0.0 --port 3000"
 
 # Rede personalizada para comunicação entre serviços
 networks:
@@ -177,5 +177,6 @@ volumes:
   go-modules:
   redis-data:
   vite-cache:
+  frontend-node-modules:
 
 

@@ -501,6 +501,20 @@ db-shell: ## Acessa o shell do banco de dados
 	@echo "${GREEN}▶ Iniciando shell do PostgreSQL...${RESET}"
 	${DOCKER_COMPOSE_DEV} exec postgres psql -U explorer -d blockexplorer
 
+.PHONY: db-ddl
+db-ddl: ## Executa o DDL completo do banco de dados
+	@echo "${GREEN}${BOLD}▶ Executando DDL do banco de dados...${RESET}"
+	@echo "${YELLOW}Aguardando PostgreSQL estar pronto...${RESET}"
+	@until ${DOCKER_COMPOSE_DEV} exec postgres pg_isready -U explorer -d blockexplorer; do \
+		echo "PostgreSQL não está pronto ainda..."; \
+		sleep 2; \
+	done
+	@echo "${GREEN}Copiando DDL para o container...${RESET}"
+	@docker cp database/ddl.sql besuscan-postgres:/tmp/ddl.sql
+	@echo "${GREEN}Executando DDL completo...${RESET}"
+	@${DOCKER_COMPOSE_DEV} exec postgres psql -U explorer -d blockexplorer -f /tmp/ddl.sql
+	@echo "${GREEN}✅ DDL executado com sucesso!${RESET}"
+
 # ==============================================================================
 # DESENVOLVIMENTO
 # ==============================================================================
@@ -695,10 +709,10 @@ migrate: ## Executa as migrations do banco de dados
 .PHONY: migrate-copy
 migrate-copy: ## Copia as migrations para o container PostgreSQL
 	@echo "${GREEN}${BOLD}▶ Copiando migrations para o container...${RESET}"
-	@docker cp apps/indexer/migrations/001_create_blocks_table.sql explorer-postgres-dev:/tmp/ || true
-	@docker cp apps/indexer/migrations/002_create_transactions_table.sql explorer-postgres-dev:/tmp/ || true
-	@docker cp apps/indexer/migrations/003_add_missing_block_fields.sql explorer-postgres-dev:/tmp/ || true
-	@docker cp apps/indexer/migrations/006_update_transactions_table.sql explorer-postgres-dev:/tmp/ || true
+	@docker cp apps/indexer/migrations/001_create_blocks_table.sql besuscan-postgres:/tmp/ || true
+	@docker cp apps/indexer/migrations/002_create_transactions_table.sql besuscan-postgres:/tmp/ || true
+	@docker cp apps/indexer/migrations/003_add_missing_block_fields.sql besuscan-postgres:/tmp/ || true
+	@docker cp apps/indexer/migrations/006_update_transactions_table.sql besuscan-postgres:/tmp/ || true
 
 .PHONY: setup-db
 setup-db: migrate-copy migrate ## Configura o banco de dados com as migrations
@@ -755,7 +769,7 @@ migrate-transactions: ## Executa apenas a migração de atualização de transa�
 		sleep 2; \
 	done
 	@echo "${GREEN}Copiando migração de transações...${RESET}"
-	@docker cp apps/indexer/migrations/006_update_transactions_table.sql explorer-postgres-dev:/tmp/ || true
+	@docker cp apps/indexer/migrations/006_update_transactions_table.sql besuscan-postgres:/tmp/ || true
 	@echo "${GREEN}Executando migração de atualização de transações...${RESET}"
 	@${DOCKER_COMPOSE_DEV} exec postgres psql -U explorer -d blockexplorer -f /tmp/006_update_transactions_table.sql || true
 	@echo "${GREEN}✅ Migração de transações concluída!${RESET}"
@@ -833,7 +847,7 @@ sync-reset: ## Reseta sincronização e reprocessa tudo do zero
 # ==============================================================================
 
 # Variáveis para contratos (podem ser sobrescritas)
-CONTRACT_RPC_URL ?= http://localhost:8545
+CONTRACT_RPC_URL ?= http://144.22.179.183
 CONTRACT_PRIVATE_KEY ?= $(shell cd apps/contract && grep PRIVATE_KEY .env 2>/dev/null | cut -d '=' -f2)
 
 .PHONY: contract-deploy
