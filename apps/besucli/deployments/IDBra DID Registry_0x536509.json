@@ -1,0 +1,1564 @@
+{
+  "address": "0x5365098A72AdE678de35E69B50E11Da165Bf6b96",
+  "creation_block_number": 319508,
+  "creator_address": "0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73",
+  "deployment": {
+    "name": "IDBra DID Registry",
+    "symbol": "IDBRA",
+    "description": "Registro de Identidade Digital Descentralizada (DID) para o sistema IDBra",
+    "contract_type": "DID-Registry",
+    "source_code": "// SPDX-License-Identifier: MIT\n\n// File contracts/IDBraDIDRegistry.sol\n\n// Original license: SPDX_License_Identifier: MIT\npragma solidity ^0.8.20;\n\n// File npm/@openzeppelin/contracts@5.4.0/access/IAccessControl.sol\n\n// Original license: SPDX_License_Identifier: MIT\n// OpenZeppelin Contracts (last updated v5.4.0) (access/IAccessControl.sol)\n\npragma solidity \u003e=0.8.4;\n\n/**\n * @dev External interface of AccessControl declared to support ERC-165 detection.\n */\ninterface IAccessControl {\n    /**\n     * @dev The `account` is missing a role.\n     */\n    error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);\n\n    /**\n     * @dev The caller of a function is not the expected one.\n     *\n     * NOTE: Don't confuse with {AccessControlUnauthorizedAccount}.\n     */\n    error AccessControlBadConfirmation();\n\n    /**\n     * @dev Emitted when `newAdminRole` is set as ``role``'s admin role, replacing `previousAdminRole`\n     *\n     * `DEFAULT_ADMIN_ROLE` is the starting admin for all roles, despite\n     * {RoleAdminChanged} not being emitted to signal this.\n     */\n    event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole);\n\n    /**\n     * @dev Emitted when `account` is granted `role`.\n     *\n     * `sender` is the account that originated the contract call. This account bears the admin role (for the granted role).\n     * Expected in cases where the role was granted using the internal {AccessControl-_grantRole}.\n     */\n    event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender);\n\n    /**\n     * @dev Emitted when `account` is revoked `role`.\n     *\n     * `sender` is the account that originated the contract call:\n     *   - if using `revokeRole`, it is the admin role bearer\n     *   - if using `renounceRole`, it is the role bearer (i.e. `account`)\n     */\n    event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender);\n\n    /**\n     * @dev Returns `true` if `account` has been granted `role`.\n     */\n    function hasRole(bytes32 role, address account) external view returns (bool);\n\n    /**\n     * @dev Returns the admin role that controls `role`. See {grantRole} and\n     * {revokeRole}.\n     *\n     * To change a role's admin, use {AccessControl-_setRoleAdmin}.\n     */\n    function getRoleAdmin(bytes32 role) external view returns (bytes32);\n\n    /**\n     * @dev Grants `role` to `account`.\n     *\n     * If `account` had not been already granted `role`, emits a {RoleGranted}\n     * event.\n     *\n     * Requirements:\n     *\n     * - the caller must have ``role``'s admin role.\n     */\n    function grantRole(bytes32 role, address account) external;\n\n    /**\n     * @dev Revokes `role` from `account`.\n     *\n     * If `account` had been granted `role`, emits a {RoleRevoked} event.\n     *\n     * Requirements:\n     *\n     * - the caller must have ``role``'s admin role.\n     */\n    function revokeRole(bytes32 role, address account) external;\n\n    /**\n     * @dev Revokes `role` from the calling account.\n     *\n     * Roles are often managed via {grantRole} and {revokeRole}: this function's\n     * purpose is to provide a mechanism for accounts to lose their privileges\n     * if they are compromised (such as when a trusted device is misplaced).\n     *\n     * If the calling account had been granted `role`, emits a {RoleRevoked}\n     * event.\n     *\n     * Requirements:\n     *\n     * - the caller must be `callerConfirmation`.\n     */\n    function renounceRole(bytes32 role, address callerConfirmation) external;\n}\n\n\n// File npm/@openzeppelin/contracts@5.4.0/utils/Context.sol\n\n// Original license: SPDX_License_Identifier: MIT\n// OpenZeppelin Contracts (last updated v5.0.1) (utils/Context.sol)\n\npragma solidity ^0.8.20;\n\n/**\n * @dev Provides information about the current execution context, including the\n * sender of the transaction and its data. While these are generally available\n * via msg.sender and msg.data, they should not be accessed in such a direct\n * manner, since when dealing with meta-transactions the account sending and\n * paying for execution may not be the actual sender (as far as an application\n * is concerned).\n *\n * This contract is only required for intermediate, library-like contracts.\n */\nabstract contract Context {\n    function _msgSender() internal view virtual returns (address) {\n        return msg.sender;\n    }\n\n    function _msgData() internal view virtual returns (bytes calldata) {\n        return msg.data;\n    }\n\n    function _contextSuffixLength() internal view virtual returns (uint256) {\n        return 0;\n    }\n}\n\n\n\n\n\n\n// File npm/@openzeppelin/contracts@5.4.0/utils/introspection/IERC165.sol\n\n// Original license: SPDX_License_Identifier: MIT\n// OpenZeppelin Contracts (last updated v5.4.0) (utils/introspection/IERC165.sol)\n\npragma solidity \u003e=0.4.16;\n\n/**\n * @dev Interface of the ERC-165 standard, as defined in the\n * https://eips.ethereum.org/EIPS/eip-165[ERC].\n *\n * Implementers can declare support of contract interfaces, which can then be\n * queried by others ({ERC165Checker}).\n *\n * For an implementation, see {ERC165}.\n */\ninterface IERC165 {\n    /**\n     * @dev Returns true if this contract implements the interface defined by\n     * `interfaceId`. See the corresponding\n     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[ERC section]\n     * to learn more about how these ids are created.\n     *\n     * This function call must use less than 30 000 gas.\n     */\n    function supportsInterface(bytes4 interfaceId) external view returns (bool);\n}\n\n// File npm/@openzeppelin/contracts@5.4.0/utils/introspection/ERC165.sol\n\n// Original license: SPDX_License_Identifier: MIT\n// OpenZeppelin Contracts (last updated v5.4.0) (utils/introspection/ERC165.sol)\n\npragma solidity ^0.8.20;\n\n/**\n * @dev Implementation of the {IERC165} interface.\n *\n * Contracts that want to implement ERC-165 should inherit from this contract and override {supportsInterface} to check\n * for the additional interface id that will be supported. For example:\n *\n * ```solidity\n * function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\n *     return interfaceId == type(MyInterface).interfaceId || super.supportsInterface(interfaceId);\n * }\n * ```\n */\nabstract contract ERC165 is IERC165 {\n    /// @inheritdoc IERC165\n    function supportsInterface(bytes4 interfaceId) public view virtual returns (bool) {\n        return interfaceId == type(IERC165).interfaceId;\n    }\n}\n\n// File npm/@openzeppelin/contracts@5.4.0/access/AccessControl.sol\n\n// Original license: SPDX_License_Identifier: MIT\n// OpenZeppelin Contracts (last updated v5.4.0) (access/AccessControl.sol)\n\npragma solidity ^0.8.20;\n\n\n\n/**\n * @dev Contract module that allows children to implement role-based access\n * control mechanisms. This is a lightweight version that doesn't allow enumerating role\n * members except through off-chain means by accessing the contract event logs. Some\n * applications may benefit from on-chain enumerability, for those cases see\n * {AccessControlEnumerable}.\n *\n * Roles are referred to by their `bytes32` identifier. These should be exposed\n * in the external API and be unique. The best way to achieve this is by\n * using `public constant` hash digests:\n *\n * ```solidity\n * bytes32 public constant MY_ROLE = keccak256(\"MY_ROLE\");\n * ```\n *\n * Roles can be used to represent a set of permissions. To restrict access to a\n * function call, use {hasRole}:\n *\n * ```solidity\n * function foo() public {\n *     require(hasRole(MY_ROLE, msg.sender));\n *     ...\n * }\n * ```\n *\n * Roles can be granted and revoked dynamically via the {grantRole} and\n * {revokeRole} functions. Each role has an associated admin role, and only\n * accounts that have a role's admin role can call {grantRole} and {revokeRole}.\n *\n * By default, the admin role for all roles is `DEFAULT_ADMIN_ROLE`, which means\n * that only accounts with this role will be able to grant or revoke other\n * roles. More complex role relationships can be created by using\n * {_setRoleAdmin}.\n *\n * WARNING: The `DEFAULT_ADMIN_ROLE` is also its own admin: it has permission to\n * grant and revoke this role. Extra precautions should be taken to secure\n * accounts that have been granted it. We recommend using {AccessControlDefaultAdminRules}\n * to enforce additional security measures for this role.\n */\nabstract contract AccessControl is Context, IAccessControl, ERC165 {\n    struct RoleData {\n        mapping(address account =\u003e bool) hasRole;\n        bytes32 adminRole;\n    }\n\n    mapping(bytes32 role =\u003e RoleData) private _roles;\n\n    bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;\n\n    /**\n     * @dev Modifier that checks that an account has a specific role. Reverts\n     * with an {AccessControlUnauthorizedAccount} error including the required role.\n     */\n    modifier onlyRole(bytes32 role) {\n        _checkRole(role);\n        _;\n    }\n\n    /// @inheritdoc IERC165\n    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\n        return interfaceId == type(IAccessControl).interfaceId || super.supportsInterface(interfaceId);\n    }\n\n    /**\n     * @dev Returns `true` if `account` has been granted `role`.\n     */\n    function hasRole(bytes32 role, address account) public view virtual returns (bool) {\n        return _roles[role].hasRole[account];\n    }\n\n    /**\n     * @dev Reverts with an {AccessControlUnauthorizedAccount} error if `_msgSender()`\n     * is missing `role`. Overriding this function changes the behavior of the {onlyRole} modifier.\n     */\n    function _checkRole(bytes32 role) internal view virtual {\n        _checkRole(role, _msgSender());\n    }\n\n    /**\n     * @dev Reverts with an {AccessControlUnauthorizedAccount} error if `account`\n     * is missing `role`.\n     */\n    function _checkRole(bytes32 role, address account) internal view virtual {\n        if (!hasRole(role, account)) {\n            revert AccessControlUnauthorizedAccount(account, role);\n        }\n    }\n\n    /**\n     * @dev Returns the admin role that controls `role`. See {grantRole} and\n     * {revokeRole}.\n     *\n     * To change a role's admin, use {_setRoleAdmin}.\n     */\n    function getRoleAdmin(bytes32 role) public view virtual returns (bytes32) {\n        return _roles[role].adminRole;\n    }\n\n    /**\n     * @dev Grants `role` to `account`.\n     *\n     * If `account` had not been already granted `role`, emits a {RoleGranted}\n     * event.\n     *\n     * Requirements:\n     *\n     * - the caller must have ``role``'s admin role.\n     *\n     * May emit a {RoleGranted} event.\n     */\n    function grantRole(bytes32 role, address account) public virtual onlyRole(getRoleAdmin(role)) {\n        _grantRole(role, account);\n    }\n\n    /**\n     * @dev Revokes `role` from `account`.\n     *\n     * If `account` had been granted `role`, emits a {RoleRevoked} event.\n     *\n     * Requirements:\n     *\n     * - the caller must have ``role``'s admin role.\n     *\n     * May emit a {RoleRevoked} event.\n     */\n    function revokeRole(bytes32 role, address account) public virtual onlyRole(getRoleAdmin(role)) {\n        _revokeRole(role, account);\n    }\n\n    /**\n     * @dev Revokes `role` from the calling account.\n     *\n     * Roles are often managed via {grantRole} and {revokeRole}: this function's\n     * purpose is to provide a mechanism for accounts to lose their privileges\n     * if they are compromised (such as when a trusted device is misplaced).\n     *\n     * If the calling account had been revoked `role`, emits a {RoleRevoked}\n     * event.\n     *\n     * Requirements:\n     *\n     * - the caller must be `callerConfirmation`.\n     *\n     * May emit a {RoleRevoked} event.\n     */\n    function renounceRole(bytes32 role, address callerConfirmation) public virtual {\n        if (callerConfirmation != _msgSender()) {\n            revert AccessControlBadConfirmation();\n        }\n\n        _revokeRole(role, callerConfirmation);\n    }\n\n    /**\n     * @dev Sets `adminRole` as ``role``'s admin role.\n     *\n     * Emits a {RoleAdminChanged} event.\n     */\n    function _setRoleAdmin(bytes32 role, bytes32 adminRole) internal virtual {\n        bytes32 previousAdminRole = getRoleAdmin(role);\n        _roles[role].adminRole = adminRole;\n        emit RoleAdminChanged(role, previousAdminRole, adminRole);\n    }\n\n    /**\n     * @dev Attempts to grant `role` to `account` and returns a boolean indicating if `role` was granted.\n     *\n     * Internal function without access restriction.\n     *\n     * May emit a {RoleGranted} event.\n     */\n    function _grantRole(bytes32 role, address account) internal virtual returns (bool) {\n        if (!hasRole(role, account)) {\n            _roles[role].hasRole[account] = true;\n            emit RoleGranted(role, account, _msgSender());\n            return true;\n        } else {\n            return false;\n        }\n    }\n\n    /**\n     * @dev Attempts to revoke `role` from `account` and returns a boolean indicating if `role` was revoked.\n     *\n     * Internal function without access restriction.\n     *\n     * May emit a {RoleRevoked} event.\n     */\n    function _revokeRole(bytes32 role, address account) internal virtual returns (bool) {\n        if (hasRole(role, account)) {\n            _roles[role].hasRole[account] = false;\n            emit RoleRevoked(role, account, _msgSender());\n            return true;\n        } else {\n            return false;\n        }\n    }\n}\n\n\n\n\n// File npm/@openzeppelin/contracts@5.4.0/utils/Pausable.sol\n\n// Original license: SPDX_License_Identifier: MIT\n// OpenZeppelin Contracts (last updated v5.3.0) (utils/Pausable.sol)\n\npragma solidity ^0.8.20;\n\n/**\n * @dev Contract module which allows children to implement an emergency stop\n * mechanism that can be triggered by an authorized account.\n *\n * This module is used through inheritance. It will make available the\n * modifiers `whenNotPaused` and `whenPaused`, which can be applied to\n * the functions of your contract. Note that they will not be pausable by\n * simply including this module, only once the modifiers are put in place.\n */\nabstract contract Pausable is Context {\n    bool private _paused;\n\n    /**\n     * @dev Emitted when the pause is triggered by `account`.\n     */\n    event Paused(address account);\n\n    /**\n     * @dev Emitted when the pause is lifted by `account`.\n     */\n    event Unpaused(address account);\n\n    /**\n     * @dev The operation failed because the contract is paused.\n     */\n    error EnforcedPause();\n\n    /**\n     * @dev The operation failed because the contract is not paused.\n     */\n    error ExpectedPause();\n\n    /**\n     * @dev Modifier to make a function callable only when the contract is not paused.\n     *\n     * Requirements:\n     *\n     * - The contract must not be paused.\n     */\n    modifier whenNotPaused() {\n        _requireNotPaused();\n        _;\n    }\n\n    /**\n     * @dev Modifier to make a function callable only when the contract is paused.\n     *\n     * Requirements:\n     *\n     * - The contract must be paused.\n     */\n    modifier whenPaused() {\n        _requirePaused();\n        _;\n    }\n\n    /**\n     * @dev Returns true if the contract is paused, and false otherwise.\n     */\n    function paused() public view virtual returns (bool) {\n        return _paused;\n    }\n\n    /**\n     * @dev Throws if the contract is paused.\n     */\n    function _requireNotPaused() internal view virtual {\n        if (paused()) {\n            revert EnforcedPause();\n        }\n    }\n\n    /**\n     * @dev Throws if the contract is not paused.\n     */\n    function _requirePaused() internal view virtual {\n        if (!paused()) {\n            revert ExpectedPause();\n        }\n    }\n\n    /**\n     * @dev Triggers stopped state.\n     *\n     * Requirements:\n     *\n     * - The contract must not be paused.\n     */\n    function _pause() internal virtual whenNotPaused {\n        _paused = true;\n        emit Paused(_msgSender());\n    }\n\n    /**\n     * @dev Returns to normal state.\n     *\n     * Requirements:\n     *\n     * - The contract must be paused.\n     */\n    function _unpause() internal virtual whenPaused {\n        _paused = false;\n        emit Unpaused(_msgSender());\n    }\n}\n\n\n// File npm/@openzeppelin/contracts@5.4.0/utils/ReentrancyGuard.sol\n\n// Original license: SPDX_License_Identifier: MIT\n// OpenZeppelin Contracts (last updated v5.1.0) (utils/ReentrancyGuard.sol)\n\npragma solidity ^0.8.20;\n\n/**\n * @dev Contract module that helps prevent reentrant calls to a function.\n *\n * Inheriting from `ReentrancyGuard` will make the {nonReentrant} modifier\n * available, which can be applied to functions to make sure there are no nested\n * (reentrant) calls to them.\n *\n * Note that because there is a single `nonReentrant` guard, functions marked as\n * `nonReentrant` may not call one another. This can be worked around by making\n * those functions `private`, and then adding `external` `nonReentrant` entry\n * points to them.\n *\n * TIP: If EIP-1153 (transient storage) is available on the chain you're deploying at,\n * consider using {ReentrancyGuardTransient} instead.\n *\n * TIP: If you would like to learn more about reentrancy and alternative ways\n * to protect against it, check out our blog post\n * https://blog.openzeppelin.com/reentrancy-after-istanbul/[Reentrancy After Istanbul].\n */\nabstract contract ReentrancyGuard {\n    // Booleans are more expensive than uint256 or any type that takes up a full\n    // word because each write operation emits an extra SLOAD to first read the\n    // slot's contents, replace the bits taken up by the boolean, and then write\n    // back. This is the compiler's defense against contract upgrades and\n    // pointer aliasing, and it cannot be disabled.\n\n    // The values being non-zero value makes deployment a bit more expensive,\n    // but in exchange the refund on every call to nonReentrant will be lower in\n    // amount. Since refunds are capped to a percentage of the total\n    // transaction's gas, it is best to keep them low in cases like this one, to\n    // increase the likelihood of the full refund coming into effect.\n    uint256 private constant NOT_ENTERED = 1;\n    uint256 private constant ENTERED = 2;\n\n    uint256 private _status;\n\n    /**\n     * @dev Unauthorized reentrant call.\n     */\n    error ReentrancyGuardReentrantCall();\n\n    constructor() {\n        _status = NOT_ENTERED;\n    }\n\n    /**\n     * @dev Prevents a contract from calling itself, directly or indirectly.\n     * Calling a `nonReentrant` function from another `nonReentrant`\n     * function is not supported. It is possible to prevent this from happening\n     * by making the `nonReentrant` function external, and making it call a\n     * `private` function that does the actual work.\n     */\n    modifier nonReentrant() {\n        _nonReentrantBefore();\n        _;\n        _nonReentrantAfter();\n    }\n\n    function _nonReentrantBefore() private {\n        // On the first call to nonReentrant, _status will be NOT_ENTERED\n        if (_status == ENTERED) {\n            revert ReentrancyGuardReentrantCall();\n        }\n\n        // Any calls to nonReentrant after this point will fail\n        _status = ENTERED;\n    }\n\n    function _nonReentrantAfter() private {\n        // By storing the original value once again, a refund is triggered (see\n        // https://eips.ethereum.org/EIPS/eip-2200)\n        _status = NOT_ENTERED;\n    }\n\n    /**\n     * @dev Returns true if the reentrancy guard is currently set to \"entered\", which indicates there is a\n     * `nonReentrant` function in the call stack.\n     */\n    function _reentrancyGuardEntered() internal view returns (bool) {\n        return _status == ENTERED;\n    }\n}\n\n\n/**\n * @title IDBraUnifiedRegistry\n * @notice Contrato unificado EIP-1056 + StatusList + Revogação para Hyperledger Besu\n * @dev Implementação completa para identidade digital bancária com máxima rastreabilidade\n */\n contract IDBraDIDRegistry is AccessControl, Pausable, ReentrancyGuard {\n\n    // ========= Roles =========\n    bytes32 public constant REGISTRAR_ROLE = keccak256(\"REGISTRAR_ROLE\");\n    bytes32 public constant ISSUER_ROLE = keccak256(\"ISSUER_ROLE\");\n    bytes32 public constant AUDITOR_ROLE = keccak256(\"AUDITOR_ROLE\");\n    bytes32 public constant EMERGENCY_ROLE = keccak256(\"EMERGENCY_ROLE\");\n\n    // ========= EIP-1056 Core State =========\n\n    /// @dev Mapeia identidade para delegates por tipo e validade (EIP-1056 padrão)\n    mapping(address =\u003e mapping(bytes32 =\u003e mapping(address =\u003e uint256))) public delegates;\n\n    /// @dev Último bloco que mudou cada identidade (EIP-1056 padrão)\n    mapping(address =\u003e uint256) public changed;\n\n    // ========= Identity Management State =========\n\n    /// @dev Status de verificação KYC para compliance bancária\n    mapping(address =\u003e bool) public isKYCVerified;\n\n    /// @dev Metadata IPFS para documentos DID W3C\n    mapping(address =\u003e string) public didDocuments;\n\n    /// @dev Controle de existência de DID\n    mapping(address =\u003e bool) public didExists;\n\n    /// @dev Timestamps para auditoria\n    mapping(address =\u003e uint256) public lastActivity;\n\n    // ========= Credential Revocation State =========\n\n    struct RevocationRecord {\n        bool revoked;\n        uint256 timestamp;\n        address revoker;\n        string reason;\n        bytes32 credentialHash; // Hash da credencial para verificação\n    }\n\n    /// @dev Registro de revogações de credenciais\n    mapping(bytes32 =\u003e RevocationRecord) public credentialRevocations;\n\n    /// @dev Mapeamento de identidade para suas credenciais\n    mapping(address =\u003e bytes32[]) public identityCredentials;\n\n    /// @dev Contador de credenciais por identidade\n    mapping(address =\u003e uint256) public credentialCount;\n\n\n\n    // ========= Metrics State =========\n\n    uint256 public totalDIDs;\n    uint256 public totalVerifiedDIDs;\n    uint256 public totalCredentials;\n    uint256 public totalRevokedCredentials;\n    uint256 public totalOperations;\n\n    // ========= EIP-1056 Standard Events =========\n\n    event DIDOwnerChanged(\n        address indexed identity,\n        address owner,\n        uint256 previousChange\n    );\n\n    event DIDDelegateChanged(\n        address indexed identity,\n        bytes32 delegateType,\n        address delegate,\n        uint256 validTo,\n        uint256 previousChange\n    );\n\n    event DIDAttributeChanged(\n        address indexed identity,\n        bytes32 name,\n        bytes value,\n        uint256 validTo,\n        uint256 previousChange\n    );\n\n    // ========= Identity Events =========\n\n    event DIDCreated(\n        address indexed identity,\n        address indexed creator,\n        string didDocument,\n        uint256 timestamp\n    );\n\n    event DIDUpdated(\n        address indexed identity,\n        address indexed updater,\n        string newDocument,\n        uint256 timestamp\n    );\n\n    event KYCStatusChanged(\n        address indexed identity,\n        bool verified,\n        address indexed verifier,\n        uint256 timestamp\n    );\n\n    // ========= Credential Events =========\n\n    event CredentialIssued(\n        bytes32 indexed credentialId,\n        address indexed issuer,\n        address indexed subject,\n        bytes32 credentialHash,\n        uint256 timestamp\n    );\n\n    event CredentialRevoked(\n        bytes32 indexed credentialId,\n        address indexed revoker,\n        address indexed subject,\n        string reason,\n        uint256 timestamp\n    );\n\n    event CredentialRestored(\n        bytes32 indexed credentialId,\n        address indexed restorer,\n        address indexed subject,\n        string reason,\n        uint256 timestamp\n    );\n\n    // ========= Audit Events =========\n\n    event BankingAuditLog(\n        address indexed identity,\n        string indexed action,\n        address indexed actor,\n        bytes32 dataHash,\n        uint256 timestamp\n    );\n\n    event SystemMetricsUpdated(\n        uint256 totalDIDs,\n        uint256 totalCredentials,\n        uint256 totalRevoked,\n        uint256 timestamp\n    );\n\n    // ========= Errors =========\n\n    error NotOwner();\n    error DIDAlreadyExists();\n    error DIDNotFound();\n    error InvalidDocument();\n    error CredentialAlreadyExists();\n    error CredentialNotFound();\n    error CredentialAlreadyRevoked();\n    error CredentialNotRevoked();\n\n    // ========= Modifiers =========\n\n    modifier onlyOwner(address identity, address actor) {\n        if (actor != identity) revert NotOwner();\n        _;\n    }\n\n    modifier didMustExist(address identity) {\n        if (!didExists[identity]) revert DIDNotFound();\n        _;\n    }\n\n    modifier credentialMustExist(bytes32 credentialId) {\n        if (credentialRevocations[credentialId].credentialHash == bytes32(0)) revert CredentialNotFound();\n        _;\n    }\n\n    // ========= Constructor =========\n\n    constructor(address admin) {\n        _grantRole(DEFAULT_ADMIN_ROLE, admin);\n        _grantRole(EMERGENCY_ROLE, admin);\n    }\n\n    // ========= EIP-1056 Core Functions =========\n\n    /**\n     * @notice Retorna o owner atual de uma identidade (EIP-1056)\n     */\n    function identityOwner(address identity) public pure returns (address) {\n        return identity;\n    }\n\n    /**\n     * @notice Verifica se address é delegate válido para identidade (EIP-1056)\n     */\n    function validDelegate(\n        address identity,\n        bytes32 delegateType,\n        address delegate\n    ) public view returns (bool) {\n        return delegates[identity][delegateType][delegate] \u003e= block.timestamp;\n    }\n\n    /**\n     * @notice Retorna timestamp de validade do delegate\n     */\n    function validDelegateFrom(\n        address identity,\n        bytes32 delegateType,\n        address delegate\n    ) public view returns (uint256) {\n        return delegates[identity][delegateType][delegate];\n    }\n\n    /**\n     * @notice Adiciona delegate para identidade (EIP-1056)\n     */\n    function addDelegate(\n        address identity,\n        bytes32 delegateType,\n        address delegate,\n        uint256 validity\n    ) external whenNotPaused onlyOwner(identity, msg.sender) didMustExist(identity) {\n        uint256 prev = changed[identity];\n        delegates[identity][delegateType][delegate] = block.timestamp + validity;\n        changed[identity] = block.number;\n        lastActivity[identity] = block.timestamp;\n        totalOperations++;\n\n        emit DIDDelegateChanged(identity, delegateType, delegate, block.timestamp + validity, prev);\n        emit BankingAuditLog(\n            identity,\n            \"DELEGATE_ADDED\",\n            msg.sender,\n            keccak256(abi.encodePacked(delegateType, delegate, validity)),\n            block.timestamp\n        );\n    }\n\n    /**\n     * @notice Remove delegate da identidade (EIP-1056)\n     */\n    function revokeDelegate(\n        address identity,\n        bytes32 delegateType,\n        address delegate\n    ) external whenNotPaused onlyOwner(identity, msg.sender) didMustExist(identity) {\n        uint256 prev = changed[identity];\n        delegates[identity][delegateType][delegate] = block.timestamp;\n        changed[identity] = block.number;\n        lastActivity[identity] = block.timestamp;\n        totalOperations++;\n\n        emit DIDDelegateChanged(identity, delegateType, delegate, block.timestamp, prev);\n        emit BankingAuditLog(\n            identity,\n            \"DELEGATE_REVOKED\",\n            msg.sender,\n            keccak256(abi.encodePacked(delegateType, delegate)),\n            block.timestamp\n        );\n    }\n\n    /**\n     * @notice Define atributo para identidade (EIP-1056)\n     */\n    function setAttribute(\n        address identity,\n        bytes32 name,\n        bytes calldata value,\n        uint256 validity\n    ) external whenNotPaused onlyOwner(identity, msg.sender) didMustExist(identity) {\n        uint256 prev = changed[identity];\n        changed[identity] = block.number;\n        lastActivity[identity] = block.timestamp;\n        totalOperations++;\n\n        emit DIDAttributeChanged(identity, name, value, block.timestamp + validity, prev);\n        emit BankingAuditLog(\n            identity,\n            \"ATTRIBUTE_SET\",\n            msg.sender,\n            keccak256(abi.encodePacked(name, value)),\n            block.timestamp\n        );\n    }\n\n    /**\n     * @notice Remove atributo da identidade (EIP-1056)\n     */\n    function revokeAttribute(\n        address identity,\n        bytes32 name,\n        bytes calldata value\n    ) external whenNotPaused onlyOwner(identity, msg.sender) didMustExist(identity) {\n        uint256 prev = changed[identity];\n        changed[identity] = block.number;\n        lastActivity[identity] = block.timestamp;\n        totalOperations++;\n\n        emit DIDAttributeChanged(identity, name, value, 0, prev);\n        emit BankingAuditLog(\n            identity,\n            \"ATTRIBUTE_REVOKED\",\n            msg.sender,\n            keccak256(abi.encodePacked(name, value)),\n            block.timestamp\n        );\n    }\n\n    // ========= Identity Management Functions =========\n\n    /**\n     * @notice Cria nova identidade DID\n     */\n    function createDID(\n        address identity,\n        string calldata didDocument\n    ) external whenNotPaused nonReentrant returns (bool) {\n        if (didExists[identity]) revert DIDAlreadyExists();\n        if (bytes(didDocument).length == 0) revert InvalidDocument();\n\n        didExists[identity] = true;\n        didDocuments[identity] = didDocument;\n        lastActivity[identity] = block.timestamp;\n\n        totalDIDs++;\n        totalOperations++;\n\n        uint256 prev = changed[identity];\n        changed[identity] = block.number;\n\n        emit DIDCreated(identity, msg.sender, didDocument, block.timestamp);\n        emit DIDOwnerChanged(identity, identity, prev);\n        emit BankingAuditLog(\n            identity,\n            \"DID_CREATED\",\n            msg.sender,\n            keccak256(bytes(didDocument)),\n            block.timestamp\n        );\n\n        return true;\n    }\n\n    /**\n     * @notice Atualiza documento DID\n     */\n    function updateDIDDocument(\n        address identity,\n        string calldata newDidDocument\n    ) external whenNotPaused onlyOwner(identity, msg.sender) didMustExist(identity) {\n        if (bytes(newDidDocument).length == 0) revert InvalidDocument();\n\n        string memory oldDocument = didDocuments[identity];\n        didDocuments[identity] = newDidDocument;\n        lastActivity[identity] = block.timestamp;\n        totalOperations++;\n\n        emit DIDUpdated(identity, msg.sender, newDidDocument, block.timestamp);\n        emit BankingAuditLog(\n            identity,\n            \"DID_UPDATED\",\n            msg.sender,\n            keccak256(abi.encodePacked(oldDocument, newDidDocument)),\n            block.timestamp\n        );\n    }\n\n    /**\n     * @notice Define status KYC\n     */\n    function setKYCStatus(\n        address identity,\n        bool verified\n    ) external whenNotPaused onlyRole(REGISTRAR_ROLE) didMustExist(identity) {\n        bool wasVerified = isKYCVerified[identity];\n        isKYCVerified[identity] = verified;\n        lastActivity[identity] = block.timestamp;\n        totalOperations++;\n\n        if (verified \u0026\u0026 !wasVerified) {\n            totalVerifiedDIDs++;\n        } else if (!verified \u0026\u0026 wasVerified) {\n            totalVerifiedDIDs--;\n        }\n\n        emit KYCStatusChanged(identity, verified, msg.sender, block.timestamp);\n        emit BankingAuditLog(\n            identity,\n            verified ? \"KYC_VERIFIED\" : \"KYC_REVOKED\",\n            msg.sender,\n            keccak256(abi.encodePacked(verified, wasVerified)),\n            block.timestamp\n        );\n    }\n\n    // ========= Credential Management Functions =========\n\n    /**\n     * @notice Registra uma nova credencial\n     */\n    function issueCredential(\n        bytes32 credentialId,\n        address subject,\n        bytes32 credentialHash\n    ) external whenNotPaused onlyRole(ISSUER_ROLE) didMustExist(subject) returns (bool) {\n        if (credentialRevocations[credentialId].credentialHash != bytes32(0)) revert CredentialAlreadyExists();\n\n        credentialRevocations[credentialId] = RevocationRecord({\n            revoked: false,\n            timestamp: block.timestamp,\n            revoker: msg.sender,\n            reason: \"\",\n            credentialHash: credentialHash\n        });\n\n        identityCredentials[subject].push(credentialId);\n        credentialCount[subject]++;\n        totalCredentials++;\n        totalOperations++;\n\n        emit CredentialIssued(credentialId, msg.sender, subject, credentialHash, block.timestamp);\n        emit BankingAuditLog(\n            subject,\n            \"CREDENTIAL_ISSUED\",\n            msg.sender,\n            credentialHash,\n            block.timestamp\n        );\n\n        return true;\n    }\n\n    /**\n     * @notice Revoga uma credencial\n     */\n    function revokeCredential(\n        bytes32 credentialId,\n        address subject,\n        string calldata reason\n    ) external whenNotPaused onlyRole(ISSUER_ROLE) credentialMustExist(credentialId) {\n        RevocationRecord storage record = credentialRevocations[credentialId];\n        if (record.revoked) revert CredentialAlreadyRevoked();\n\n        record.revoked = true;\n        record.timestamp = block.timestamp;\n        record.revoker = msg.sender;\n        record.reason = reason;\n\n        totalRevokedCredentials++;\n        totalOperations++;\n\n        emit CredentialRevoked(credentialId, msg.sender, subject, reason, block.timestamp);\n        emit BankingAuditLog(\n            subject,\n            \"CREDENTIAL_REVOKED\",\n            msg.sender,\n            keccak256(abi.encodePacked(credentialId, reason)),\n            block.timestamp\n        );\n    }\n\n    /**\n     * @notice Restaura uma credencial revogada\n     */\n    function restoreCredential(\n        bytes32 credentialId,\n        address subject,\n        string calldata reason\n    ) external whenNotPaused onlyRole(ISSUER_ROLE) credentialMustExist(credentialId) {\n        RevocationRecord storage record = credentialRevocations[credentialId];\n        if (!record.revoked) revert CredentialNotRevoked();\n\n        record.revoked = false;\n        record.timestamp = block.timestamp;\n        record.revoker = msg.sender;\n        record.reason = reason;\n\n        totalRevokedCredentials--;\n        totalOperations++;\n\n        emit CredentialRestored(credentialId, msg.sender, subject, reason, block.timestamp);\n        emit BankingAuditLog(\n            subject,\n            \"CREDENTIAL_RESTORED\",\n            msg.sender,\n            keccak256(abi.encodePacked(credentialId, reason)),\n            block.timestamp\n        );\n    }\n\n    /**\n     * @notice Verifica se uma credencial está revogada\n     */\n    function isCredentialRevoked(bytes32 credentialId) external view returns (bool) {\n        return credentialRevocations[credentialId].revoked;\n    }\n\n    // ========= View Functions =========\n\n    /**\n     * @notice Retorna informações completas da identidade\n     */\n    function getIdentityInfo(address identity) external view returns (\n        address owner,\n        string memory didDocument,\n        bool kycVerified,\n        uint256 lastActivityTime,\n        uint256 lastChanged,\n        uint256 credentialCountForIdentity\n    ) {\n        return (\n            identity,\n            didDocuments[identity],\n            isKYCVerified[identity],\n            lastActivity[identity],\n            changed[identity],\n            credentialCount[identity]\n        );\n    }\n\n    /**\n     * @notice Retorna registro de revogação de credencial\n     */\n    function getCredentialRevocation(bytes32 credentialId) external view returns (RevocationRecord memory) {\n        return credentialRevocations[credentialId];\n    }\n\n    /**\n     * @notice Retorna credenciais de uma identidade\n     */\n    function getIdentityCredentials(address identity) external view returns (bytes32[] memory) {\n        return identityCredentials[identity];\n    }\n\n    /**\n     * @notice Retorna métricas do sistema\n     */\n    function getSystemMetrics() external view returns (\n        uint256 totalDIDCount,\n        uint256 totalVerifiedDIDCount,\n        uint256 totalCredentialCount,\n        uint256 totalRevokedCredentialCount,\n        uint256 totalOperationCount\n    ) {\n        return (\n            totalDIDs,\n            totalVerifiedDIDs,\n            totalCredentials,\n            totalRevokedCredentials,\n            totalOperations\n        );\n    }\n\n    /**\n     * @notice Verifica se DID existe\n     */\n    function exists(address identity) external view returns (bool) {\n        return didExists[identity];\n    }\n\n    // ========= Admin Functions =========\n\n    function pause() external onlyRole(EMERGENCY_ROLE) {\n        _pause();\n        emit BankingAuditLog(msg.sender, \"SYSTEM_PAUSED\", msg.sender, bytes32(0), block.timestamp);\n    }\n\n    function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) {\n        _unpause();\n        emit BankingAuditLog(msg.sender, \"SYSTEM_UNPAUSED\", msg.sender, bytes32(0), block.timestamp);\n    }\n}\n",
+    "abi": [
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "admin",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "inputs": [],
+        "name": "AccessControlBadConfirmation",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "neededRole",
+            "type": "bytes32"
+          }
+        ],
+        "name": "AccessControlUnauthorizedAccount",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "CredentialAlreadyExists",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "CredentialAlreadyRevoked",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "CredentialNotFound",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "CredentialNotRevoked",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "DIDAlreadyExists",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "DIDNotFound",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "EnforcedPause",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "ExpectedPause",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "InvalidDocument",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "NotOwner",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "ReentrancyGuardReentrantCall",
+        "type": "error"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "identity",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "string",
+            "name": "action",
+            "type": "string"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "actor",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "dataHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          }
+        ],
+        "name": "BankingAuditLog",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "credentialId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "issuer",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "subject",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "credentialHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          }
+        ],
+        "name": "CredentialIssued",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "credentialId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "restorer",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "subject",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "string",
+            "name": "reason",
+            "type": "string"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          }
+        ],
+        "name": "CredentialRestored",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "credentialId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "revoker",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "subject",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "string",
+            "name": "reason",
+            "type": "string"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          }
+        ],
+        "name": "CredentialRevoked",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "identity",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "name",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes",
+            "name": "value",
+            "type": "bytes"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "validTo",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "previousChange",
+            "type": "uint256"
+          }
+        ],
+        "name": "DIDAttributeChanged",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "identity",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "creator",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "string",
+            "name": "didDocument",
+            "type": "string"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          }
+        ],
+        "name": "DIDCreated",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "identity",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "delegateType",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "delegate",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "validTo",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "previousChange",
+            "type": "uint256"
+          }
+        ],
+        "name": "DIDDelegateChanged",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "identity",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "previousChange",
+            "type": "uint256"
+          }
+        ],
+        "name": "DIDOwnerChanged",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "identity",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "updater",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "string",
+            "name": "newDocument",
+            "type": "string"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          }
+        ],
+        "name": "DIDUpdated",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "identity",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "bool",
+            "name": "verified",
+            "type": "bool"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "verifier",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          }
+        ],
+        "name": "KYCStatusChanged",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          }
+        ],
+        "name": "Paused",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "previousAdminRole",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "newAdminRole",
+            "type": "bytes32"
+          }
+        ],
+        "name": "RoleAdminChanged",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleGranted",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleRevoked",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "totalDIDs",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "totalCredentials",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "totalRevoked",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          }
+        ],
+        "name": "SystemMetricsUpdated",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          }
+        ],
+        "name": "Unpaused",
+        "type": "event"
+      },
+      {
+        "inputs": [],
+        "name": "AUDITOR_ROLE",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "DEFAULT_ADMIN_ROLE",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "EMERGENCY_ROLE",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "ISSUER_ROLE",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "REGISTRAR_ROLE",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "identity",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "delegateType",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "delegate",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "validity",
+            "type": "uint256"
+          }
+        ],
+        "name": "addDelegate",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "name": "changed",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "identity",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "didDocument",
+            "type": "string"
+          }
+        ],
+        "name": "createDID",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "name": "credentialCount",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "name": "credentialRevocations",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "revoked",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "revoker",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "reason",
+            "type": "string"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "credentialHash",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "name": "delegates",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "name": "didDocuments",
+        "outputs": [
+          {
+            "internalType": "string",
+            "name": "",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "name": "didExists",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "identity",
+            "type": "address"
+          }
+        ],
+        "name": "exists",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "credentialId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "getCredentialRevocation",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "bool",
+                "name": "revoked",
+                "type": "bool"
+              },
+              {
+                "internalType": "uint256",
+                "name": "timestamp",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "revoker",
+                "type": "address"
+              },
+              {
+                "internalType": "string",
+                "name": "reason",
+                "type": "string"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "credentialHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IDBraDIDRegistry.RevocationRecord",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "identity",
+            "type": "address"
+          }
+        ],
+        "name": "getIdentityCredentials",
+        "outputs": [
+          {
+            "internalType": "bytes32[]",
+            "name": "",
+            "type": "bytes32[]"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "identity",
+            "type": "address"
+          }
+        ],
+        "name": "getIdentityInfo",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "didDocument",
+            "type": "string"
+          },
+          {
+            "internalType": "bool",
+            "name": "kycVerified",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastActivityTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastChanged",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "credentialCountForIdentity",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          }
+        ],
+        "name": "getRoleAdmin",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "getSystemMetrics",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "totalDIDCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalVerifiedDIDCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalCredentialCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalRevokedCredentialCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalOperationCount",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          }
+        ],
+        "name": "grantRole",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          }
+        ],
+        "name": "hasRole",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "name": "identityCredentials",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "identity",
+            "type": "address"
+          }
+        ],
+        "name": "identityOwner",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "pure",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "credentialId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "isCredentialRevoked",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "name": "isKYCVerified",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "credentialId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "subject",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "credentialHash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "issueCredential",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "name": "lastActivity",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "pause",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "paused",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "callerConfirmation",
+            "type": "address"
+          }
+        ],
+        "name": "renounceRole",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "credentialId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "subject",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "reason",
+            "type": "string"
+          }
+        ],
+        "name": "restoreCredential",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "identity",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "name",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes",
+            "name": "value",
+            "type": "bytes"
+          }
+        ],
+        "name": "revokeAttribute",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "credentialId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "subject",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "reason",
+            "type": "string"
+          }
+        ],
+        "name": "revokeCredential",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "identity",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "delegateType",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "delegate",
+            "type": "address"
+          }
+        ],
+        "name": "revokeDelegate",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          }
+        ],
+        "name": "revokeRole",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "identity",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "name",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes",
+            "name": "value",
+            "type": "bytes"
+          },
+          {
+            "internalType": "uint256",
+            "name": "validity",
+            "type": "uint256"
+          }
+        ],
+        "name": "setAttribute",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "identity",
+            "type": "address"
+          },
+          {
+            "internalType": "bool",
+            "name": "verified",
+            "type": "bool"
+          }
+        ],
+        "name": "setKYCStatus",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes4",
+            "name": "interfaceId",
+            "type": "bytes4"
+          }
+        ],
+        "name": "supportsInterface",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "totalCredentials",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "totalDIDs",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "totalOperations",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "totalRevokedCredentials",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "totalVerifiedDIDs",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "unpause",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "identity",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "newDidDocument",
+            "type": "string"
+          }
+        ],
+        "name": "updateDIDDocument",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "identity",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "delegateType",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "delegate",
+            "type": "address"
+          }
+        ],
+        "name": "validDelegate",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "identity",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "delegateType",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "delegate",
+            "type": "address"
+          }
+        ],
+        "name": "validDelegateFrom",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ],
+    "bytecode": "608060405234801561000f575f80fd5b5060405161545638038061545683398181016040528101906100319190610240565b600160028190555061004b5f801b8261008360201b60201c565b5061007c7fbf233dd2aafeb4d50879c4aa5c81e96d92f6e6945c906a58f9f2d1c1631b4b268261008360201b60201c565b505061026b565b5f610094838361017860201b60201c565b61016e5760015f808581526020019081526020015f205f015f8473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205f6101000a81548160ff02191690831515021790555061010b6101db60201b60201c565b73ffffffffffffffffffffffffffffffffffffffff168273ffffffffffffffffffffffffffffffffffffffff16847f2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d60405160405180910390a460019050610172565b5f90505b92915050565b5f805f8481526020019081526020015f205f015f8373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205f9054906101000a900460ff16905092915050565b5f33905090565b5f80fd5b5f73ffffffffffffffffffffffffffffffffffffffff82169050919050565b5f61020f826101e6565b9050919050565b61021f81610205565b8114610229575f80fd5b50565b5f8151905061023a81610216565b92915050565b5f60208284031215610255576102546101e2565b5b5f6102628482850161022c565b91505092915050565b6151de806102785f395ff3fe608060405234801561000f575f80fd5b5060043610610291575f3560e01c80636cfccc2f11610165578063a217fddf116100cc578063e828ef2711610085578063e828ef2714610872578063ed232029146108a6578063f07e96b3146108c4578063f68e9553146108f4578063f6a3d24e14610912578063f96d0f9f1461094257610291565b8063a217fddf146107a0578063a3f569ae146107be578063a7068d66146107da578063c1221360146107f6578063d547741f14610826578063d86bba801461084257610291565b806381b764fb1161011e57806381b764fb146106c757806382aefa24146106fc5780638456cb591461071a5780638733d4e8146107245780638bb1ea521461075457806391d148541461077057610291565b80636cfccc2f146106035780636e1d616e146106255780636fc464a2146106435780637ad4b0a4146106735780637e3df0a41461068f57806380b29f7c146106ab57610291565b80633691de76116102095780635c975abb116101c25780635c975abb146105075780635d66b80e146105255780635db2b71814610543578063622b2a3c1461057357806363d61166146105a357806369989ffb146105d357610291565b80633691de76146104215780633f4ba83a1461045157806342242ed81461045b57806344f92a391461048b57806354b7636e146104a757806355ec9440146104d757610291565b80631c4d4e1b1161025b5780631c4d4e1b1461035f5780632032bfd91461037d57806320df43591461039b578063248a9ca3146103b95780632f2ff15d146103e957806336568abe1461040557610291565b8062c023da14610295578062cf8668146102b157806301ffc9a7146102e15780630d44625b146103115780631513d62b14610341575b5f80fd5b6102af60048036038101906102aa9190613aee565b610972565b005b6102cb60048036038101906102c69190613b5f565b610c43565b6040516102d89190613ba4565b60405180910390f35b6102fb60048036038101906102f69190613c12565b610c6b565b6040516103089190613ba4565b60405180910390f35b61032b60048036038101906103269190613c3d565b610ce4565b6040516103389190613ca5565b60405180910390f35b610349610d0f565b6040516103569190613ca5565b60405180910390f35b610367610d15565b6040516103749190613ca5565b60405180910390f35b610385610d1b565b6040516103929190613ca5565b60405180910390f35b6103a3610d21565b6040516103b09190613ccd565b60405180910390f35b6103d360048036038101906103ce9190613b5f565b610d45565b6040516103e09190613ccd565b60405180910390f35b61040360048036038101906103fe9190613ce6565b610d61565b005b61041f600480360381019061041a9190613ce6565b610d83565b005b61043b60048036038101906104369190613d24565b610dfe565b6040516104489190613e06565b60405180910390f35b610459610e91565b005b61047560048036038101906104709190613d24565b610f25565b6040516104829190613ba4565b60405180910390f35b6104a560048036038101906104a09190613e7b565b610f42565b005b6104c160048036038101906104bc9190613d24565b6111df565b6040516104ce9190613ba4565b60405180910390f35b6104f160048036038101906104ec9190613eec565b6111fc565b6040516104fe9190613ba4565b60405180910390f35b61050f6115be565b60405161051c9190613ba4565b60405180910390f35b61052d6115d3565b60405161053a9190613ca5565b60405180910390f35b61055d60048036038101906105589190613b5f565b6115d9565b60405161056a919061404c565b60405180910390f35b61058d60048036038101906105889190613c3d565b611716565b60405161059a9190613ba4565b60405180910390f35b6105bd60048036038101906105b8919061406c565b6117ab565b6040516105ca9190613ba4565b60405180910390f35b6105ed60048036038101906105e89190613d24565b611b6d565b6040516105fa9190613ca5565b60405180910390f35b61060b611b82565b60405161061c9594939291906140c9565b60405180910390f35b61062d611ba7565b60405161063a9190613ccd565b60405180910390f35b61065d60048036038101906106589190614144565b611bcb565b60405161066a9190613ccd565b60405180910390f35b61068d60048036038101906106889190614182565b611bf6565b005b6106a960048036038101906106a4919061406c565b611ed3565b005b6106c560048036038101906106c09190613c3d565b612283565b005b6106e160048036038101906106dc9190613d24565b6125db565b6040516106f39695949392919061425d565b60405180910390f35b6107046127c3565b6040516107119190613ccd565b60405180910390f35b6107226127e7565b005b61073e60048036038101906107399190613d24565b612899565b60405161074b91906142c3565b60405180910390f35b61076e60048036038101906107699190613e7b565b6128a2565b005b61078a60048036038101906107859190613ce6565b612b3d565b6040516107979190613ba4565b60405180910390f35b6107a8612ba0565b6040516107b59190613ccd565b60405180910390f35b6107d860048036038101906107d39190614306565b612ba6565b005b6107f460048036038101906107ef9190614344565b612f31565b005b610810600480360381019061080b9190613c3d565b6132a2565b60405161081d9190613ca5565b60405180910390f35b610840600480360381019061083b9190613ce6565b613334565b005b61085c60048036038101906108579190613d24565b613356565b60405161086991906143a8565b60405180910390f35b61088c60048036038101906108879190613b5f565b6133f1565b60405161089d9594939291906143c8565b60405180910390f35b6108ae6134d4565b6040516108bb9190613ca5565b60405180910390f35b6108de60048036038101906108d99190613d24565b6134da565b6040516108eb9190613ca5565b60405180910390f35b6108fc6134ef565b6040516109099190613ccd565b60405180910390f35b61092c60048036038101906109279190613d24565b613513565b6040516109399190613ba4565b60405180910390f35b61095c60048036038101906109579190613d24565b613565565b6040516109699190613ca5565b60405180910390f35b61097a61357a565b83338173ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff16146109e1576040517f30cd747100000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b8560075f8273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205f9054906101000a900460ff16610a62576040517f426b82e400000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b5f60045f8973ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205490504360045f8a73ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f20819055504260085f8a73ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f208190555060105f815480929190610b399061444d565b91905055508773ffffffffffffffffffffffffffffffffffffffff167f18ab6b2ae3d64306c00ce663125f2bd680e441a098de1635bd7ad8b0d44965e48888885f86604051610b8c959493929190614520565b60405180910390a23373ffffffffffffffffffffffffffffffffffffffff16604051610bb7906145c0565b60405180910390208973ffffffffffffffffffffffffffffffffffffffff167feeee7ccc2d2e34605754e260f45f28ac297083ceda8f8ac76cb9e1d60952bcb48a8a8a604051602001610c0c93929190614622565b6040516020818303038152906040528051906020012042604051610c3192919061464b565b60405180910390a45050505050505050565b5f60095f8381526020019081526020015f205f015f9054906101000a900460ff169050919050565b5f7f7965db0b000000000000000000000000000000000000000000000000000000007bffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916827bffffffffffffffffffffffffffffffffffffffffffffffffffffffff19161480610cdd5750610cdc826135bb565b5b9050919050565b6003602052825f5260405f20602052815f5260405f20602052805f5260405f205f9250925050505481565b600e5481565b600f5481565b600d5481565b7fbf233dd2aafeb4d50879c4aa5c81e96d92f6e6945c906a58f9f2d1c1631b4b2681565b5f805f8381526020019081526020015f20600101549050919050565b610d6a82610d45565b610d7381613624565b610d7d8383613638565b50505050565b610d8b613721565b73ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff1614610def576040517f6697b23200000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b610df98282613728565b505050565b6060600a5f8373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f20805480602002602001604051908101604052809291908181526020018280548015610e8557602002820191905f5260205f20905b815481526020019060010190808311610e71575b50505050509050919050565b5f801b610e9d81613624565b610ea5613811565b3373ffffffffffffffffffffffffffffffffffffffff16604051610ec8906146bc565b60405180910390203373ffffffffffffffffffffffffffffffffffffffff167feeee7ccc2d2e34605754e260f45f28ac297083ceda8f8ac76cb9e1d60952bcb45f801b42604051610f1a92919061464b565b60405180910390a450565b6007602052805f5260405f205f915054906101000a900460ff1681565b610f4a61357a565b7f114e74f6ea3bd819998f78687bfcb11b140da08e9b7d222fa9c1f1ba1f2aa122610f7481613624565b845f801b60095f8381526020019081526020015f206004015403610fc4576040517fb7199d4c00000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b5f60095f8881526020019081526020015f209050805f015f9054906101000a900460ff161561101f576040517f7c78296200000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b6001815f015f6101000a81548160ff02191690831515021790555042816001018190555033816002015f6101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555084848260030191826110989291906148f8565b50600f5f8154809291906110ab9061444d565b919050555060105f8154809291906110c29061444d565b91905055508573ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16887f2a918ae971d77dfa6dc08d5400e652b9d78cd1c354adc31553300a9dbeb68db7888842604051611129939291906149f1565b60405180910390a43373ffffffffffffffffffffffffffffffffffffffff1660405161115490614a6b565b60405180910390208773ffffffffffffffffffffffffffffffffffffffff167feeee7ccc2d2e34605754e260f45f28ac297083ceda8f8ac76cb9e1d60952bcb48a89896040516020016111a993929190614aa3565b60405160208183030381529060405280519060200120426040516111ce92919061464b565b60405180910390a450505050505050565b6005602052805f5260405f205f915054906101000a900460ff1681565b5f61120561357a565b7f114e74f6ea3bd819998f78687bfcb11b140da08e9b7d222fa9c1f1ba1f2aa12261122f81613624565b8360075f8273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205f9054906101000a900460ff166112b0576040517f426b82e400000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b5f801b60095f8881526020019081526020015f2060040154146112ff576040517f724efe9100000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b6040518060a001604052805f151581526020014281526020013373ffffffffffffffffffffffffffffffffffffffff16815260200160405180602001604052805f81525081526020018581525060095f8881526020019081526020015f205f820151815f015f6101000a81548160ff021916908315150217905550602082015181600101556040820151816002015f6101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555060608201518160030190816113df9190614acc565b5060808201518160040155905050600a5f8673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f2086908060018154018082558091505060019003905f5260205f20015f9091909190915055600b5f8673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205f81548092919061149b9061444d565b9190505550600e5f8154809291906114b29061444d565b919050555060105f8154809291906114c99061444d565b91905055508473ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16877f5a48e710db944aa9bc28f4b9023ac791581696393867b1928fe113ad4d1aa4da874260405161152e92919061464b565b60405180910390a43373ffffffffffffffffffffffffffffffffffffffff1660405161155990614be5565b60405180910390208673ffffffffffffffffffffffffffffffffffffffff167feeee7ccc2d2e34605754e260f45f28ac297083ceda8f8ac76cb9e1d60952bcb487426040516115a992919061464b565b60405180910390a46001925050509392505050565b5f60015f9054906101000a900460ff16905090565b600c5481565b6115e16139b2565b60095f8381526020019081526020015f206040518060a00160405290815f82015f9054906101000a900460ff1615151515815260200160018201548152602001600282015f9054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200160038201805461168590614734565b80601f01602080910402602001604051908101604052809291908181526020018280546116b190614734565b80156116fc5780601f106116d3576101008083540402835291602001916116fc565b820191905f5260205f20905b8154815290600101906020018083116116df57829003601f168201915b505050505081526020016004820154815250509050919050565b5f4260035f8673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205f8581526020019081526020015f205f8473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f2054101590509392505050565b5f6117b461357a565b6117bc613872565b60075f8573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205f9054906101000a900460ff161561183d576040517f338c38da00000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b5f8383905003611879576040517f2c4639c600000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b600160075f8673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205f6101000a81548160ff021916908315150217905550828260065f8773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f20918261191a9291906148f8565b504260085f8673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f2081905550600c5f81548092919061196f9061444d565b919050555060105f8154809291906119869061444d565b91905055505f60045f8673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205490504360045f8773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f20819055503373ffffffffffffffffffffffffffffffffffffffff168573ffffffffffffffffffffffffffffffffffffffff167fd4fd20250033620b97463bb73a5cfebcf40b0ed201c4961e325cd88f05b4b962868642604051611a6f939291906149f1565b60405180910390a38473ffffffffffffffffffffffffffffffffffffffff167f38a5a6e68f30ed1ab45860a4afb34bcb2fc00f22ca462d249b8a8d40cda6f7a38683604051611abf929190614bf9565b60405180910390a23373ffffffffffffffffffffffffffffffffffffffff16604051611aea90614c6a565b60405180910390208673ffffffffffffffffffffffffffffffffffffffff167feeee7ccc2d2e34605754e260f45f28ac297083ceda8f8ac76cb9e1d60952bcb48787604051611b3a929190614c7e565b604051809103902042604051611b5192919061464b565b60405180910390a46001915050611b666138b6565b9392505050565b600b602052805f5260405f205f915090505481565b5f805f805f600c54600d54600e54600f54601054945094509450945094509091929394565b7f59a1c48e5837ad7a7f3dcedcbe129bf3249ec4fbf651fd4f5e2600ead39fe2f581565b600a602052815f5260405f208181548110611be4575f80fd5b905f5260205f20015f91509150505481565b611bfe61357a565b84338173ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff1614611c65576040517f30cd747100000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b8660075f8273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205f9054906101000a900460ff16611ce6576040517f426b82e400000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b5f60045f8a73ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205490504360045f8b73ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f20819055504260085f8b73ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f208190555060105f815480929190611dbd9061444d565b91905055508873ffffffffffffffffffffffffffffffffffffffff167f18ab6b2ae3d64306c00ce663125f2bd680e441a098de1635bd7ad8b0d44965e48989898942611e099190614c96565b86604051611e1b959493929190614cc9565b60405180910390a23373ffffffffffffffffffffffffffffffffffffffff16604051611e4690614d5f565b60405180910390208a73ffffffffffffffffffffffffffffffffffffffff167feeee7ccc2d2e34605754e260f45f28ac297083ceda8f8ac76cb9e1d60952bcb48b8b8b604051602001611e9b93929190614622565b6040516020818303038152906040528051906020012042604051611ec092919061464b565b60405180910390a4505050505050505050565b611edb61357a565b82338173ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff1614611f42576040517f30cd747100000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b8460075f8273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205f9054906101000a900460ff16611fc3576040517f426b82e400000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b5f8585905003611fff576040517f2c4639c600000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b5f60065f8873ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f20805461204890614734565b80601f016020809104026020016040519081016040528092919081815260200182805461207490614734565b80156120bf5780601f10612096576101008083540402835291602001916120bf565b820191905f5260205f20905b8154815290600101906020018083116120a257829003601f168201915b50505050509050858560065f8a73ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f2091826121129291906148f8565b504260085f8973ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f208190555060105f8154809291906121679061444d565b91905055503373ffffffffffffffffffffffffffffffffffffffff168773ffffffffffffffffffffffffffffffffffffffff167fa1dfcc78aef14c3293a0fd04072d97878facfc74e6f4bf1f6de31c22564e836b8888426040516121cd939291906149f1565b60405180910390a33373ffffffffffffffffffffffffffffffffffffffff166040516121f890614dbd565b60405180910390208873ffffffffffffffffffffffffffffffffffffffff167feeee7ccc2d2e34605754e260f45f28ac297083ceda8f8ac76cb9e1d60952bcb4848a8a60405160200161224d93929190614e01565b604051602081830303815290604052805190602001204260405161227292919061464b565b60405180910390a450505050505050565b61228b61357a565b82338173ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff16146122f2576040517f30cd747100000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b8460075f8273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205f9054906101000a900460ff16612373576040517f426b82e400000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b5f60045f8873ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205490504260035f8973ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205f8881526020019081526020015f205f8773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f20819055504360045f8973ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f20819055504260085f8973ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f208190555060105f8154809291906124d69061444d565b91905055508673ffffffffffffffffffffffffffffffffffffffff167f5a5084339536bcab65f20799fcc58724588145ca054bd2be626174b27ba156f7878742856040516125279493929190614e26565b60405180910390a23373ffffffffffffffffffffffffffffffffffffffff1660405161255290614eb3565b60405180910390208873ffffffffffffffffffffffffffffffffffffffff167feeee7ccc2d2e34605754e260f45f28ac297083ceda8f8ac76cb9e1d60952bcb489896040516020016125a5929190614f0c565b60405160208183030381529060405280519060200120426040516125ca92919061464b565b60405180910390a450505050505050565b5f60605f805f808660065f8973ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f2060055f8a73ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205f9054906101000a900460ff1660085f8b73ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205460045f8c73ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f2054600b5f8d73ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205484805461273090614734565b80601f016020809104026020016040519081016040528092919081815260200182805461275c90614734565b80156127a75780601f1061277e576101008083540402835291602001916127a7565b820191905f5260205f20905b81548152906001019060200180831161278a57829003601f168201915b5050505050945095509550955095509550955091939550919395565b7f114e74f6ea3bd819998f78687bfcb11b140da08e9b7d222fa9c1f1ba1f2aa12281565b7fbf233dd2aafeb4d50879c4aa5c81e96d92f6e6945c906a58f9f2d1c1631b4b2661281181613624565b6128196138c0565b3373ffffffffffffffffffffffffffffffffffffffff1660405161283c90614f81565b60405180910390203373ffffffffffffffffffffffffffffffffffffffff167feeee7ccc2d2e34605754e260f45f28ac297083ceda8f8ac76cb9e1d60952bcb45f801b4260405161288e92919061464b565b60405180910390a450565b5f819050919050565b6128aa61357a565b7f114e74f6ea3bd819998f78687bfcb11b140da08e9b7d222fa9c1f1ba1f2aa1226128d481613624565b845f801b60095f8381526020019081526020015f206004015403612924576040517fb7199d4c00000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b5f60095f8881526020019081526020015f209050805f015f9054906101000a900460ff1661297e576040517fab9fbb1500000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b5f815f015f6101000a81548160ff02191690831515021790555042816001018190555033816002015f6101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555084848260030191826129f69291906148f8565b50600f5f815480929190612a0990614f95565b919050555060105f815480929190612a209061444d565b91905055508573ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16887f421950bdfacf5c616651166d08827b4f00fc7f09619f1f5fe2c03267b833b40d888842604051612a87939291906149f1565b60405180910390a43373ffffffffffffffffffffffffffffffffffffffff16604051612ab290615006565b60405180910390208773ffffffffffffffffffffffffffffffffffffffff167feeee7ccc2d2e34605754e260f45f28ac297083ceda8f8ac76cb9e1d60952bcb48a8989604051602001612b0793929190614aa3565b6040516020818303038152906040528051906020012042604051612b2c92919061464b565b60405180910390a450505050505050565b5f805f8481526020019081526020015f205f015f8373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205f9054906101000a900460ff16905092915050565b5f801b81565b612bae61357a565b7fedcc084d3dcd65a1f7f23c65c46722faca6953d28e43150a467cf43e5c309238612bd881613624565b8260075f8273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205f9054906101000a900460ff16612c59576040517f426b82e400000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b5f60055f8673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205f9054906101000a900460ff1690508360055f8773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205f6101000a81548160ff0219169083151502179055504260085f8773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f208190555060105f815480929190612d4e9061444d565b9190505550838015612d5e575080155b15612d7f57600d5f815480929190612d759061444d565b9190505550612da8565b83158015612d8a5750805b15612da757600d5f815480929190612da190614f95565b91905055505b5b3373ffffffffffffffffffffffffffffffffffffffff168573ffffffffffffffffffffffffffffffffffffffff167f3dcdd9691f7366395bd1c77d97ec50a547fee2a1ca05fe2a2a9849f9c4b8b6b88642604051612e0792919061501a565b60405180910390a33373ffffffffffffffffffffffffffffffffffffffff1684612e66576040518060400160405280600b81526020017f4b59435f5245564f4b4544000000000000000000000000000000000000000000815250612e9d565b6040518060400160405280600c81526020017f4b59435f564552494649454400000000000000000000000000000000000000008152505b604051612eaa9190615041565b60405180910390208673ffffffffffffffffffffffffffffffffffffffff167feeee7ccc2d2e34605754e260f45f28ac297083ceda8f8ac76cb9e1d60952bcb48785604051602001612efd92919061509c565b6040516020818303038152906040528051906020012042604051612f2292919061464b565b60405180910390a45050505050565b612f3961357a565b83338173ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff1614612fa0576040517f30cd747100000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b8560075f8273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205f9054906101000a900460ff16613021576040517f426b82e400000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b5f60045f8973ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f20549050844261306e9190614c96565b60035f8a73ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205f8981526020019081526020015f205f8873ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f20819055504360045f8a73ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f20819055504260085f8a73ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f208190555060105f81548092919061318f9061444d565b91905055508773ffffffffffffffffffffffffffffffffffffffff167f5a5084339536bcab65f20799fcc58724588145ca054bd2be626174b27ba156f7888888426131da9190614c96565b856040516131eb9493929190614e26565b60405180910390a23373ffffffffffffffffffffffffffffffffffffffff1660405161321690615111565b60405180910390208973ffffffffffffffffffffffffffffffffffffffff167feeee7ccc2d2e34605754e260f45f28ac297083ceda8f8ac76cb9e1d60952bcb48a8a8a60405160200161326b93929190615145565b604051602081830303815290604052805190602001204260405161329092919061464b565b60405180910390a45050505050505050565b5f60035f8573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205f8481526020019081526020015f205f8373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205490509392505050565b61333d82610d45565b61334681613624565b6133508383613728565b50505050565b6006602052805f5260405f205f91509050805461337290614734565b80601f016020809104026020016040519081016040528092919081815260200182805461339e90614734565b80156133e95780601f106133c0576101008083540402835291602001916133e9565b820191905f5260205f20905b8154815290600101906020018083116133cc57829003601f168201915b505050505081565b6009602052805f5260405f205f91509050805f015f9054906101000a900460ff1690806001015490806002015f9054906101000a900473ffffffffffffffffffffffffffffffffffffffff169080600301805461344d90614734565b80601f016020809104026020016040519081016040528092919081815260200182805461347990614734565b80156134c45780601f1061349b576101008083540402835291602001916134c4565b820191905f5260205f20905b8154815290600101906020018083116134a757829003601f168201915b5050505050908060040154905085565b60105481565b6008602052805f5260405f205f915090505481565b7fedcc084d3dcd65a1f7f23c65c46722faca6953d28e43150a467cf43e5c30923881565b5f60075f8373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205f9054906101000a900460ff169050919050565b6004602052805f5260405f205f915090505481565b6135826115be565b156135b9576040517fd93c066500000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b565b5f7f01ffc9a7000000000000000000000000000000000000000000000000000000007bffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916827bffffffffffffffffffffffffffffffffffffffffffffffffffffffff1916149050919050565b61363581613630613721565b613921565b50565b5f6136438383612b3d565b6137175760015f808581526020019081526020015f205f015f8473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205f6101000a81548160ff0219169083151502179055506136b4613721565b73ffffffffffffffffffffffffffffffffffffffff168273ffffffffffffffffffffffffffffffffffffffff16847f2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d60405160405180910390a46001905061371b565b5f90505b92915050565b5f33905090565b5f6137338383612b3d565b15613807575f805f8581526020019081526020015f205f015f8473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020015f205f6101000a81548160ff0219169083151502179055506137a4613721565b73ffffffffffffffffffffffffffffffffffffffff168273ffffffffffffffffffffffffffffffffffffffff16847ff6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b60405160405180910390a46001905061380b565b5f90505b92915050565b613819613972565b5f60015f6101000a81548160ff0219169083151502179055507f5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa61385b613721565b60405161386891906142c3565b60405180910390a1565b60028054036138ad576040517f3ee5aeb500000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b60028081905550565b6001600281905550565b6138c861357a565b6001805f6101000a81548160ff0219169083151502179055507f62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a25861390a613721565b60405161391791906142c3565b60405180910390a1565b61392b8282612b3d565b61396e5780826040517fe2517d3f000000000000000000000000000000000000000000000000000000008152600401613965929190615181565b60405180910390fd5b5050565b61397a6115be565b6139b0576040517f8dfc202b00000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b565b6040518060a001604052805f151581526020015f81526020015f73ffffffffffffffffffffffffffffffffffffffff168152602001606081526020015f80191681525090565b5f80fd5b5f80fd5b5f73ffffffffffffffffffffffffffffffffffffffff82169050919050565b5f613a2982613a00565b9050919050565b613a3981613a1f565b8114613a43575f80fd5b50565b5f81359050613a5481613a30565b92915050565b5f819050919050565b613a6c81613a5a565b8114613a76575f80fd5b50565b5f81359050613a8781613a63565b92915050565b5f80fd5b5f80fd5b5f80fd5b5f8083601f840112613aae57613aad613a8d565b5b8235905067ffffffffffffffff811115613acb57613aca613a91565b5b602083019150836001820283011115613ae757613ae6613a95565b5b9250929050565b5f805f8060608587031215613b0657613b056139f8565b5b5f613b1387828801613a46565b9450506020613b2487828801613a79565b935050604085013567ffffffffffffffff811115613b4557613b446139fc565b5b613b5187828801613a99565b925092505092959194509250565b5f60208284031215613b7457613b736139f8565b5b5f613b8184828501613a79565b91505092915050565b5f8115159050919050565b613b9e81613b8a565b82525050565b5f602082019050613bb75f830184613b95565b92915050565b5f7fffffffff0000000000000000000000000000000000000000000000000000000082169050919050565b613bf181613bbd565b8114613bfb575f80fd5b50565b5f81359050613c0c81613be8565b92915050565b5f60208284031215613c2757613c266139f8565b5b5f613c3484828501613bfe565b91505092915050565b5f805f60608486031215613c5457613c536139f8565b5b5f613c6186828701613a46565b9350506020613c7286828701613a79565b9250506040613c8386828701613a46565b9150509250925092565b5f819050919050565b613c9f81613c8d565b82525050565b5f602082019050613cb85f830184613c96565b92915050565b613cc781613a5a565b82525050565b5f602082019050613ce05f830184613cbe565b92915050565b5f8060408385031215613cfc57613cfb6139f8565b5b5f613d0985828601613a79565b9250506020613d1a85828601613a46565b9150509250929050565b5f60208284031215613d3957613d386139f8565b5b5f613d4684828501613a46565b91505092915050565b5f81519050919050565b5f82825260208201905092915050565b5f819050602082019050919050565b613d8181613a5a565b82525050565b5f613d928383613d78565b60208301905092915050565b5f602082019050919050565b5f613db482613d4f565b613dbe8185613d59565b9350613dc983613d69565b805f5b83811015613df9578151613de08882613d87565b9750613deb83613d9e565b925050600181019050613dcc565b5085935050505092915050565b5f6020820190508181035f830152613e1e8184613daa565b905092915050565b5f8083601f840112613e3b57613e3a613a8d565b5b8235905067ffffffffffffffff811115613e5857613e57613a91565b5b602083019150836001820283011115613e7457613e73613a95565b5b9250929050565b5f805f8060608587031215613e9357613e926139f8565b5b5f613ea087828801613a79565b9450506020613eb187828801613a46565b935050604085013567ffffffffffffffff811115613ed257613ed16139fc565b5b613ede87828801613e26565b925092505092959194509250565b5f805f60608486031215613f0357613f026139f8565b5b5f613f1086828701613a79565b9350506020613f2186828701613a46565b9250506040613f3286828701613a79565b9150509250925092565b613f4581613b8a565b82525050565b613f5481613c8d565b82525050565b613f6381613a1f565b82525050565b5f81519050919050565b5f82825260208201905092915050565b8281835e5f83830152505050565b5f601f19601f8301169050919050565b5f613fab82613f69565b613fb58185613f73565b9350613fc5818560208601613f83565b613fce81613f91565b840191505092915050565b5f60a083015f830151613fee5f860182613f3c565b5060208301516140016020860182613f4b565b5060408301516140146040860182613f5a565b506060830151848203606086015261402c8282613fa1565b91505060808301516140416080860182613d78565b508091505092915050565b5f6020820190508181035f8301526140648184613fd9565b905092915050565b5f805f60408486031215614083576140826139f8565b5b5f61409086828701613a46565b935050602084013567ffffffffffffffff8111156140b1576140b06139fc565b5b6140bd86828701613e26565b92509250509250925092565b5f60a0820190506140dc5f830188613c96565b6140e96020830187613c96565b6140f66040830186613c96565b6141036060830185613c96565b6141106080830184613c96565b9695505050505050565b61412381613c8d565b811461412d575f80fd5b50565b5f8135905061413e8161411a565b92915050565b5f806040838503121561415a576141596139f8565b5b5f61416785828601613a46565b925050602061417885828601614130565b9150509250929050565b5f805f805f6080868803121561419b5761419a6139f8565b5b5f6141a888828901613a46565b95505060206141b988828901613a79565b945050604086013567ffffffffffffffff8111156141da576141d96139fc565b5b6141e688828901613a99565b935093505060606141f988828901614130565b9150509295509295909350565b61420f81613a1f565b82525050565b5f82825260208201905092915050565b5f61422f82613f69565b6142398185614215565b9350614249818560208601613f83565b61425281613f91565b840191505092915050565b5f60c0820190506142705f830189614206565b81810360208301526142828188614225565b90506142916040830187613b95565b61429e6060830186613c96565b6142ab6080830185613c96565b6142b860a0830184613c96565b979650505050505050565b5f6020820190506142d65f830184614206565b92915050565b6142e581613b8a565b81146142ef575f80fd5b50565b5f81359050614300816142dc565b92915050565b5f806040838503121561431c5761431b6139f8565b5b5f61432985828601613a46565b925050602061433a858286016142f2565b9150509250929050565b5f805f806080858703121561435c5761435b6139f8565b5b5f61436987828801613a46565b945050602061437a87828801613a79565b935050604061438b87828801613a46565b925050606061439c87828801614130565b91505092959194509250565b5f6020820190508181035f8301526143c08184614225565b905092915050565b5f60a0820190506143db5f830188613b95565b6143e86020830187613c96565b6143f56040830186614206565b81810360608301526144078185614225565b90506144166080830184613cbe565b9695505050505050565b7f4e487b71000000000000000000000000000000000000000000000000000000005f52601160045260245ffd5b5f61445782613c8d565b91507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff820361448957614488614420565b5b600182019050919050565b5f82825260208201905092915050565b828183375f83830152505050565b5f6144bd8385614494565b93506144ca8385846144a4565b6144d383613f91565b840190509392505050565b5f819050919050565b5f819050919050565b5f61450a614505614500846144de565b6144e7565b613c8d565b9050919050565b61451a816144f0565b82525050565b5f6080820190506145335f830188613cbe565b81810360208301526145468186886144b2565b90506145556040830185614511565b6145626060830184613c96565b9695505050505050565b5f81905092915050565b7f4154545249425554455f5245564f4b45440000000000000000000000000000005f82015250565b5f6145aa60118361456c565b91506145b582614576565b601182019050919050565b5f6145ca8261459e565b9150819050919050565b5f819050919050565b6145ee6145e982613a5a565b6145d4565b82525050565b5f81905092915050565b5f61460983856145f4565b93506146168385846144a4565b82840190509392505050565b5f61462d82866145dd565b60208201915061463e8284866145fe565b9150819050949350505050565b5f60408201905061465e5f830185613cbe565b61466b6020830184613c96565b9392505050565b7f53595354454d5f554e50415553454400000000000000000000000000000000005f82015250565b5f6146a6600f8361456c565b91506146b182614672565b600f82019050919050565b5f6146c68261469a565b9150819050919050565b5f82905092915050565b7f4e487b71000000000000000000000000000000000000000000000000000000005f52604160045260245ffd5b7f4e487b71000000000000000000000000000000000000000000000000000000005f52602260045260245ffd5b5f600282049050600182168061474b57607f821691505b60208210810361475e5761475d614707565b5b50919050565b5f819050815f5260205f209050919050565b5f6020601f8301049050919050565b5f82821b905092915050565b5f600883026147c07fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff82614785565b6147ca8683614785565b95508019841693508086168417925050509392505050565b5f6147fc6147f76147f284613c8d565b6144e7565b613c8d565b9050919050565b5f819050919050565b614815836147e2565b61482961482182614803565b848454614791565b825550505050565b5f90565b61483d614831565b61484881848461480c565b505050565b5b8181101561486b576148605f82614835565b60018101905061484e565b5050565b601f8211156148b05761488181614764565b61488a84614776565b81016020851015614899578190505b6148ad6148a585614776565b83018261484d565b50505b505050565b5f82821c905092915050565b5f6148d05f19846008026148b5565b1980831691505092915050565b5f6148e883836148c1565b9150826002028217905092915050565b61490283836146d0565b67ffffffffffffffff81111561491b5761491a6146da565b5b6149258254614734565b61493082828561486f565b5f601f83116001811461495d575f841561494b578287013590505b61495585826148dd565b8655506149bc565b601f19841661496b86614764565b5f5b828110156149925784890135825560018201915060208501945060208101905061496d565b868310156149af57848901356149ab601f8916826148c1565b8355505b6001600288020188555050505b50505050505050565b5f6149d08385614215565b93506149dd8385846144a4565b6149e683613f91565b840190509392505050565b5f6040820190508181035f830152614a0a8185876149c5565b9050614a196020830184613c96565b949350505050565b7f43524544454e5449414c5f5245564f4b454400000000000000000000000000005f82015250565b5f614a5560128361456c565b9150614a6082614a21565b601282019050919050565b5f614a7582614a49565b9150819050919050565b5f614a8a838561456c565b9350614a978385846144a4565b82840190509392505050565b5f614aae82866145dd565b602082019150614abf828486614a7f565b9150819050949350505050565b614ad582613f69565b67ffffffffffffffff811115614aee57614aed6146da565b5b614af88254614734565b614b0382828561486f565b5f60209050601f831160018114614b34575f8415614b22578287015190505b614b2c85826148dd565b865550614b93565b601f198416614b4286614764565b5f5b82811015614b6957848901518255600182019150602085019450602081019050614b44565b86831015614b865784890151614b82601f8916826148c1565b8355505b6001600288020188555050505b505050505050565b7f43524544454e5449414c5f4953535545440000000000000000000000000000005f82015250565b5f614bcf60118361456c565b9150614bda82614b9b565b601182019050919050565b5f614bef82614bc3565b9150819050919050565b5f604082019050614c0c5f830185614206565b614c196020830184613c96565b9392505050565b7f4449445f435245415445440000000000000000000000000000000000000000005f82015250565b5f614c54600b8361456c565b9150614c5f82614c20565b600b82019050919050565b5f614c7482614c48565b9150819050919050565b5f614c8a8284866145fe565b91508190509392505050565b5f614ca082613c8d565b9150614cab83613c8d565b9250828201905080821115614cc357614cc2614420565b5b92915050565b5f608082019050614cdc5f830188613cbe565b8181036020830152614cef8186886144b2565b9050614cfe6040830185613c96565b614d0b6060830184613c96565b9695505050505050565b7f4154545249425554455f534554000000000000000000000000000000000000005f82015250565b5f614d49600d8361456c565b9150614d5482614d15565b600d82019050919050565b5f614d6982614d3d565b9150819050919050565b7f4449445f555044415445440000000000000000000000000000000000000000005f82015250565b5f614da7600b8361456c565b9150614db282614d73565b600b82019050919050565b5f614dc782614d9b565b9150819050919050565b5f614ddb82613f69565b614de5818561456c565b9350614df5818560208601613f83565b80840191505092915050565b5f614e0c8286614dd1565b9150614e19828486614a7f565b9150819050949350505050565b5f608082019050614e395f830187613cbe565b614e466020830186614206565b614e536040830185613c96565b614e606060830184613c96565b95945050505050565b7f44454c45474154455f5245564f4b4544000000000000000000000000000000005f82015250565b5f614e9d60108361456c565b9150614ea882614e69565b601082019050919050565b5f614ebd82614e91565b9150819050919050565b5f8160601b9050919050565b5f614edd82614ec7565b9050919050565b5f614eee82614ed3565b9050919050565b614f06614f0182613a1f565b614ee4565b82525050565b5f614f1782856145dd565b602082019150614f278284614ef5565b6014820191508190509392505050565b7f53595354454d5f504155534544000000000000000000000000000000000000005f82015250565b5f614f6b600d8361456c565b9150614f7682614f37565b600d82019050919050565b5f614f8b82614f5f565b9150819050919050565b5f614f9f82613c8d565b91505f8203614fb157614fb0614420565b5b600182039050919050565b7f43524544454e5449414c5f524553544f524544000000000000000000000000005f82015250565b5f614ff060138361456c565b9150614ffb82614fbc565b601382019050919050565b5f61501082614fe4565b9150819050919050565b5f60408201905061502d5f830185613b95565b61503a6020830184613c96565b9392505050565b5f61504c8284614dd1565b915081905092915050565b5f8160f81b9050919050565b5f61506d82615057565b9050919050565b5f61507e82615063565b9050919050565b61509661509182613b8a565b615074565b82525050565b5f6150a78285615085565b6001820191506150b78284615085565b6001820191508190509392505050565b7f44454c45474154455f41444445440000000000000000000000000000000000005f82015250565b5f6150fb600e8361456c565b9150615106826150c7565b600e82019050919050565b5f61511b826150ef565b9150819050919050565b5f819050919050565b61513f61513a82613c8d565b615125565b82525050565b5f61515082866145dd565b6020820191506151608285614ef5565b601482019150615170828461512e565b602082019150819050949350505050565b5f6040820190506151945f830185614206565b6151a16020830184613cbe565b939250505056fea264697066735822122071b54155a2edbbf7b506520fd3083370207b48a1e76f5c619be9f657351bb70464736f6c63430008190033",
+    "constructor_args": [
+      "0xfe3b557e8fb62b89f4916b721be55ceb828dbd73"
+    ],
+    "compiler_version": "v0.8.19",
+    "optimization_enabled": true,
+    "optimization_runs": 200,
+    "license_type": "MIT",
+    "tags": [
+      "did",
+      "registry",
+      "identity",
+      "idbra"
+    ],
+    "metadata": {}
+  },
+  "gas_used": 4654510,
+  "timestamp": "2025-08-20T14:18:22Z",
+  "tx_hash": "0xad6f344c35141a60352382398c7d26b5aa50bcc9ce8cb9ee2f36f8c823e4ccc2"
+}

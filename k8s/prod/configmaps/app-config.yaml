@@ -1,0 +1,215 @@
+# =============================================================================
+# CONFIGMAP - CONFIGURAÇÕES DA APLICAÇÃO (DESENVOLVIMENTO)
+# =============================================================================
+# Este arquivo contém todas as configurações não-sensíveis da aplicação.
+# 
+# O que é um ConfigMap?
+# - Armazena dados de configuração em pares chave-valor
+# - Permite separar configuração do código da aplicação
+# - Pode ser montado como volumes ou variáveis de ambiente
+# - Facilita mudanças de configuração sem rebuild da imagem
+# =============================================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: besuscan-app-config
+  namespace: besuscan-prod
+  labels:
+    app: besuscan
+    environment: production
+    component: configuration
+  annotations:
+    description: "Configurações gerais da aplicação BeSuScan para produção"
+data:
+  # =============================================================================
+  # CONFIGURAÇÕES GERAIS
+  # =============================================================================
+  ENVIRONMENT: "production"
+  LOG_LEVEL: "info"
+  LOG_FORMAT: "json"
+  
+  # =============================================================================
+  # CONFIGURAÇÕES DE REDE BLOCKCHAIN
+  # =============================================================================
+  # URLs do Hyperledger Besu
+  ETH_WS_URL: "ws://147.93.11.54:6174"
+  ETH_RPC_URL: "http://147.93.11.54:6174"
+  BESU_RPC_URL: "http://147.93.11.54:6174"
+  ETHEREUM_RPC_URL: "http://147.93.11.54:6174"
+  
+  # Configurações da rede
+  CHAIN_ID: "1337"
+  NETWORK_NAME: "HubWeb3 Besu Network"
+  
+  # Configurações de sincronização
+  SYNC_INTERVAL: "5"
+  
+  # =============================================================================
+  # CONFIGURAÇÕES DE SERVIÇOS INTERNOS
+  # =============================================================================
+  
+  # RabbitMQ
+  RABBITMQ_HOST: "rabbitmq-service"
+  RABBITMQ_PORT: "5672"
+  RABBITMQ_USER: "guest"
+  RABBITMQ_EXCHANGE: "blockchain_events"
+  RABBITMQ_MANAGEMENT_PORT: "15672"
+  
+  # Redis
+  REDIS_HOST: "redis-service"
+  REDIS_PORT: "6379"
+  REDIS_DB: "0"
+  
+  # =============================================================================
+  # CONFIGURAÇÕES DOS SERVIÇOS DA APLICAÇÃO
+  # =============================================================================
+  # API
+  API_PORT: "8080"
+  API_HOST: "0.0.0.0"
+  ENABLE_WEBSOCKET: "false"
+  
+  # Indexer
+  INDEXER_PORT: "8080"
+  INDEXER_HOST: "0.0.0.0"
+  
+  # Worker
+  WORKER_CONCURRENCY: "5"
+  WORKER_RETRY_ATTEMPTS: "3"
+  WORKER_RETRY_DELAY: "5s"
+  
+  # Frontend
+  FRONTEND_PORT: "3000"
+  NODE_ENV: "production"
+  DOCKER_ENV: "true"
+  
+  # =============================================================================
+  # CONFIGURAÇÕES DE MONITORAMENTO E OBSERVABILIDADE
+  # =============================================================================
+  # Métricas
+  METRICS_ENABLED: "true"
+  METRICS_PORT: "9090"
+  METRICS_PATH: "/metrics"
+  
+  # Health checks
+  HEALTH_CHECK_ENABLED: "true"
+  HEALTH_CHECK_PORT: "8081"
+  HEALTH_CHECK_PATH: "/health"
+  
+  # =============================================================================
+  # CONFIGURAÇÕES DE SEGURANÇA (NÃO-SENSÍVEIS)
+  # =============================================================================
+  # CORS
+  CORS_ENABLED: "true"
+  CORS_ORIGINS: "*"
+  CORS_METHODS: "GET,POST,PUT,DELETE,OPTIONS"
+  CORS_HEADERS: "Origin,Content-Type,Accept,Authorization"
+  
+  # Rate limiting
+  RATE_LIMIT_ENABLED: "true"
+  RATE_LIMIT_REQUESTS_PER_MINUTE: "100"
+  
+  # =============================================================================
+  # CONFIGURAÇÕES DE CACHE
+  # =============================================================================
+  CACHE_ENABLED: "true"
+  CACHE_TTL: "300"  # 5 minutos
+  CACHE_MAX_SIZE: "1000"
+
+---
+# =============================================================================
+# CONFIGMAP - CONFIGURAÇÕES DO NGINX
+# =============================================================================
+# Configuração do Nginx para proxy reverso e load balancing
+# =============================================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: besuscan-prod
+  labels:
+    app: besuscan
+    environment: production
+    component: nginx
+data:
+  nginx.conf: |
+    user nginx;
+    worker_processes auto;
+    error_log /var/log/nginx/error.log notice;
+    pid /var/run/nginx.pid;
+
+    events {
+        worker_connections 1024;
+    }
+
+    http {
+        include /etc/nginx/mime.types;
+        default_type application/octet-stream;
+
+        log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+                        '$status $body_bytes_sent "$http_referer" '
+                        '"$http_user_agent" "$http_x_forwarded_for"';
+
+        access_log /var/log/nginx/access.log main;
+
+        sendfile on;
+        tcp_nopush on;
+        keepalive_timeout 65;
+        gzip on;
+
+        # Upstream para API
+        upstream api_backend {
+            server api-service:8080;
+        }
+
+        # Upstream para Frontend
+        upstream frontend_backend {
+            server frontend-service:3000;
+        }
+
+        server {
+            listen 80;
+            server_name besuscan.com;
+
+            # Configuração de proxy básica
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+
+            # Proxy para API
+            location /api/ {
+                # CORS Headers
+                add_header 'Access-Control-Allow-Origin' '*' always;
+                add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+                add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
+
+                # Preflight requests
+                if ($request_method = 'OPTIONS') {
+                    add_header 'Access-Control-Max-Age' 1728000;
+                    add_header 'Content-Type' 'text/plain; charset=utf-8';
+                    add_header 'Content-Length' 0;
+                    return 204;
+                }
+
+                proxy_pass http://api_backend/api/;
+            }
+
+            # Servir frontend
+            location / {
+                proxy_pass http://frontend_backend/;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection 'upgrade';
+                proxy_cache_bypass $http_upgrade;
+            }
+
+            # Health check endpoint
+            location /health {
+                access_log off;
+                return 200 "healthy\n";
+                add_header Content-Type text/plain;
+            }
+        }
+    } 

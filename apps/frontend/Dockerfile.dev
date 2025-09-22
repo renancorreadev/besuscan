@@ -1,0 +1,33 @@
+FROM node:20-alpine AS deps
+
+WORKDIR /app
+
+# Instalar apenas as dependências necessárias
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
+
+# Imagem final
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copiar dependências do estágio anterior
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/package.json ./package.json
+
+# Copiar arquivos do projeto
+COPY . .
+
+# Limpar cache e arquivos desnecessários
+RUN yarn cache clean && \
+    rm -rf /root/.npm && \
+    rm -rf /root/.yarn
+
+# Usuário não-root para segurança
+USER node
+
+# Expor porta do Vite
+EXPOSE 5173
+
+# Iniciar em modo de desenvolvimento
+CMD ["yarn", "dev", "--host"] 

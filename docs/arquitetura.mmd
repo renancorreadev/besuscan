@@ -1,0 +1,54 @@
+flowchart TD
+
+  %% Blockchain Layer
+  subgraph Blockchain Layer
+    A1[Hyperledger Besu<br/>(JSON-RPC / WebSocket)]
+  end
+
+  %% Indexer Service
+  subgraph Indexer Service (Go)
+    A2[Indexador WebSocket<br/>↳ Escuta novos blocos]
+    A2 -->|Bloco encontrado| Q1
+  end
+
+  %% RabbitMQ Queues
+  subgraph Queue System (RabbitMQ)
+    Q1[blocks.new]
+    Q2[txs.new]
+  end
+
+  %% Worker Service
+  subgraph Worker Service (Go)
+    W1[Worker Go<br/>↳ Processa blocos e transações]
+    Q1 --> W1
+    Q2 --> W1
+    W1 --> DB1
+    W1 -->|Limita a| C1[Últimos N blocos<br/>(.env: BLOCK_LIMIT)]
+  end
+
+  %% API
+  subgraph API (Go REST)
+    A3[API REST<br/>↳ /blocks, /tx/:hash]
+    A3 --> DB1
+  end
+
+  %% UI
+  subgraph UI (React + Vite)
+    A4[Frontend React<br/>↳ /blocks, /tx, /search]
+    A4 --> A3
+  end
+
+  %% Infraestrutura
+  subgraph Infraestrutura
+    DB1[(PostgreSQL<br/>Tabelas: blocks, transactions)]
+    MQ[(RabbitMQ)]
+    ENV[[.env Config<br/>↳ BLOCK_LIMIT, RPC_URL, etc]]
+  end
+
+  %% Connections to infrastructure
+  A1 --> A2
+  ENV --> A2
+  ENV --> W1
+  ENV --> A3
+  ENV --> DB1
+  ENV --> MQ

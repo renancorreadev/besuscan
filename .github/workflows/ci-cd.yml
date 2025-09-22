@@ -1,0 +1,429 @@
+# =============================================================================
+# BESUSCAN - PIPELINE CI/CD
+# =============================================================================
+# Este arquivo define o pipeline completo de CI/CD para o BeSuScan
+# 
+# Funcionalidades:
+# - Build e teste automático em PRs
+# - Deploy automático para desenvolvimento
+# - Deploy manual para produção com aprovação
+# - Versionamento automático com tags
+# - Notificações de status
+# =============================================================================
+
+name: 🚀 BeSuScan CI/CD Pipeline
+
+on:
+  # Trigger em push para branches principais
+  push:
+    branches:
+      - main
+      - develop
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  
+  # Trigger em Pull Requests
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  
+  # Trigger manual
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Ambiente para deploy'
+        required: true
+        default: 'development'
+        type: choice
+        options:
+          - development
+          - production
+      force_build:
+        description: 'Forçar rebuild das imagens'
+        required: false
+        default: false
+        type: boolean
+
+# =============================================================================
+# VARIÁVEIS GLOBAIS
+# =============================================================================
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: besuscan
+  KUBECONFIG_DEV: ${{ secrets.KUBECONFIG_DEV }}
+  KUBECONFIG_PROD: ${{ secrets.KUBECONFIG_PROD }}
+
+# =============================================================================
+# JOBS
+# =============================================================================
+jobs:
+  # ===========================================================================
+  # JOB 1: ANÁLISE E VALIDAÇÃO
+  # ===========================================================================
+  analyze:
+    name: 📊 Análise e Validação
+    runs-on: ubuntu-latest
+    outputs:
+      changed-services: ${{ steps.changes.outputs.services }}
+      version: ${{ steps.version.outputs.version }}
+    
+    steps:
+    - name: 📥 Checkout código
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch completo para análise de mudanças
+    
+    - name: 🔍 Detectar mudanças nos serviços
+      id: changes
+      uses: dorny/paths-filter@v2
+      with:
+        filters: |
+          indexer:
+            - 'apps/indexer/**'
+          worker:
+            - 'apps/worker/**'
+          api:
+            - 'apps/api/**'
+          frontend:
+            - 'apps/frontend/**'
+          besucli:
+            - 'apps/besucli/**'
+          k8s:
+            - 'k8s/**'
+        list-files: 'json'
+    
+    - name: 🏷️ Gerar versão
+      id: version
+      run: |
+        if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+          # Produção - usar tag semântica
+          VERSION=$(date +%Y.%m.%d)-${GITHUB_SHA:0:7}
+        else
+          # Desenvolvimento - usar branch e commit
+          BRANCH=${GITHUB_REF#refs/heads/}
+          VERSION=${BRANCH}-${GITHUB_SHA:0:7}
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "🏷️ Versão gerada: $VERSION"
+    
+    - name: 📋 Resumo das mudanças
+      run: |
+        echo "### 📊 Análise do Pipeline" >> $GITHUB_STEP_SUMMARY
+        echo "**Versão:** ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Branch:** ${GITHUB_REF#refs/heads/}" >> $GITHUB_STEP_SUMMARY
+        echo "**Commit:** ${GITHUB_SHA:0:7}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Serviços alterados:**" >> $GITHUB_STEP_SUMMARY
+        if [[ "${{ steps.changes.outputs.indexer }}" == "true" ]]; then
+          echo "- 🔍 Indexer" >> $GITHUB_STEP_SUMMARY
+        fi
+        if [[ "${{ steps.changes.outputs.worker }}" == "true" ]]; then
+          echo "- ⚙️ Worker" >> $GITHUB_STEP_SUMMARY
+        fi
+        if [[ "${{ steps.changes.outputs.api }}" == "true" ]]; then
+          echo "- 🌐 API" >> $GITHUB_STEP_SUMMARY
+        fi
+        if [[ "${{ steps.changes.outputs.frontend }}" == "true" ]]; then
+          echo "- 🎨 Frontend" >> $GITHUB_STEP_SUMMARY
+        fi
+        if [[ "${{ steps.changes.outputs.k8s }}" == "true" ]]; then
+          echo "- ☸️ Kubernetes" >> $GITHUB_STEP_SUMMARY
+        fi
+
+  # ===========================================================================
+  # JOB 2: TESTES
+  # ===========================================================================
+  test:
+    name: 🧪 Testes
+    runs-on: ubuntu-latest
+    needs: analyze
+    if: github.event_name == 'pull_request' || contains(needs.analyze.outputs.changed-services, 'true')
+    
+    strategy:
+      matrix:
+        service: [indexer, worker, api]
+        include:
+          - service: indexer
+            go-version: '1.24'
+            working-directory: apps/indexer
+          - service: worker
+            go-version: '1.24'
+            working-directory: apps/worker
+          - service: api
+            go-version: '1.22'
+            working-directory: apps/api
+    
+    steps:
+    - name: 📥 Checkout código
+      uses: actions/checkout@v4
+    
+    - name: 🐹 Setup Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: ${{ matrix.go-version }}
+        cache-dependency-path: ${{ matrix.working-directory }}/go.sum
+    
+    - name: 📦 Cache dependências
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ matrix.service }}-${{ hashFiles(format('{0}/go.sum', matrix.working-directory)) }}
+    
+    - name: 📥 Download dependências
+      working-directory: ${{ matrix.working-directory }}
+      run: go mod download
+    
+    - name: 🔍 Lint
+      working-directory: ${{ matrix.working-directory }}
+      run: |
+        go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+        golangci-lint run
+    
+    - name: 🧪 Executar testes
+      working-directory: ${{ matrix.working-directory }}
+      run: |
+        go test -v -race -coverprofile=coverage.out ./...
+        go tool cover -html=coverage.out -o coverage.html
+    
+    - name: 📊 Upload cobertura
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-${{ matrix.service }}
+        path: ${{ matrix.working-directory }}/coverage.html
+
+  # ===========================================================================
+  # JOB 3: TESTES FRONTEND
+  # ===========================================================================
+  test-frontend:
+    name: 🎨 Testes Frontend
+    runs-on: ubuntu-latest
+    needs: analyze
+    if: needs.analyze.outputs.changed-services == 'true' && contains(needs.analyze.outputs.changed-services, 'frontend')
+    
+    steps:
+    - name: 📥 Checkout código
+      uses: actions/checkout@v4
+    
+    - name: 🟢 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'yarn'
+        cache-dependency-path: apps/frontend/yarn.lock
+    
+    - name: 📦 Instalar dependências
+      working-directory: apps/frontend
+      run: yarn install --frozen-lockfile
+    
+    - name: 🔍 Lint
+      working-directory: apps/frontend
+      run: yarn lint
+    
+    - name: 🏗️ Build
+      working-directory: apps/frontend
+      run: yarn build
+    
+    - name: 📊 Upload build
+      uses: actions/upload-artifact@v3
+      with:
+        name: frontend-build
+        path: apps/frontend/dist
+
+  # ===========================================================================
+  # JOB 4: BUILD E PUSH IMAGENS
+  # ===========================================================================
+  build:
+    name: 🏗️ Build Imagens
+    runs-on: ubuntu-latest
+    needs: [analyze, test]
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    
+    permissions:
+      contents: read
+      packages: write
+    
+    strategy:
+      matrix:
+        service: [indexer, worker, api, frontend]
+        include:
+          - service: indexer
+            dockerfile: Dockerfile.dev
+            context: apps/indexer
+          - service: worker
+            dockerfile: Dockerfile.dev
+            context: apps/worker
+          - service: api
+            dockerfile: Dockerfile.dev
+            context: apps/api
+          - service: frontend
+            dockerfile: Dockerfile.dev
+            context: apps/frontend
+    
+    steps:
+    - name: 📥 Checkout código
+      uses: actions/checkout@v4
+    
+    - name: 🔐 Login no Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: 🏷️ Extrair metadados
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_PREFIX }}-${{ matrix.service }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=raw,value=${{ needs.analyze.outputs.version }}
+          type=raw,value=latest,enable={{is_default_branch}}
+    
+    - name: 🏗️ Build e Push
+      uses: docker/build-push-action@v5
+      with:
+        context: ${{ matrix.context }}
+        file: ${{ matrix.context }}/${{ matrix.dockerfile }}
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  # ===========================================================================
+  # JOB 5: DEPLOY DESENVOLVIMENTO
+  # ===========================================================================
+  deploy-dev:
+    name: 🚀 Deploy Desenvolvimento
+    runs-on: ubuntu-latest
+    needs: [analyze, build]
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    environment: development
+    
+    steps:
+    - name: 📥 Checkout código
+      uses: actions/checkout@v4
+    
+    - name: ☸️ Setup kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'latest'
+    
+    - name: 🔐 Setup kubeconfig
+      run: |
+        mkdir -p ~/.kube
+        echo "${{ secrets.KUBECONFIG_DEV }}" | base64 -d > ~/.kube/config
+        chmod 600 ~/.kube/config
+    
+    - name: 🚀 Deploy para desenvolvimento
+      run: |
+        cd k8s
+        ./scripts/deploy-dev.sh --no-build
+        
+        # Atualizar imagens nos deployments
+        kubectl set image deployment/indexer-deployment indexer=${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_PREFIX }}-indexer:${{ needs.analyze.outputs.version }} -n besuscan-dev
+        kubectl set image deployment/worker-deployment worker=${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_PREFIX }}-worker:${{ needs.analyze.outputs.version }} -n besuscan-dev
+        kubectl set image deployment/api-deployment api=${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_PREFIX }}-api:${{ needs.analyze.outputs.version }} -n besuscan-dev
+        kubectl set image deployment/frontend-deployment frontend=${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_PREFIX }}-frontend:${{ needs.analyze.outputs.version }} -n besuscan-dev
+    
+    - name: ✅ Verificar deploy
+      run: |
+        kubectl rollout status deployment/indexer-deployment -n besuscan-dev --timeout=300s
+        kubectl rollout status deployment/worker-deployment -n besuscan-dev --timeout=300s
+        kubectl rollout status deployment/api-deployment -n besuscan-dev --timeout=300s
+        kubectl rollout status deployment/frontend-deployment -n besuscan-dev --timeout=300s
+
+  # ===========================================================================
+  # JOB 6: DEPLOY PRODUÇÃO
+  # ===========================================================================
+  deploy-prod:
+    name: 🏭 Deploy Produção
+    runs-on: ubuntu-latest
+    needs: [analyze, build]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+    
+    steps:
+    - name: 📥 Checkout código
+      uses: actions/checkout@v4
+    
+    - name: ☸️ Setup kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'latest'
+    
+    - name: 🔐 Setup kubeconfig
+      run: |
+        mkdir -p ~/.kube
+        echo "${{ secrets.KUBECONFIG_PROD }}" | base64 -d > ~/.kube/config
+        chmod 600 ~/.kube/config
+    
+    - name: 🏭 Deploy para produção
+      run: |
+        cd k8s
+        ./scripts/deploy-prod.sh --no-build
+        
+        # Atualizar imagens nos deployments
+        kubectl set image deployment/indexer-deployment indexer=${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_PREFIX }}-indexer:${{ needs.analyze.outputs.version }} -n besuscan-prod
+        kubectl set image deployment/worker-deployment worker=${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_PREFIX }}-worker:${{ needs.analyze.outputs.version }} -n besuscan-prod
+        kubectl set image deployment/api-deployment api=${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_PREFIX }}-api:${{ needs.analyze.outputs.version }} -n besuscan-prod
+        kubectl set image deployment/frontend-deployment frontend=${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_PREFIX }}-frontend:${{ needs.analyze.outputs.version }} -n besuscan-prod
+    
+    - name: ✅ Verificar deploy
+      run: |
+        kubectl rollout status deployment/indexer-deployment -n besuscan-prod --timeout=600s
+        kubectl rollout status deployment/worker-deployment -n besuscan-prod --timeout=600s
+        kubectl rollout status deployment/api-deployment -n besuscan-prod --timeout=600s
+        kubectl rollout status deployment/frontend-deployment -n besuscan-prod --timeout=600s
+    
+    - name: 🏷️ Criar release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ needs.analyze.outputs.version }}
+        release_name: Release v${{ needs.analyze.outputs.version }}
+        body: |
+          ## 🚀 BeSuScan Release v${{ needs.analyze.outputs.version }}
+          
+          ### 📋 Mudanças incluídas:
+          - Deploy automático para produção
+          - Versão: ${{ needs.analyze.outputs.version }}
+          - Commit: ${{ github.sha }}
+          
+          ### 🔗 Links:
+          - [Frontend](https://besuscan.com)
+          - [API](https://besuscan.com/api)
+        draft: false
+        prerelease: false
+
+  # ===========================================================================
+  # JOB 7: NOTIFICAÇÕES
+  # ===========================================================================
+  notify:
+    name: 📢 Notificações
+    runs-on: ubuntu-latest
+    needs: [deploy-dev, deploy-prod]
+    if: always()
+    
+    steps:
+    - name: 📢 Notificar sucesso
+      if: needs.deploy-dev.result == 'success' || needs.deploy-prod.result == 'success'
+      run: |
+        echo "✅ Deploy realizado com sucesso!"
+        # Aqui você pode adicionar notificações para Slack, Discord, etc.
+    
+    - name: 📢 Notificar falha
+      if: needs.deploy-dev.result == 'failure' || needs.deploy-prod.result == 'failure'
+      run: |
+        echo "❌ Deploy falhou!"
+        # Aqui você pode adicionar notificações para Slack, Discord, etc. 

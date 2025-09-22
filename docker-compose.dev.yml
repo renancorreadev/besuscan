@@ -1,0 +1,181 @@
+services:
+  # Serviços de infraestrutura
+  postgres:
+    image: postgres:15
+    container_name: explorer-postgres-dev
+    restart: always
+    environment:
+      POSTGRES_USER: explorer
+      POSTGRES_PASSWORD: explorer
+      POSTGRES_DB: blockexplorer
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - explorer-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: explorer-rabbit-dev
+    ports:
+      - "5673:5672"
+      - "15673:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - explorer-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: explorer-redis-dev
+    restart: always
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - explorer-network
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+
+  indexer:
+    build:
+      context: ./apps/indexer
+      dockerfile: Dockerfile.dev
+    container_name: explorer-indexer-dev
+    volumes:
+      - ./apps/indexer:/app
+      - go-modules:/go/pkg/mod
+    depends_on:
+      - rabbitmq
+    environment:
+      - AIR_WORKDIR=/app
+      - AIR_BUILD_CMD="go build -o /tmp/main ./cmd/main.go"
+      - AIR_BIN="main"
+      - AIR_CMD="./main"
+      # Variáveis de ambiente para conexão com os serviços
+      - ETH_WS_URL=ws://144.22.179.183/ws
+      - ETH_RPC_URL=http://144.22.179.183
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - RABBITMQ_EXCHANGE=blockchain_events
+      - SYNC_INTERVAL=5
+      - CHAIN_ID=1337
+      - API_BASE_URL=http://api:8080/api
+    ports:
+      - "8081:8080"
+    networks:
+      - explorer-network
+    command: air -c .air.toml
+
+  # API com hot reload
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile.dev
+    container_name: explorer-api-dev
+    volumes:
+      - ./apps/api:/app
+      - go-modules:/go/pkg/mod
+    depends_on:
+      - postgres
+      - rabbitmq
+      - redis
+    environment:
+      - AIR_WORKDIR=/app
+      - AIR_BUILD_CMD="go build -o /tmp/api ./cmd/main.go"
+      - AIR_BIN="api"
+      - AIR_CMD="./api"
+      # Variáveis de ambiente para conexão com os serviços
+      - DATABASE_URL=postgres://explorer:explorer@postgres:5432/blockexplorer?sslmode=disable
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - RABBITMQ_EXCHANGE=blockchain_events
+      - BESU_RPC_URL=http://144.22.179.183
+      - REDIS_URL=redis://redis:6379
+      - CHAIN_ID=1337
+      - PORT=8080
+      # WebSocket desabilitado por padrão para melhor performance
+      - ENABLE_WEBSOCKET=false
+    ports:
+      - "8080:8080"
+    networks:
+      - explorer-network
+    command: air -c .air.toml
+
+  # Worker com hot reload
+  worker:
+    build:
+      context: ./apps/worker
+      dockerfile: Dockerfile.dev
+    container_name: explorer-worker-dev
+    volumes:
+      - ./apps/worker:/app
+      - go-modules:/go/pkg/mod
+    depends_on:
+      - rabbitmq
+      - postgres
+      - redis
+    environment:
+      - AIR_WORKDIR=/app
+      - AIR_BUILD_CMD="go build -o /tmp/worker ./cmd/main.go"
+      - AIR_BIN="worker"
+      - AIR_CMD="./worker"
+      # Variáveis de ambiente para conexão com os serviços
+      - DATABASE_URL=postgres://explorer:explorer@postgres:5432/blockexplorer?sslmode=disable
+      - ETH_RPC_URL=http://144.22.179.183
+      - ETH_WS_URL=ws://144.22.179.183/ws
+      - ETHEREUM_RPC_URL=http://144.22.179.183
+      - BESU_RPC_URL=http://144.22.179.183
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - RABBITMQ_EXCHANGE=blockchain_events
+      - REDIS_URL=redis://redis:6379
+      - CHAIN_ID=1337
+    networks:
+      - explorer-network
+    command: air -c .air.toml
+
+  # Frontend com hot reload
+  frontend:
+    build:
+      context: ./apps/frontend
+      dockerfile: Dockerfile.dev
+    container_name: explorer-frontend-dev
+    user: "node"
+    ports:
+      - "3000:3000"
+      - "24678:24678" # Porta para HMR
+    volumes:
+      - ./apps/frontend:/app:delegated
+      - /app/node_modules
+      - vite-cache:/app/node_modules/.vite
+    depends_on:
+      - api
+    environment:
+      - NODE_ENV=development
+      - DOCKER_ENV=true
+      - VITE_API_URL=/api
+      - VITE_LLM_CHAT_URL=/api/llm-chat
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - FAST_REFRESH=true
+      - HMR=true
+      # Configuração RPC - FORÇAR USO DO PROXY LOCAL
+      - VITE_USE_LOCAL_RPC=true
+      - VITE_CHAIN_ID=1337
+      - VITE_NETWORK_NAME=HubWeb3 Besu Network
+    networks:
+      - explorer-network
+    command: yarn dev --host 0.0.0.0 --port 3000
+
+# Rede personalizada para comunicação entre serviços
+networks:
+  explorer-network:
+    driver: bridge
+
+volumes:
+  pgdata:
+  go-modules:
+  redis-data:
+  vite-cache:
+
+

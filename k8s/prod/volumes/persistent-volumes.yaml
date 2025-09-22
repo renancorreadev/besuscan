@@ -1,0 +1,104 @@
+# =============================================================================
+# PERSISTENT VOLUMES - ARMAZENAMENTO PERSISTENTE (PRODUÇÃO)
+# =============================================================================
+# Este arquivo define os volumes persistentes para armazenamento de dados.
+# 
+# O que são Persistent Volumes (PV) e Persistent Volume Claims (PVC)?
+# - PV: Recurso de armazenamento no cluster (como um "disco")
+# - PVC: Solicitação de armazenamento por um pod (como "quero 10GB")
+# - Permite que dados persistam mesmo quando pods são reiniciados
+# - Diferentes tipos: local, NFS, cloud storage, etc.
+# =============================================================================
+
+# =============================================================================
+# RABBITMQ - VOLUME PERSISTENTE
+# =============================================================================
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: rabbitmq-pv-prod
+  labels:
+    app: besuscan
+    environment: production
+    component: rabbitmq
+    type: messaging
+spec:
+  capacity:
+    storage: 5Gi  # 5GB para filas e mensagens em produção
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  hostPath:
+    path: /var/lib/besuscan/prod/rabbitmq
+    type: DirectoryOrCreate
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rabbitmq-pvc
+  namespace: besuscan-prod
+  labels:
+    app: besuscan
+    environment: production
+    component: rabbitmq
+  annotations:
+    description: "Volume para dados do RabbitMQ em produção"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: local-storage
+  selector:
+    matchLabels:
+      component: rabbitmq
+
+---
+# =============================================================================
+# REDIS - VOLUME PERSISTENTE
+# =============================================================================
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: redis-pv-prod
+  labels:
+    app: besuscan
+    environment: production
+    component: redis
+    type: cache
+spec:
+  capacity:
+    storage: 5Gi  # 5GB para cache em produção
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  hostPath:
+    path: /var/lib/besuscan/prod/redis
+    type: DirectoryOrCreate
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-pvc
+  namespace: besuscan-prod
+  labels:
+    app: besuscan
+    environment: production
+    component: redis
+  annotations:
+    description: "Volume para dados do Redis em produção"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: local-storage
+  selector:
+    matchLabels:
+      component: redis 

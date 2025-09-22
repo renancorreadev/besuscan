@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: indexer-deployment
+  namespace: besuscan-prod
+  labels:
+    app: besuscan
+    component: indexer
+    environment: production
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: indexer
+  template:
+    metadata:
+      labels:
+        app: indexer
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      dnsConfig:
+        nameservers:
+          - 10.96.0.10
+        searches:
+          - besuscan-prod.svc.cluster.local
+          - svc.cluster.local
+          - cluster.local
+      containers:
+      - name: indexer
+        image: besuscan/indexer:v1.0.4
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9091
+        env:
+        - name: ETH_WS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: besuscan-app-config
+              key: ETH_WS_URL
+        - name: ETH_RPC_URL
+          valueFrom:
+            configMapKeyRef:
+              name: besuscan-app-config
+              key: ETH_RPC_URL
+        - name: RABBITMQ_URL
+          valueFrom:
+            secretKeyRef:
+              name: besuscan-app-secrets
+              key: RABBITMQ_URL
+        - name: RABBITMQ_EXCHANGE
+          valueFrom:
+            configMapKeyRef:
+              name: besuscan-app-config
+              key: RABBITMQ_EXCHANGE
+        - name: SYNC_INTERVAL
+          valueFrom:
+            configMapKeyRef:
+              name: besuscan-app-config
+              key: SYNC_INTERVAL
+        - name: CHAIN_ID
+          valueFrom:
+            configMapKeyRef:
+              name: besuscan-app-config
+              key: CHAIN_ID
+
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m" 

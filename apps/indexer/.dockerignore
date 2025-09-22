@@ -1,0 +1,10 @@
+.git
+.gitignore
+Dockerfile
+Dockerfile.dev
+.air.toml
+*.log
+tmp/
+bin/
+.vscode/
+.idea/

@@ -1,0 +1,36 @@
+services:
+  postgres-indexer:
+    container_name: postgres-indexer
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: indexer
+      POSTGRES_PASSWORD: indexer
+      POSTGRES_DB: indexer
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata-indexer:/var/lib/postgresql/data
+      - ./migrations:/migrations:ro
+
+  redis-indexer:
+    container_name: redis-indexer
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata-indexer:/data
+
+  rabbit-indexer:
+    container_name: rabbit-indexer
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitdata-indexer:/var/lib/rabbitmq
+
+volumes:
+  pgdata-indexer:
+  redisdata-indexer:
+  rabbitdata-indexer:

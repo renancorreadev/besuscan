@@ -1,0 +1,77 @@
+# =============================================================================
+# SERVIÇOS EXTERNOS - AMBIENTE DE DESENVOLVIMENTO
+# =============================================================================
+# Conecta o Kubernetes aos containers Docker locais para desenvolvimento
+# =============================================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: dev-frontend-service
+  namespace: besuscan-prod
+  labels:
+    app: besuscan
+    component: frontend
+    environment: development
+  annotations:
+    description: "Proxy para frontend de desenvolvimento rodando em Docker"
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3000
+    targetPort: 3000
+    protocol: TCP
+    name: http
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dev-api-service
+  namespace: besuscan-prod
+  labels:
+    app: besuscan
+    component: api
+    environment: development
+  annotations:
+    description: "Proxy para API de desenvolvimento rodando em Docker"
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: http
+
+---
+# =============================================================================
+# ENDPOINTS PARA SERVIÇOS EXTERNOS
+# =============================================================================
+# Define os endpoints específicos para os containers Docker
+
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: dev-frontend-service
+  namespace: besuscan-prod
+subsets:
+- addresses:
+  - ip: 147.93.11.54
+  ports:
+  - port: 3000
+    name: http
+    protocol: TCP
+
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: dev-api-service
+  namespace: besuscan-prod
+subsets:
+- addresses:
+  - ip: 147.93.11.54
+  ports:
+  - port: 8080
+    name: http
+    protocol: TCP 

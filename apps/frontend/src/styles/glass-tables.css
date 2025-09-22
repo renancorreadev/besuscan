@@ -1,0 +1,582 @@
+/* Glass Tables - Estilos modernos para tabelas com efeito glass */
+
+.glass-table-container {
+  @apply bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-2xl overflow-hidden shadow-xl;
+}
+
+.glass-table {
+  @apply w-full;
+}
+
+.glass-table-header {
+  @apply bg-gradient-to-r from-gray-50/90 to-gray-100/90 dark:from-gray-800/90 dark:to-gray-900/90 backdrop-blur-sm;
+}
+
+.glass-table-header th {
+  @apply px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider border-b border-gray-200/50 dark:border-gray-700/50;
+}
+
+.glass-table-body {
+  @apply divide-y divide-gray-200/50 dark:divide-gray-700/50;
+}
+
+.glass-table-row {
+  @apply hover:bg-white/50 dark:hover:bg-gray-700/30 transition-all duration-200;
+}
+
+.glass-table-cell {
+  @apply px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200;
+}
+
+/* Status badges com efeito glass */
+.glass-badge {
+  @apply px-2 py-1 rounded-lg text-xs font-medium backdrop-blur-sm border;
+}
+
+.glass-badge-success {
+  @apply bg-green-100/80 dark:bg-green-900/40 text-green-800 dark:text-green-300 border-green-200/50 dark:border-green-700/50;
+}
+
+.glass-badge-error {
+  @apply bg-red-100/80 dark:bg-red-900/40 text-red-800 dark:text-red-300 border-red-200/50 dark:border-red-700/50;
+}
+
+.glass-badge-warning {
+  @apply bg-yellow-100/80 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300 border-yellow-200/50 dark:border-yellow-700/50;
+}
+
+.glass-badge-info {
+  @apply bg-blue-100/80 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 border-blue-200/50 dark:border-blue-700/50;
+}
+
+.glass-badge-neutral {
+  @apply bg-gray-100/80 dark:bg-gray-700/40 text-gray-800 dark:text-gray-300 border-gray-200/50 dark:border-gray-600/50;
+}
+
+/* Método badges com cores específicas */
+.method-badge {
+  @apply px-2 py-1 rounded-lg text-xs font-medium backdrop-blur-sm border text-gray-800 dark:text-white;
+}
+
+.method-badge-transfer {
+  @apply bg-blue-100/80 dark:bg-blue-900/40 border-blue-200/50 dark:border-blue-700/50 text-blue-800 dark:text-blue-300;
+}
+
+.method-badge-approve {
+  @apply bg-green-100/80 dark:bg-green-900/40 border-green-200/50 dark:border-green-700/50 text-green-800 dark:text-green-300;
+}
+
+.method-badge-swap {
+  @apply bg-purple-100/80 dark:bg-purple-900/40 border-purple-200/50 dark:border-purple-700/50 text-purple-800 dark:text-purple-300;
+}
+
+.method-badge-mint {
+  @apply bg-emerald-100/80 dark:bg-emerald-900/40 border-emerald-200/50 dark:border-emerald-700/50 text-emerald-800 dark:text-emerald-300;
+}
+
+.method-badge-burn {
+  @apply bg-red-100/80 dark:bg-red-900/40 border-red-200/50 dark:border-red-700/50 text-red-800 dark:text-red-300;
+}
+
+/* Ícones de transação com efeito glass */
+.transaction-type-container {
+  @apply flex items-center gap-2;
+}
+
+.transaction-icon {
+  @apply p-1.5 rounded-lg backdrop-blur-sm border;
+}
+
+.transaction-icon-sent {
+  @apply bg-red-100/80 dark:bg-red-900/40 border-red-200/50 dark:border-red-700/50;
+}
+
+.transaction-icon-received {
+  @apply bg-green-100/80 dark:bg-green-900/40 border-green-200/50 dark:border-green-700/50;
+}
+
+.transaction-icon-contract_call {
+  @apply bg-purple-100/80 dark:bg-purple-900/40 border-purple-200/50 dark:border-purple-700/50;
+}
+
+.transaction-icon-contract_creation {
+  @apply bg-orange-100/80 dark:bg-orange-900/40 border-orange-200/50 dark:border-orange-700/50;
+}
+
+/* Valores monetários */
+.value-display {
+  @apply font-medium;
+}
+
+.value-display-positive {
+  @apply text-green-600 dark:text-green-400;
+}
+
+.value-display-negative {
+  @apply text-red-600 dark:text-red-400;
+}
+
+.value-display-neutral {
+  @apply text-gray-600 dark:text-gray-400;
+}
+
+/* Endereços com efeito glass */
+.address-display {
+  @apply flex items-center gap-2 font-mono text-sm text-gray-700 dark:text-gray-300;
+}
+
+/* Botões de ação glass */
+.glass-action-button {
+  @apply px-4 py-2 bg-white/60 dark:bg-gray-800/60 backdrop-blur-md border border-gray-200/30 dark:border-gray-700/30 rounded-xl hover:bg-white/80 dark:hover:bg-gray-800/80 hover:scale-105 transition-all duration-300 focus:ring-2 focus:ring-blue-500/30 text-gray-700 dark:text-white;
+}
+
+/* Loading skeleton com efeito glass */
+.glass-skeleton {
+  @apply animate-pulse;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  background-size: 200% 100%;
+  animation: glass-shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+.dark .glass-skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  background-size: 200% 100%;
+}
+
+@keyframes glass-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Estilos para paginação glass */
+.glass-pagination-container {
+  @apply bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-4 mt-6;
+}
+
+.glass-pagination-info {
+  @apply text-sm text-gray-600 dark:text-gray-300;
+}
+
+.glass-pagination-button {
+  @apply px-3 py-2 bg-white/60 dark:bg-gray-800/60 backdrop-blur-md border border-gray-200/30 dark:border-gray-700/30 rounded-lg hover:bg-white/80 dark:hover:bg-gray-800/80 hover:scale-105 transition-all duration-300 text-gray-700 dark:text-white;
+}
+
+.glass-pagination-button.active {
+  @apply bg-blue-500/20 dark:bg-blue-500/30 border-blue-500/50 text-blue-700 dark:text-blue-300 font-medium;
+}
+
+/* Estilos para os filtros com efeito glass - VERSÃO MELHORADA */
+.glass-filters-container {
+  @apply bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 mb-6 shadow-xl;
+}
+
+.glass-filters-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  z-index: 1;
+}
+
+.dark .glass-filters-container {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.6));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.dark .glass-filters-container::before {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+}
+
+/* Título dos filtros */
+.glass-filters-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 20px;
+  text-align: center;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.dark .glass-filters-title {
+  color: #e5e7eb;
+}
+
+.glass-filters-title::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    rgba(59, 130, 246, 0.8), 
+    rgba(139, 92, 246, 0.6), 
+    rgba(236, 72, 153, 0.8)
+  );
+  border-radius: 2px;
+}
+
+/* Grid melhorada */
+.glass-filters-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
+}
+
+@media (max-width: 768px) {
+  .glass-filters-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .glass-filters-container {
+    padding: 20px 16px;
+    margin-bottom: 20px;
+  }
+}
+
+/* Labels melhoradas */
+.glass-filter-label {
+  @apply block mb-2;
+}
+
+.glass-filter-label span {
+  @apply text-sm font-medium text-gray-700 dark:text-white;
+}
+
+.glass-filter-label::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(139, 92, 246, 0.6));
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+}
+
+/* Inputs melhorados */
+.glass-filter-input {
+  @apply w-full bg-white/70 dark:bg-gray-800/70 backdrop-blur-md border border-gray-200/40 dark:border-gray-700/40 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 transition-all duration-300 hover:bg-white/80 dark:hover:bg-gray-800/80 hover:scale-[1.02] placeholder:text-gray-400 text-gray-700 dark:text-white;
+}
+
+.glass-filter-input:focus {
+  @apply outline-none ring-2 ring-blue-500/30 ring-offset-2 ring-offset-transparent;
+}
+
+.glass-filter-input::placeholder {
+  color: #9ca3af !important;
+  font-weight: 400;
+}
+
+/* Selects melhorados */
+.glass-select-trigger {
+  @apply h-12 bg-white/70 dark:bg-gray-800/70 backdrop-blur-md border border-gray-200/40 dark:border-gray-700/40 rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 transition-all duration-300 hover:bg-white/80 dark:hover:bg-gray-800/80 hover:scale-[1.02] text-gray-700 dark:text-white;
+}
+
+.glass-select-trigger:focus {
+  @apply outline-none ring-2 ring-blue-500/30 ring-offset-2 ring-offset-transparent;
+}
+
+.glass-select-content {
+  @apply backdrop-blur-xl bg-white/95 dark:bg-gray-800/95 border border-gray-200/50 dark:border-gray-700/50 rounded-xl shadow-2xl;
+}
+
+.glass-select-item {
+  @apply px-3 py-2 hover:bg-gray-100/80 dark:hover:bg-gray-700/80 focus:bg-gray-100/80 dark:focus:bg-gray-700/80 transition-all duration-200 text-gray-700 dark:text-white;
+}
+
+/* Animações */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.glass-filter-input,
+.glass-select-trigger {
+  animation: filterFadeIn 0.4s ease-out;
+}
+
+@keyframes filterFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Estilos para inputs com ícones */
+.glass-filter-input.pl-10 {
+  padding-left: 2.75rem !important;
+}
+
+.glass-filter-input.uppercase {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.glass-filter-input.font-mono {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+/* Hover states melhorados */
+.glass-filter-input:hover:not(:focus) {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  transform: translateY(-0.5px);
+  box-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.dark .glass-filter-input:hover:not(:focus) {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Botões de limpar input */
+.glass-filter-input + button {
+  transition: all 0.2s ease;
+  border-radius: 50%;
+  padding: 2px;
+}
+
+.glass-filter-input + button:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626 !important;
+  transform: scale(1.1);
+}
+
+.dark .glass-filter-input + button:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171 !important;
+}
+
+/* Melhorias nos labels */
+.glass-filter-label {
+  @apply text-sm font-medium text-gray-700 mb-2 flex items-center gap-2;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+.dark .glass-filter-label {
+  @apply text-gray-300;
+}
+
+/* Estilos para os containers de filtro */
+/* Grid de filtros melhorado */
+.glass-filters-grid {
+  @apply grid gap-6;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+@media (max-width: 768px) {
+  .glass-filters-grid {
+    grid-template-columns: 1fr;
+    gap: 4;
+  }
+}
+
+/* Estilos para tabs glass */
+.glass-tabs-list {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  padding: 4px !important;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.dark .glass-tabs-list {
+  background: rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.glass-tabs-trigger {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 8px !important;
+  color: #6b7280 !important;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  padding: 12px 16px !important;
+  position: relative;
+}
+
+.dark .glass-tabs-trigger {
+  color: #9ca3af !important;
+}
+
+.glass-tabs-trigger:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #374151 !important;
+}
+
+.dark .glass-tabs-trigger:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: #e5e7eb !important;
+}
+
+.glass-tabs-trigger[data-state="active"] {
+  background: rgba(59, 130, 246, 0.15) !important;
+  color: #1d4ed8 !important;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.dark .glass-tabs-trigger[data-state="active"] {
+  background: rgba(59, 130, 246, 0.2) !important;
+  color: #60a5fa !important;
+}
+
+.glass-tabs-content {
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(5px);
+  border-radius: 12px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.dark .glass-tabs-content {
+  background: rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .glass-table-cell {
+    @apply px-3 py-2 text-xs;
+  }
+  
+  .glass-table-header th {
+    @apply px-3 py-3 text-xs;
+  }
+  
+  .address-display {
+    @apply text-xs px-1.5 py-0.5;
+  }
+  
+  .glass-badge {
+    @apply px-2 py-0.5 text-xs;
+  }
+}
+
+/* Estilos para a coluna Type melhorada */
+.transaction-type-container {
+  @apply flex items-center gap-2;
+}
+
+.transaction-type-label {
+  @apply text-xs font-medium text-gray-700 dark:text-gray-300 capitalize;
+}
+
+/* Smooth Animations */
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.glass-filters-container {
+  animation: fadeInScale 0.3s ease-out;
+}
+
+/* Focus-within effects for better interaction */
+.group:focus-within .group-focus-within\:text-blue-500 {
+  @apply text-blue-500;
+}
+
+.group:focus-within .group-focus-within\:text-purple-500 {
+  @apply text-purple-500;
+}
+
+.group:focus-within .group-focus-within\:text-emerald-500 {
+  @apply text-emerald-500;
+}
+
+.group:focus-within .group-focus-within\:text-amber-500 {
+  @apply text-amber-500;
+}
+
+.group:focus-within .group-focus-within\:text-orange-500 {
+  @apply text-orange-500;
+}
+
+.group:focus-within .group-focus-within\:text-green-500 {
+  @apply text-green-500;
+}
+
+.group:focus-within .group-focus-within\:text-indigo-500 {
+  @apply text-indigo-500;
+}
+
+.group:focus-within .group-focus-within\:text-pink-500 {
+  @apply text-pink-500;
+}
+
+/* Animation */
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in-scale {
+  animation: fadeInScale 0.3s ease-out;
+}
+
+/* Custom scrollbar for select content */
+.glass-select-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.glass-select-content::-webkit-scrollbar-track {
+  @apply bg-gray-100/50 dark:bg-gray-800/50 rounded-lg;
+}
+
+.glass-select-content::-webkit-scrollbar-thumb {
+  @apply bg-gray-300/70 dark:bg-gray-600/70 rounded-lg hover:bg-gray-400/70 dark:hover:bg-gray-500/70;
+}

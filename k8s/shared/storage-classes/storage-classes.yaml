@@ -1,0 +1,169 @@
+# =============================================================================
+# STORAGE CLASSES - CLASSES DE ARMAZENAMENTO
+# =============================================================================
+# Este arquivo define as classes de armazenamento disponíveis no cluster.
+# 
+# O que são Storage Classes?
+# - Definem diferentes "tipos" de armazenamento disponíveis
+# - Permitem provisionamento dinâmico de volumes
+# - Cada classe pode ter diferentes características (performance, backup, etc.)
+# - Facilitam a gestão de diferentes necessidades de armazenamento
+# =============================================================================
+
+# =============================================================================
+# LOCAL STORAGE - ARMAZENAMENTO LOCAL
+# =============================================================================
+# Para dados que precisam de alta performance e podem ser perdidos
+# Usado para: bancos de dados, cache, dados temporários
+# =============================================================================
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-storage
+  labels:
+    app: besuscan
+    component: storage
+  annotations:
+    description: "Armazenamento local para alta performance"
+    storageclass.kubernetes.io/is-default-class: "false"
+provisioner: kubernetes.io/no-provisioner  # Não provisiona automaticamente
+volumeBindingMode: WaitForFirstConsumer    # Aguarda pod ser criado para fazer bind
+reclaimPolicy: Retain                      # Mantém dados após deletar PVC
+allowVolumeExpansion: true                 # Permite expandir volumes
+parameters:
+  # Parâmetros específicos para armazenamento local
+  type: "local"
+  performance: "high"
+
+---
+# =============================================================================
+# SOURCE CODE STORAGE - CÓDIGO FONTE (DESENVOLVIMENTO)
+# =============================================================================
+# Para montar código fonte e permitir hot reload
+# Usado para: desenvolvimento, hot reload, debugging
+# =============================================================================
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: source-code
+  labels:
+    app: besuscan
+    component: storage
+    environment: development
+  annotations:
+    description: "Armazenamento para código fonte (hot reload)"
+    storageclass.kubernetes.io/is-default-class: "false"
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: Immediate               # Bind imediato para desenvolvimento
+reclaimPolicy: Retain
+allowVolumeExpansion: true
+parameters:
+  type: "source-code"
+  access: "read-write"
+  hot-reload: "enabled"
+
+---
+# =============================================================================
+# BUILD CACHE STORAGE - CACHE DE BUILD
+# =============================================================================
+# Para cache de dependências e builds
+# Usado para: Go modules, npm cache, build artifacts
+# =============================================================================
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: build-cache
+  labels:
+    app: besuscan
+    component: storage
+  annotations:
+    description: "Armazenamento para cache de builds e dependências"
+    storageclass.kubernetes.io/is-default-class: "false"
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: Immediate
+reclaimPolicy: Delete                      # Pode ser deletado (é cache)
+allowVolumeExpansion: true
+parameters:
+  type: "cache"
+  cleanup: "automatic"
+
+---
+# =============================================================================
+# FAST STORAGE - ARMAZENAMENTO RÁPIDO (PRODUÇÃO)
+# =============================================================================
+# Para dados críticos que precisam de alta performance em produção
+# Usado para: bancos de dados de produção, índices, logs críticos
+# =============================================================================
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: fast-storage
+  labels:
+    app: besuscan
+    component: storage
+    environment: production
+  annotations:
+    description: "Armazenamento de alta performance para produção"
+    storageclass.kubernetes.io/is-default-class: "false"
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Retain
+allowVolumeExpansion: true
+parameters:
+  type: "fast"
+  performance: "high"
+  backup: "enabled"
+  encryption: "enabled"
+
+---
+# =============================================================================
+# BACKUP STORAGE - ARMAZENAMENTO PARA BACKUPS
+# =============================================================================
+# Para backups e dados de longa duração
+# Usado para: backups do banco, logs históricos, arquivos de auditoria
+# =============================================================================
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: backup-storage
+  labels:
+    app: besuscan
+    component: storage
+  annotations:
+    description: "Armazenamento para backups e dados de longa duração"
+    storageclass.kubernetes.io/is-default-class: "false"
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: Immediate
+reclaimPolicy: Retain
+allowVolumeExpansion: true
+parameters:
+  type: "backup"
+  durability: "high"
+  compression: "enabled"
+  encryption: "enabled"
+
+---
+# =============================================================================
+# TEMPORARY STORAGE - ARMAZENAMENTO TEMPORÁRIO
+# =============================================================================
+# Para dados temporários que podem ser perdidos
+# Usado para: cache temporário, processamento de dados, logs não críticos
+# =============================================================================
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: temporary-storage
+  labels:
+    app: besuscan
+    component: storage
+  annotations:
+    description: "Armazenamento temporário para dados não críticos"
+    storageclass.kubernetes.io/is-default-class: "false"
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: Immediate
+reclaimPolicy: Delete                      # Deleta automaticamente
+allowVolumeExpansion: false                # Não permite expansão
+parameters:
+  type: "temporary"
+  cleanup: "automatic"
+  ttl: "7d"                               # Time to live: 7 dias 

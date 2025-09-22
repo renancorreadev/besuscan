@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  namespace: besuscan-prod
+  labels:
+    app: besuscan
+    component: frontend
+    environment: production
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image:  besuscan/frontend:v1.0.2
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+        env:
+        - name: NODE_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: besuscan-app-config
+              key: NODE_ENV
+        - name: DOCKER_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: besuscan-app-config
+              key: DOCKER_ENV
+        - name: VITE_API_URL
+          value: "/api"
+        - name: VITE_LLM_CHAT_URL
+          value: "/api/llm-chat"
+        - name: VITE_CHAIN_ID
+          valueFrom:
+            configMapKeyRef:
+              name: besuscan-app-config
+              key: CHAIN_ID
+        - name: VITE_NETWORK_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: besuscan-app-config
+              key: NETWORK_NAME
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m" 

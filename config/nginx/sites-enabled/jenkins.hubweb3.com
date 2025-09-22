@@ -1,0 +1,1 @@
+/etc/nginx/sites-available/jenkins.hubweb3.com

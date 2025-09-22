@@ -1,0 +1,44 @@
+# Binários
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+worker
+main
+
+# Arquivos de teste
+*.test
+
+# Arquivos de cobertura
+*.out
+coverage.txt
+
+# Arquivos temporários do Air
+tmp/
+build-errors.log
+
+# Arquivos de dependências
+vendor/
+
+# Arquivos de configuração local
+.env
+.env.local
+
+# Logs
+*.log
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Arquivos de build
+dist/
+build/ 

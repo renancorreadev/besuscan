@@ -1,0 +1,188 @@
+# =============================================================================
+# NAMESPACE - PRODUÇÃO
+# =============================================================================
+# Este arquivo define o namespace para o ambiente de produção do BeSuScan.
+# 
+# Diferenças do ambiente de desenvolvimento:
+# - Recursos mais generosos para suportar carga de produção
+# - Políticas de segurança mais rigorosas
+# - Monitoramento e alertas mais detalhados
+# - Backup e recuperação configurados
+# =============================================================================
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: besuscan-prod
+  labels:
+    # Labels para identificação e organização
+    app: besuscan
+    environment: production
+    version: v1
+    team: blockchain
+    criticality: high
+  annotations:
+    # Anotações com informações adicionais
+    description: "Namespace para o ambiente de produção do BeSuScan Block Explorer"
+    contact: "ops-team@besuscan.com"
+    created-by: "devops-team"
+    # Política de backup
+    backup/enabled: "true"
+    backup/schedule: "0 2 * * *"  # Backup diário às 2h da manhã
+    # Monitoramento
+    monitoring/enabled: "true"
+    alerting/enabled: "true"
+
+---
+# =============================================================================
+# RESOURCE QUOTA - LIMITES DE RECURSOS PRODUÇÃO
+# =============================================================================
+# Define limites de recursos mais generosos para produção
+# Permite maior escalabilidade e performance
+# =============================================================================
+
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: prod-resource-quota
+  namespace: besuscan-prod
+  labels:
+    app: besuscan
+    environment: production
+spec:
+  hard:
+    # Limites de CPU e Memória (mais generosos que dev)
+    requests.cpu: "6"      # CPU total solicitada pelos pods
+    requests.memory: 16Gi  # Memória total solicitada pelos pods
+    limits.cpu: "8"       # CPU máxima que os pods podem usar
+    limits.memory: 32Gi    # Memória máxima que os pods podem usar
+    
+    # Limites de objetos Kubernetes
+    pods: "50"                    # Máximo de pods no namespace
+    persistentvolumeclaims: "20"  # Máximo de PVCs
+    services: "20"                # Máximo de services
+    secrets: "30"                 # Máximo de secrets
+    configmaps: "30"              # Máximo de configmaps
+    
+    # Limites de storage
+    requests.storage: "500Gi"     # Storage total solicitado
+
+---
+# =============================================================================
+# LIMIT RANGE - LIMITES PADRÃO PARA PODS PRODUÇÃO
+# =============================================================================
+# Define limites padrão otimizados para produção
+# Garante performance adequada sem desperdício de recursos
+# =============================================================================
+
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: prod-limit-range
+  namespace: besuscan-prod
+  labels:
+    app: besuscan
+    environment: production
+spec:
+  limits:
+  # Limites para containers
+  - type: Container
+    default:
+      # Limites padrão mais generosos para produção
+      cpu: "1"         # 1 CPU
+      memory: 1Gi      # 1GB RAM
+    defaultRequest:
+      # Requests padrão para garantir recursos
+      cpu: 200m        # 0.2 CPU  
+      memory: 256Mi    # 256MB RAM
+    max:
+      # Limites máximos para qualquer container
+      cpu: "4"         # 4 CPUs
+      memory: 8Gi      # 8GB RAM
+    min:
+      # Limites mínimos para qualquer container
+      cpu: 100m        # 0.1 CPU
+      memory: 128Mi    # 128MB RAM
+  
+  # Limites para PVCs (volumes persistentes)
+  - type: PersistentVolumeClaim
+    max:
+      storage: 200Gi   # Máximo de 200GB por volume
+    min:
+      storage: 5Gi     # Mínimo de 5GB por volume
+
+---
+# =============================================================================
+# NETWORK POLICY - POLÍTICA DE REDE PRODUÇÃO
+# =============================================================================
+# Define políticas de rede mais restritivas para produção
+# Implementa princípio de menor privilégio para comunicação entre pods
+# =============================================================================
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: prod-default-deny
+  namespace: besuscan-prod
+  labels:
+    app: besuscan
+    environment: production
+spec:
+  # Aplica a todos os pods no namespace
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  # Regras de Egress (Saída):
+  egress:
+  # Permitir tráfego DNS (UDP na porta 53) para o CoreDNS (no namespace kube-system)
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+  # Permitir tráfego para RabbitMQ (TCP na porta 5672)
+  - to:
+    - podSelector:
+        matchLabels:
+          app: rabbitmq
+    ports:
+    - protocol: TCP
+      port: 5672
+  # Permitir tráfego para qualquer IP fora do cluster (acesso à internet, por exemplo)
+  # Esta regra é genérica e pode ser mais restritiva se necessário
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+  # Permitir tráfego para pods dentro do mesmo namespace (besuscan-prod)
+  - to:
+    - podSelector: {}
+  # Regras de Ingress (Entrada):
+  ingress:
+  # Permitir tráfego de pods dentro do mesmo namespace (besuscan-prod)
+  - from:
+    - podSelector: {}
+
+---
+# =============================================================================
+# PRIORITY CLASS - PRIORIDADE DOS PODS
+# =============================================================================
+# Define prioridade alta para pods de produção
+# Garante que pods críticos sejam agendados primeiro
+# =============================================================================
+
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: besuscan-prod-priority
+  labels:
+    app: besuscan
+    environment: production
+value: 1000
+globalDefault: false
+description: "Prioridade alta para pods de produção do BeSuScan" 

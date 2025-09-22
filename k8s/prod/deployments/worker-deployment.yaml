@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-deployment
+  namespace: besuscan-prod
+  labels:
+    app: besuscan
+    component: worker
+    environment: production
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: worker
+  template:
+    metadata:
+      labels:
+        app: worker
+    spec:
+      containers:
+      - name: worker
+        image: besuscan/worker:v1.0.1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9091
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: besuscan-app-secrets
+              key: DATABASE_URL
+        - name: ETHEREUM_RPC_URL
+          valueFrom:
+            configMapKeyRef:
+              name: besuscan-app-config
+              key: ETHEREUM_RPC_URL
+        - name: BESU_RPC_URL
+          valueFrom:
+            configMapKeyRef:
+              name: besuscan-app-config
+              key: BESU_RPC_URL
+        - name: RABBITMQ_URL
+          valueFrom:
+            secretKeyRef:
+              name: besuscan-app-secrets
+              key: RABBITMQ_URL
+        - name: RABBITMQ_EXCHANGE
+          valueFrom:
+            configMapKeyRef:
+              name: besuscan-app-config
+              key: RABBITMQ_EXCHANGE
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: besuscan-app-secrets
+              key: REDIS_URL
+        - name: CHAIN_ID
+          valueFrom:
+            configMapKeyRef:
+              name: besuscan-app-config
+              key: CHAIN_ID
+
+        - name: WORKER_CONCURRENCY
+          valueFrom:
+            configMapKeyRef:
+              name: besuscan-app-config
+              key: WORKER_CONCURRENCY
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m" 

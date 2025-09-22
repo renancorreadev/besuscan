@@ -1,0 +1,43 @@
+# BesuScan Contract CLI - Deploy Configuration
+# Configuração simples para deploy do contrato DREX
+
+# Informações básicas do contrato
+contract:
+  name: "DREX"
+  symbol: "DREX"
+  description: "Real Digital brasileiro - CBDC oficial"
+  type: "ERC-20"
+  
+# Arquivos do contrato
+files:
+  contract: "templates/smart-contracts/Drex.sol"  
+  abi: "templates/abis/Drex.abi"
+  bytecode: "templates/abis/Drex.bin"
+
+# Argumentos do construtor (initialOwner)
+constructor_args:
+  - "{{wallet_address}}"  # initialOwner - será substituído pelo endereço da carteira
+
+# Configurações de compilação
+compiler:
+  version: "v0.8.27"
+  optimization_enabled: true
+  optimization_runs: 200
+
+# Metadados do contrato
+metadata:
+  license: "MIT"
+  tags:
+    - "drex"
+    - "cbdc"
+    - "erc20"
+
+# Configurações de deploy
+deploy:
+  auto_verify: true
+  save_deployment: true
+  
+# Configurações de gas
+gas:
+  limit: 3000000
+  price: "0" 

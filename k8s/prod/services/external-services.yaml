@@ -1,0 +1,269 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: portainer-service
+  namespace: besuscan-prod
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9000
+      targetPort: 9000
+      protocol: TCP
+  selector: {}
+
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: portainer-service
+  namespace: besuscan-prod
+subsets:
+  - addresses:
+      - ip: 147.93.11.54  # IP da máquina onde o Portainer está rodando
+    ports:
+      - port: 9000
+        protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins-service
+  namespace: besuscan-prod
+spec:
+  type: ClusterIP
+  ports:
+    - port: 1001
+      targetPort: 1001
+      protocol: TCP
+  selector: {}
+
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: jenkins-service
+  namespace: besuscan-prod
+subsets:
+  - addresses:
+      - ip: 147.93.11.54
+    ports:
+      - port: 1001
+        protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hubweb3-service
+  namespace: besuscan-prod
+spec:
+  type: ClusterIP
+  ports:
+    - port: 1000
+      targetPort: 1000
+      protocol: TCP
+  selector: {}
+
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: hubweb3-service
+  namespace: besuscan-prod
+subsets:
+  - addresses:
+      - ip: 147.93.11.54
+    ports:
+      - port: 1000
+        protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rpc-service
+  namespace: besuscan-prod
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8546
+      targetPort: 8546
+      protocol: TCP
+  selector: {}
+
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: rpc-service
+  namespace: besuscan-prod
+subsets:
+  - addresses:
+      - ip: 147.93.11.54
+    ports:
+      - port: 8546
+        protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: verifier-service
+  namespace: besuscan-prod
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8050
+      targetPort: 8050
+      protocol: TCP
+  selector: {}
+
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: verifier-service
+  namespace: besuscan-prod
+subsets:
+  - addresses:
+      - ip: 147.93.11.54
+    ports:
+      - port: 8050
+        protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wsrpc-service
+  namespace: besuscan-prod
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6174
+      targetPort: 6174
+      protocol: TCP
+  selector: {}
+
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: wsrpc-service
+  namespace: besuscan-prod
+subsets:
+  - addresses:
+      - ip: 147.93.11.54
+    ports:
+      - port: 6174
+        protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: llm-chat-service
+  namespace: besuscan-prod
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8082
+      targetPort: 8082
+      protocol: TCP
+  selector: {}
+
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: llm-chat-service
+  namespace: besuscan-prod
+subsets:
+  - addresses:
+      - ip: 147.93.11.54
+    ports:
+      - port: 8082
+        protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: websocket-service
+  namespace: besuscan-prod
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+  selector: {}
+
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: websocket-service
+  namespace: besuscan-prod
+subsets:
+  - addresses:
+      - ip: 147.93.11.54
+    ports:
+      - port: 8080
+        protocol: TCP
+
+---
+# Serviços de Desenvolvimento - Docker Compose Local
+apiVersion: v1
+kind: Service
+metadata:
+  name: dev-frontend-service
+  namespace: besuscan-prod
+spec:
+  type: ExternalName
+  externalName: 147.93.11.54  # IP da VPS onde roda o Docker Compose
+  ports:
+    - port: 3001
+      targetPort: 3001
+      protocol: TCP
+
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: dev-frontend-service
+  namespace: besuscan-prod
+subsets:
+  - addresses:
+      - ip: 147.93.11.54
+    ports:
+      - port: 3001
+        protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dev-api-service
+  namespace: besuscan-prod
+spec:
+  type: ExternalName
+  externalName: 147.93.11.54  # IP da VPS onde roda o Docker Compose
+  ports:
+    - port: 8083
+      targetPort: 8083
+      protocol: TCP
+
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: dev-api-service
+  namespace: besuscan-prod
+subsets:
+  - addresses:
+      - ip: 147.93.11.54
+    ports:
+      - port: 8083
+        protocol: TCP 

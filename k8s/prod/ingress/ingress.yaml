@@ -1,0 +1,254 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hubweb3-ingress
+  namespace: besuscan-prod
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    # Configurações adicionais de segurança
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-protocols: "TLSv1.2 TLSv1.3"
+    nginx.ingress.kubernetes.io/ssl-prefer-server-ciphers: "true"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    # Headers de segurança
+    nginx.ingress.kubernetes.io/x-frame-options: "DENY"
+    nginx.ingress.kubernetes.io/x-content-type-options: "nosniff"
+    nginx.ingress.kubernetes.io/x-xss-protection: "1; mode=block"
+    # Headers de segurança adicionais
+    nginx.ingress.kubernetes.io/custom-http-errors: "404,503"
+    # CORS para APIs
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
+    nginx.ingress.kubernetes.io/cors-expose-headers: "Content-Length,Content-Range"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - besuscan.com
+      secretName: besuscan-tls
+    - hosts:
+        - besuscan.hubweb3.com
+      secretName: besuscan-hubweb3-tls
+    - hosts:
+        - bsapi.hubweb3.com
+      secretName: bsapi-hubweb3-tls
+    - hosts:
+        - container.hubweb3.com
+      secretName: container-hubweb3-tls
+    - hosts:
+        - hubweb3.com
+      secretName: hubweb3-tls
+    - hosts:
+        - www.hubweb3.com
+      secretName: www-hubweb3-tls
+    - hosts:
+        - jenkins.hubweb3.com
+      secretName: jenkins-hubweb3-tls
+    - hosts:
+        - http://144.22.179.183
+      secretName: rpc-hubweb3-tls
+    - hosts:
+        - verifier.hubweb3.com
+      secretName: verifier-hubweb3-tls
+    - hosts:
+        - wsrpc.hubweb3.com
+      secretName: wsrpc-hubweb3-tls
+  rules:
+    # BeSuScan - Domínio principal
+    - host: besuscan.com
+      http:
+        paths:
+          - path: /api/llm-chat
+            pathType: Prefix
+            backend:
+              service:
+                name: llm-chat-service
+                port:
+                  number: 8082
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: api-service
+                port:
+                  number: 8080
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-service
+                port:
+                  number: 3000
+
+    # BeSuScan - Subdomínio hubweb3 (DESENVOLVIMENTO)
+    - host: besuscan.hubweb3.com
+      http:
+        paths:
+          - path: /api/llm-chat
+            pathType: Prefix
+            backend:
+              service:
+                name: dev-api-service  # Serviço que aponta para Docker localhost:8080
+                port:
+                  number: 8080
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: dev-api-service  # Serviço que aponta para Docker localhost:8080
+                port:
+                  number: 8080
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dev-frontend-service  # Serviço que aponta para Docker localhost:3000
+                port:
+                  number: 3000
+
+    # API BeSuScan
+    - host: bsapi.hubweb3.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: api-service
+                port:
+                  number: 8080
+
+    # Container/Portainer
+    - host: container.hubweb3.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: portainer-service
+                port:
+                  number: 9000
+
+    # HubWeb3 Principal
+    - host: hubweb3.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: hubweb3-service
+                port:
+                  number: 1000
+
+    # HubWeb3 WWW
+    - host: www.hubweb3.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: hubweb3-service
+                port:
+                  number: 1000
+
+    # Jenkins
+    - host: jenkins.hubweb3.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: jenkins-service
+                port:
+                  number: 1001
+
+    # RPC
+    - host: http://144.22.179.183
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: rpc-service
+                port:
+                  number: 8546
+
+    # Verifier
+    - host: verifier.hubweb3.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: verifier-service
+                port:
+                  number: 8050
+
+    # WebSocket RPC
+    - host: wsrpc.hubweb3.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: wsrpc-service
+                port:
+                  number: 6174
+
+---
+# Configurações específicas para WebSocket
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: websocket-ingress
+  namespace: besuscan-prod
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "86400"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "86400"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "86400"
+    nginx.ingress.kubernetes.io/websocket-services: "websocket-service,wsrpc-service"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - bsapi.hubweb3.com
+      secretName: bsapi-websocket-tls
+    - hosts:
+        - wsrpc.hubweb3.com
+      secretName: wsrpc-websocket-tls
+  rules:
+    - host: bsapi.hubweb3.com
+      http:
+        paths:
+          - path: /ws
+            pathType: Prefix
+            backend:
+              service:
+                name: websocket-service
+                port:
+                  number: 8080
+    - host: wsrpc.hubweb3.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: wsrpc-service
+                port:
+                  number: 6174

@@ -1,0 +1,119 @@
+image: atlassian/default-image:3
+
+definitions:
+  steps:
+    - step: &build-and-push
+        name: Build and Push Docker Image
+        services:
+          - docker
+        script:
+          # Header da pipeline
+          - echo "=============================================="
+          - echo "NXplorer - Deploy Automatico"
+          - echo "=============================================="
+          - echo ""
+          
+          # Extrai informacoes da tag
+          - echo "Extraindo informacoes da tag..."
+          - export SERVICE=$(echo "$BITBUCKET_TAG" | cut -d'-' -f1)
+          - export ENVIRONMENT=$(echo "$BITBUCKET_TAG" | cut -d'-' -f2)
+          - export VERSION=$(echo "$BITBUCKET_TAG" | cut -d'-' -f3)
+          
+          # Exibe informacoes
+          - echo "Informacoes extraidas:"
+          - echo "  Tag:" $BITBUCKET_TAG
+          - echo "  Servico:" $SERVICE
+          - echo "  Ambiente:" $ENVIRONMENT  
+          - echo "  Versao:" $VERSION
+          - echo ""
+          
+          # Validacoes
+          - echo "Validando parametros..."
+          - |
+            if [ -z "$SERVICE" ] || [ -z "$ENVIRONMENT" ] || [ -z "$VERSION" ]; then
+              echo "ERRO: Tag deve seguir o formato servico-ambiente-versao"
+              echo "Exemplo: worker-prod-1.0.2"
+              exit 1
+            fi
+            echo "Formato da tag valido"
+            
+          - |
+            if [ ! -d "apps/$SERVICE" ]; then
+              echo "ERRO: Servico '$SERVICE' nao encontrado em apps/"
+              echo "Servicos disponiveis:"
+              ls -1 apps/ | sed 's/^/  - /'
+              exit 1
+            fi
+            echo "Servico '$SERVICE' encontrado"
+            
+          - |
+            if [ "$ENVIRONMENT" != "dev" ] && [ "$ENVIRONMENT" != "prod" ]; then
+              echo "ERRO: Ambiente deve ser 'dev' ou 'prod', recebido '$ENVIRONMENT'"
+              exit 1
+            fi
+            echo "Ambiente '$ENVIRONMENT' valido"
+            
+          - echo ""
+          
+          # Login no Docker Hub
+          - echo "Autenticacao no Docker Hub..."
+          - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+          - echo "Login realizado com sucesso"
+          - echo ""
+          
+          # Navegacao e build
+          - echo "Navegando para apps/$SERVICE..."
+          - cd apps/$SERVICE
+          - echo "Diretorio alterado"
+          - echo ""
+          
+          - echo "Iniciando build e push..."
+          - echo "  Servico:" $SERVICE
+          - echo "  Ambiente:" $ENVIRONMENT 
+          - echo "  Versao:" v$VERSION
+          - echo ""
+          
+          # Executa o build
+          - make $ENVIRONMENT $VERSION
+          
+          # Confirmacao final
+          - echo ""
+          - echo "=============================================="
+          - echo "Deploy Concluido com Sucesso!"
+          - echo "=============================================="
+          - |
+            if [ "$ENVIRONMENT" = "dev" ]; then
+              echo "Imagens publicadas no Docker Hub:"
+              echo "  besuscan/${SERVICE}-dev:latest"
+              echo "  besuscan/${SERVICE}-dev:v${VERSION}"
+              echo ""
+              echo "Para testar:"
+              echo "  docker pull besuscan/${SERVICE}-dev:v${VERSION}"
+            else
+              echo "Imagens publicadas no Docker Hub:"
+              echo "  besuscan/${SERVICE}:latest"
+              echo "  besuscan/${SERVICE}:v${VERSION}"
+              echo ""
+              echo "Para usar em producao:"
+              echo "  docker pull besuscan/${SERVICE}:v${VERSION}"
+            fi
+          - echo ""
+          - echo "Links uteis:"
+          - echo "  Docker Hub:" https://hub.docker.com/u/besuscan
+          - echo "  Repositorio:" https://bitbucket.org/hubweb3/explorer
+          - echo "=============================================="
+
+pipelines:
+  # Pipelines APENAS para tags específicas de deploy
+  tags:
+    # Tags de desenvolvimento (qualquer serviço)
+    '*-dev-*':
+      - step:
+          <<: *build-and-push
+          name: Deploy Development
+    
+    # Tags de produção (qualquer serviço)
+    '*-prod-*':
+      - step:
+          <<: *build-and-push
+          name: Deploy Production

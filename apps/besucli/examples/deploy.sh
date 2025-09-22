@@ -1,0 +1,12 @@
+besucli deploy \
+  --name "DrexCoin" \
+  --symbol "DREX" \
+  --description "Token de teste com informações completas" \
+  --type "ERC-20" \
+  --contract templates/smart-contracts/Drex.sol \
+  --abi templates/abis/Drex.abi \
+  --bytecode templates/abis/Drex.bin \
+  --args "0x11CBe2649BeD3e3cCc31A3FFC40D5533320473B5" \
+  --tags "erc20" \
+  --license "MIT" \
+  --auto-verify

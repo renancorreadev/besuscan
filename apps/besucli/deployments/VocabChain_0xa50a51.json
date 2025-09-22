@@ -1,0 +1,826 @@
+{
+  "address": "0xa50a51c09a5c451C52BB714527E1974b686D8e77",
+  "creation_block_number": 4643,
+  "creator_address": "0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73",
+  "deployment": {
+    "name": "VocabChain",
+    "symbol": "VCHAIN",
+    "description": "Smart Contract para registro e acompanhamento de estudos de ingles",
+    "contract_type": "Learning",
+    "source_code": "// SPDX-License-Identifier: MIT\npragma solidity 0.8.25;\n\n/**\n * @title VocabChain\n * @author VocabChain Team\n * @notice Smart contract for tracking vocabulary learning progress on blockchain\n * @dev Implements modern Solidity patterns with events, custom errors, and efficient storage\n */\ncontract VocabChain {\n    // =============================================================\n    //                          CONSTANTS\n    // =============================================================\n\n    uint256 public constant MAX_LEVEL = 100;\n    uint256 public constant WORDS_PER_LEVEL = 50;\n    uint256 public constant STREAK_MULTIPLIER = 2;\n    uint256 public constant PERFECT_SCORE_BONUS = 10;\n\n    // =============================================================\n    //                       CUSTOM ERRORS\n    // =============================================================\n\n    error VocabChain__UserNotRegistered();\n    error VocabChain__InvalidLevel(uint256 provided, uint256 max);\n    error VocabChain__InvalidScore(uint256 provided, uint256 max);\n    error VocabChain__AlreadyRegistered();\n    error VocabChain__UnauthorizedAccess();\n    error VocabChain__InvalidDifficulty();\n    error VocabChain__SessionAlreadyStarted();\n    error VocabChain__NoActiveSession();\n    error VocabChain__InvalidWordCount();\n\n    // =============================================================\n    //                           ENUMS\n    // =============================================================\n\n    enum Difficulty {\n        BEGINNER, // 0\n        ELEMENTARY, // 1\n        INTERMEDIATE, // 2\n        ADVANCED, // 3\n        EXPERT // 4\n    }\n\n    enum AchievementType {\n        FIRST_WORD,\n        STREAK_7,\n        STREAK_30,\n        PERFECT_SESSION,\n        LEVEL_UP,\n        VOCABULARY_MASTER\n    }\n\n    // =============================================================\n    //                          STRUCTS\n    // =============================================================\n\n    struct UserProfile {\n        bool isRegistered;\n        string username;\n        uint256 currentLevel;\n        uint256 totalWordsLearned;\n        uint256 currentStreak;\n        uint256 longestStreak;\n        uint256 totalSessions;\n        uint256 totalCorrectAnswers;\n        uint256 totalIncorrectAnswers;\n        Difficulty currentDifficulty;\n        uint256 registrationTimestamp;\n        uint256 lastActiveTimestamp;\n    }\n\n    struct StudySession {\n        uint256 sessionId;\n        address user;\n        uint256 startTimestamp;\n        uint256 endTimestamp;\n        uint256 wordsStudied;\n        uint256 correctAnswers;\n        uint256 incorrectAnswers;\n        Difficulty difficulty;\n        bool isCompleted;\n        uint256 scoreEarned;\n    }\n\n    struct Achievement {\n        AchievementType achievementType;\n        uint256 timestamp;\n        string description;\n        uint256 pointsAwarded;\n    }\n\n    struct WordProgress {\n        uint256 timesStudied;\n        uint256 correctAttempts;\n        uint256 incorrectAttempts;\n        uint256 lastStudiedTimestamp;\n        bool isMastered;\n    }\n\n    // =============================================================\n    //                         STORAGE\n    // =============================================================\n\n    mapping(address =\u003e UserProfile) private s_userProfiles;\n    mapping(address =\u003e StudySession) private s_activeSessions;\n    mapping(address =\u003e Achievement[]) private s_userAchievements;\n    mapping(address =\u003e mapping(string =\u003e WordProgress)) private s_wordProgress;\n    mapping(uint256 =\u003e StudySession) private s_completedSessions;\n\n    address[] private s_registeredUsers;\n    uint256 private s_nextSessionId = 1;\n    uint256 private s_totalSessionsCompleted;\n\n    // =============================================================\n    //                          EVENTS\n    // =============================================================\n\n    event UserRegistered(\n        address indexed user,\n        string username,\n        Difficulty difficulty,\n        uint256 timestamp\n    );\n\n    event SessionStarted(\n        address indexed user,\n        uint256 indexed sessionId,\n        Difficulty difficulty,\n        uint256 timestamp\n    );\n\n    event SessionCompleted(\n        address indexed user,\n        uint256 indexed sessionId,\n        uint256 wordsStudied,\n        uint256 correctAnswers,\n        uint256 scoreEarned,\n        uint256 timestamp\n    );\n\n    event WordStudied(\n        address indexed user,\n        string indexed wordHash,\n        bool correct,\n        uint256 timestamp\n    );\n\n    event LevelUp(\n        address indexed user,\n        uint256 previousLevel,\n        uint256 newLevel,\n        uint256 timestamp\n    );\n\n    event AchievementUnlocked(\n        address indexed user,\n        AchievementType indexed achievementType,\n        string description,\n        uint256 pointsAwarded,\n        uint256 timestamp\n    );\n\n    event StreakUpdated(\n        address indexed user,\n        uint256 newStreak,\n        bool isNewRecord,\n        uint256 timestamp\n    );\n\n    event DifficultyChanged(\n        address indexed user,\n        Difficulty previousDifficulty,\n        Difficulty newDifficulty,\n        uint256 timestamp\n    );\n\n    // =============================================================\n    //                        MODIFIERS\n    // =============================================================\n\n    modifier onlyRegistered() {\n        if (!s_userProfiles[msg.sender].isRegistered) {\n            revert VocabChain__UserNotRegistered();\n        }\n        _;\n    }\n\n    modifier validDifficulty(Difficulty _difficulty) {\n        if (uint8(_difficulty) \u003e uint8(Difficulty.EXPERT)) {\n            revert VocabChain__InvalidDifficulty();\n        }\n        _;\n    }\n\n    // =============================================================\n    //                    USER MANAGEMENT\n    // =============================================================\n\n    /**\n     * @notice Register a new user in the VocabChain system\n     * @param _username Unique username for the user\n     * @param _difficulty Starting difficulty level\n     */\n    function registerUser(\n        string calldata _username,\n        Difficulty _difficulty\n    ) external validDifficulty(_difficulty) {\n        if (s_userProfiles[msg.sender].isRegistered) {\n            revert VocabChain__AlreadyRegistered();\n        }\n\n        s_userProfiles[msg.sender] = UserProfile({\n            isRegistered: true,\n            username: _username,\n            currentLevel: 1,\n            totalWordsLearned: 0,\n            currentStreak: 0,\n            longestStreak: 0,\n            totalSessions: 0,\n            totalCorrectAnswers: 0,\n            totalIncorrectAnswers: 0,\n            currentDifficulty: _difficulty,\n            registrationTimestamp: block.timestamp,\n            lastActiveTimestamp: block.timestamp\n        });\n\n        s_registeredUsers.push(msg.sender);\n\n        // Award first achievement\n        _unlockAchievement(\n            msg.sender,\n            AchievementType.FIRST_WORD,\n            \"Welcome to VocabChain!\",\n            10\n        );\n\n        emit UserRegistered(\n            msg.sender,\n            _username,\n            _difficulty,\n            block.timestamp\n        );\n    }\n\n    // =============================================================\n    //                    SESSION MANAGEMENT\n    // =============================================================\n\n    /**\n     * @notice Start a new study session\n     * @param _difficulty Difficulty level for this session\n     */\n    function startSession(\n        Difficulty _difficulty\n    ) external onlyRegistered validDifficulty(_difficulty) {\n        if (s_activeSessions[msg.sender].sessionId != 0) {\n            revert VocabChain__SessionAlreadyStarted();\n        }\n\n        uint256 sessionId = s_nextSessionId++;\n\n        s_activeSessions[msg.sender] = StudySession({\n            sessionId: sessionId,\n            user: msg.sender,\n            startTimestamp: block.timestamp,\n            endTimestamp: 0,\n            wordsStudied: 0,\n            correctAnswers: 0,\n            incorrectAnswers: 0,\n            difficulty: _difficulty,\n            isCompleted: false,\n            scoreEarned: 0\n        });\n\n        // Update user's last active timestamp\n        s_userProfiles[msg.sender].lastActiveTimestamp = block.timestamp;\n\n        emit SessionStarted(\n            msg.sender,\n            sessionId,\n            _difficulty,\n            block.timestamp\n        );\n    }\n\n    /**\n     * @notice Record a word study attempt during active session\n     * @param _wordHash Keccak256 hash of the word studied\n     * @param _correct Whether the answer was correct\n     */\n    function recordWordStudy(\n        string calldata _wordHash,\n        bool _correct\n    ) external onlyRegistered {\n        StudySession storage session = s_activeSessions[msg.sender];\n        if (session.sessionId == 0) {\n            revert VocabChain__NoActiveSession();\n        }\n\n        // Update session stats\n        session.wordsStudied++;\n        if (_correct) {\n            session.correctAnswers++;\n        } else {\n            session.incorrectAnswers++;\n        }\n\n        // Update word progress\n        WordProgress storage wordProgress = s_wordProgress[msg.sender][\n            _wordHash\n        ];\n        wordProgress.timesStudied++;\n        wordProgress.lastStudiedTimestamp = block.timestamp;\n\n        if (_correct) {\n            wordProgress.correctAttempts++;\n            // Mark as mastered if answered correctly 3 times\n            if (\n                wordProgress.correctAttempts \u003e= 3 \u0026\u0026\n                wordProgress.correctAttempts \u003e wordProgress.incorrectAttempts\n            ) {\n                wordProgress.isMastered = true;\n            }\n        } else {\n            wordProgress.incorrectAttempts++;\n            wordProgress.isMastered = false; // Reset mastery on incorrect answer\n        }\n\n        emit WordStudied(msg.sender, _wordHash, _correct, block.timestamp);\n    }\n\n    /**\n     * @notice Complete the current study session\n     */\n    function completeSession() external onlyRegistered {\n        StudySession storage session = s_activeSessions[msg.sender];\n        if (session.sessionId == 0) {\n            revert VocabChain__NoActiveSession();\n        }\n\n        if (session.wordsStudied == 0) {\n            revert VocabChain__InvalidWordCount();\n        }\n\n        // Calculate score\n        uint256 baseScore = session.correctAnswers * 10;\n        uint256 accuracyBonus = 0;\n\n        if (session.wordsStudied \u003e 0) {\n            uint256 accuracy = (session.correctAnswers * 100) /\n                session.wordsStudied;\n            if (accuracy == 100) {\n                accuracyBonus = PERFECT_SCORE_BONUS;\n                _unlockAchievement(\n                    msg.sender,\n                    AchievementType.PERFECT_SESSION,\n                    \"Perfect Session!\",\n                    50\n                );\n            }\n        }\n\n        uint256 streakBonus = s_userProfiles[msg.sender].currentStreak *\n            STREAK_MULTIPLIER;\n        session.scoreEarned = baseScore + accuracyBonus + streakBonus;\n\n        // Mark session as completed\n        session.endTimestamp = block.timestamp;\n        session.isCompleted = true;\n\n        // Update user profile\n        UserProfile storage user = s_userProfiles[msg.sender];\n        user.totalWordsLearned += session.wordsStudied;\n        user.totalCorrectAnswers += session.correctAnswers;\n        user.totalIncorrectAnswers += session.incorrectAnswers;\n        user.totalSessions++;\n        user.lastActiveTimestamp = block.timestamp;\n\n        // Update streak\n        _updateStreak(msg.sender, session.correctAnswers \u003e 0);\n\n        // Check for level up\n        _checkLevelUp(msg.sender);\n\n        // Store completed session\n        s_completedSessions[session.sessionId] = session;\n        s_totalSessionsCompleted++;\n\n        emit SessionCompleted(\n            msg.sender,\n            session.sessionId,\n            session.wordsStudied,\n            session.correctAnswers,\n            session.scoreEarned,\n            block.timestamp\n        );\n\n        // Clear active session\n        delete s_activeSessions[msg.sender];\n    }\n\n    // =============================================================\n    //                    INTERNAL FUNCTIONS\n    // =============================================================\n\n    /**\n     * @dev Update user's streak based on session performance\n     */\n    function _updateStreak(address _user, bool _hasCorrectAnswers) internal {\n        UserProfile storage user = s_userProfiles[_user];\n        bool isNewRecord = false;\n\n        if (_hasCorrectAnswers) {\n            user.currentStreak++;\n            if (user.currentStreak \u003e user.longestStreak) {\n                user.longestStreak = user.currentStreak;\n                isNewRecord = true;\n            }\n\n            // Check for streak achievements\n            if (user.currentStreak == 7) {\n                _unlockAchievement(\n                    _user,\n                    AchievementType.STREAK_7,\n                    \"7 Day Streak!\",\n                    100\n                );\n            } else if (user.currentStreak == 30) {\n                _unlockAchievement(\n                    _user,\n                    AchievementType.STREAK_30,\n                    \"30 Day Streak Master!\",\n                    500\n                );\n            }\n        } else {\n            user.currentStreak = 0;\n        }\n\n        emit StreakUpdated(\n            _user,\n            user.currentStreak,\n            isNewRecord,\n            block.timestamp\n        );\n    }\n\n    /**\n     * @dev Check if user should level up based on words learned\n     */\n    function _checkLevelUp(address _user) internal {\n        UserProfile storage user = s_userProfiles[_user];\n        uint256 expectedLevel = (user.totalWordsLearned / WORDS_PER_LEVEL) + 1;\n\n        if (expectedLevel \u003e user.currentLevel \u0026\u0026 expectedLevel \u003c= MAX_LEVEL) {\n            uint256 previousLevel = user.currentLevel;\n            user.currentLevel = expectedLevel;\n\n            _unlockAchievement(\n                _user,\n                AchievementType.LEVEL_UP,\n                string(\n                    abi.encodePacked(\n                        \"Reached Level \",\n                        _toString(expectedLevel),\n                        \"!\"\n                    )\n                ),\n                expectedLevel * 25\n            );\n\n            // Check for vocabulary master achievement\n            if (expectedLevel \u003e= MAX_LEVEL) {\n                _unlockAchievement(\n                    _user,\n                    AchievementType.VOCABULARY_MASTER,\n                    \"Vocabulary Master - Maximum Level Reached!\",\n                    1000\n                );\n            }\n\n            emit LevelUp(_user, previousLevel, expectedLevel, block.timestamp);\n        }\n    }\n\n    /**\n     * @dev Unlock achievement for user\n     */\n    function _unlockAchievement(\n        address _user,\n        AchievementType _type,\n        string memory _description,\n        uint256 _points\n    ) internal {\n        Achievement memory newAchievement = Achievement({\n            achievementType: _type,\n            timestamp: block.timestamp,\n            description: _description,\n            pointsAwarded: _points\n        });\n\n        s_userAchievements[_user].push(newAchievement);\n\n        emit AchievementUnlocked(\n            _user,\n            _type,\n            _description,\n            _points,\n            block.timestamp\n        );\n    }\n\n    /**\n     * @dev Convert uint256 to string\n     */\n    function _toString(uint256 value) internal pure returns (string memory) {\n        if (value == 0) {\n            return \"0\";\n        }\n        uint256 temp = value;\n        uint256 digits;\n        while (temp != 0) {\n            digits++;\n            temp /= 10;\n        }\n        bytes memory buffer = new bytes(digits);\n        while (value != 0) {\n            digits -= 1;\n            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));\n            value /= 10;\n        }\n        return string(buffer);\n    }\n\n    // =============================================================\n    //                      VIEW FUNCTIONS\n    // =============================================================\n\n    /**\n     * @notice Get user profile information\n     * @param _user Address of the user\n     * @return UserProfile struct\n     */\n    function getUserProfile(\n        address _user\n    ) external view returns (UserProfile memory) {\n        return s_userProfiles[_user];\n    }\n\n    /**\n     * @notice Get user's active session\n     * @param _user Address of the user\n     * @return StudySession struct\n     */\n    function getActiveSession(\n        address _user\n    ) external view returns (StudySession memory) {\n        return s_activeSessions[_user];\n    }\n\n    /**\n     * @notice Get user's achievements\n     * @param _user Address of the user\n     * @return Array of Achievement structs\n     */\n    function getUserAchievements(\n        address _user\n    ) external view returns (Achievement[] memory) {\n        return s_userAchievements[_user];\n    }\n\n    /**\n     * @notice Get word progress for specific user and word\n     * @param _user Address of the user\n     * @param _wordHash Hash of the word\n     * @return WordProgress struct\n     */\n    function getWordProgress(\n        address _user,\n        string calldata _wordHash\n    ) external view returns (WordProgress memory) {\n        return s_wordProgress[_user][_wordHash];\n    }\n\n    /**\n     * @notice Get completed session by ID\n     * @param _sessionId ID of the session\n     * @return StudySession struct\n     */\n    function getCompletedSession(\n        uint256 _sessionId\n    ) external view returns (StudySession memory) {\n        return s_completedSessions[_sessionId];\n    }\n\n    /**\n     * @notice Get total number of registered users\n     * @return Number of registered users\n     */\n    function getTotalUsers() external view returns (uint256) {\n        return s_registeredUsers.length;\n    }\n\n    /**\n     * @notice Get total number of completed sessions\n     * @return Number of completed sessions\n     */\n    function getTotalCompletedSessions() external view returns (uint256) {\n        return s_totalSessionsCompleted;\n    }\n\n    /**\n     * @notice Check if user is registered\n     * @param _user Address to check\n     * @return Boolean indicating registration status\n     */\n    function isUserRegistered(address _user) external view returns (bool) {\n        return s_userProfiles[_user].isRegistered;\n    }\n}\n",
+    "abi": [
+      {
+        "inputs": [],
+        "name": "VocabChain__AlreadyRegistered",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "VocabChain__InvalidDifficulty",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "provided",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "max",
+            "type": "uint256"
+          }
+        ],
+        "name": "VocabChain__InvalidLevel",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "provided",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "max",
+            "type": "uint256"
+          }
+        ],
+        "name": "VocabChain__InvalidScore",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "VocabChain__InvalidWordCount",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "VocabChain__NoActiveSession",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "VocabChain__SessionAlreadyStarted",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "VocabChain__UnauthorizedAccess",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "VocabChain__UserNotRegistered",
+        "type": "error"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "enum VocabChain.AchievementType",
+            "name": "achievementType",
+            "type": "uint8"
+          },
+          {
+            "indexed": false,
+            "internalType": "string",
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "pointsAwarded",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          }
+        ],
+        "name": "AchievementUnlocked",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "enum VocabChain.Difficulty",
+            "name": "previousDifficulty",
+            "type": "uint8"
+          },
+          {
+            "indexed": false,
+            "internalType": "enum VocabChain.Difficulty",
+            "name": "newDifficulty",
+            "type": "uint8"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          }
+        ],
+        "name": "DifficultyChanged",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "previousLevel",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "newLevel",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          }
+        ],
+        "name": "LevelUp",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "sessionId",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "wordsStudied",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "correctAnswers",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "scoreEarned",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          }
+        ],
+        "name": "SessionCompleted",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "sessionId",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "enum VocabChain.Difficulty",
+            "name": "difficulty",
+            "type": "uint8"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          }
+        ],
+        "name": "SessionStarted",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "newStreak",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "bool",
+            "name": "isNewRecord",
+            "type": "bool"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          }
+        ],
+        "name": "StreakUpdated",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "string",
+            "name": "username",
+            "type": "string"
+          },
+          {
+            "indexed": false,
+            "internalType": "enum VocabChain.Difficulty",
+            "name": "difficulty",
+            "type": "uint8"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          }
+        ],
+        "name": "UserRegistered",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "string",
+            "name": "wordHash",
+            "type": "string"
+          },
+          {
+            "indexed": false,
+            "internalType": "bool",
+            "name": "correct",
+            "type": "bool"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          }
+        ],
+        "name": "WordStudied",
+        "type": "event"
+      },
+      {
+        "inputs": [],
+        "name": "MAX_LEVEL",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "PERFECT_SCORE_BONUS",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "STREAK_MULTIPLIER",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "WORDS_PER_LEVEL",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "completeSession",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "_user",
+            "type": "address"
+          }
+        ],
+        "name": "getActiveSession",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "sessionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "startTimestamp",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "endTimestamp",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "wordsStudied",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "correctAnswers",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "incorrectAnswers",
+                "type": "uint256"
+              },
+              {
+                "internalType": "enum VocabChain.Difficulty",
+                "name": "difficulty",
+                "type": "uint8"
+              },
+              {
+                "internalType": "bool",
+                "name": "isCompleted",
+                "type": "bool"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scoreEarned",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct VocabChain.StudySession",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "_sessionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "getCompletedSession",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "sessionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "startTimestamp",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "endTimestamp",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "wordsStudied",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "correctAnswers",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "incorrectAnswers",
+                "type": "uint256"
+              },
+              {
+                "internalType": "enum VocabChain.Difficulty",
+                "name": "difficulty",
+                "type": "uint8"
+              },
+              {
+                "internalType": "bool",
+                "name": "isCompleted",
+                "type": "bool"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scoreEarned",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct VocabChain.StudySession",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "getTotalCompletedSessions",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "getTotalUsers",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "_user",
+            "type": "address"
+          }
+        ],
+        "name": "getUserAchievements",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "enum VocabChain.AchievementType",
+                "name": "achievementType",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "timestamp",
+                "type": "uint256"
+              },
+              {
+                "internalType": "string",
+                "name": "description",
+                "type": "string"
+              },
+              {
+                "internalType": "uint256",
+                "name": "pointsAwarded",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct VocabChain.Achievement[]",
+            "name": "",
+            "type": "tuple[]"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "_user",
+            "type": "address"
+          }
+        ],
+        "name": "getUserProfile",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "bool",
+                "name": "isRegistered",
+                "type": "bool"
+              },
+              {
+                "internalType": "string",
+                "name": "username",
+                "type": "string"
+              },
+              {
+                "internalType": "uint256",
+                "name": "currentLevel",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "totalWordsLearned",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "currentStreak",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "longestStreak",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "totalSessions",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "totalCorrectAnswers",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "totalIncorrectAnswers",
+                "type": "uint256"
+              },
+              {
+                "internalType": "enum VocabChain.Difficulty",
+                "name": "currentDifficulty",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "registrationTimestamp",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "lastActiveTimestamp",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct VocabChain.UserProfile",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "_user",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "_wordHash",
+            "type": "string"
+          }
+        ],
+        "name": "getWordProgress",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "timesStudied",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "correctAttempts",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "incorrectAttempts",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "lastStudiedTimestamp",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bool",
+                "name": "isMastered",
+                "type": "bool"
+              }
+            ],
+            "internalType": "struct VocabChain.WordProgress",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "_user",
+            "type": "address"
+          }
+        ],
+        "name": "isUserRegistered",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "_wordHash",
+            "type": "string"
+          },
+          {
+            "internalType": "bool",
+            "name": "_correct",
+            "type": "bool"
+          }
+        ],
+        "name": "recordWordStudy",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "_username",
+            "type": "string"
+          },
+          {
+            "internalType": "enum VocabChain.Difficulty",
+            "name": "_difficulty",
+            "type": "uint8"
+          }
+        ],
+        "name": "registerUser",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "enum VocabChain.Difficulty",
+            "name": "_difficulty",
+            "type": "uint8"
+          }
+        ],
+        "name": "startSession",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ],
+    "bytecode": "60806040526001600655348015601457600080fd5b50611e44806100246000396000f3fe608060405234801561001057600080fd5b50600436106101005760003560e01c80639be572f611610097578063c4c8889c11610066578063c4c8889c1461024e578063d1588ee714610261578063f09153c414610269578063f139bda81461028957600080fd5b80639be572f6146102235780639d08c9741461022b578063a49062d41461023e578063badca51e1461024657600080fd5b80635cab4615116100d35780635cab4615146101c857806371d948e2146101d0578063887f6c1d146101e3578063987ee1561461020357600080fd5b8063163f75221461010557806327ad972714610146578063338e12eb1461015c578063351d644914610171575b600080fd5b6101316101133660046116df565b6001600160a01b031660009081526020819052604090205460ff1690565b60405190151581526020015b60405180910390f35b61014e600281565b60405190815260200161013d565b61016f61016a366004611759565b610291565b005b61018461017f3660046117ad565b61052a565b60405161013d9190600060a0820190508251825260208301516020830152604083015160408301526060830151606083015260808301511515608083015292915050565b60075461014e565b61016f6101de366004611800565b6105dc565b6101f66101f136600461181b565b610806565b60405161013d919061185e565b6102166102113660046116df565b6108ce565b60405161013d9190611937565b60055461014e565b61016f6102393660046119eb565b610a2d565b61014e606481565b61014e600a81565b6101f661025c3660046116df565b610bfb565b61014e603281565b61027c6102773660046116df565b610c8f565b60405161013d9190611a47565b61016f610dd7565b80600481818111156102a5576102a5611834565b60ff1611156102c757604051630b6193bd60e01b815260040160405180910390fd5b3360009081526020819052604090205460ff16156102f857604051638e16a40d60e01b815260040160405180910390fd5b60405180610180016040528060011515815260200185858080601f01602080910402602001604051908101604052809392919081815260200183838082843760009201829052509385525050600160208401525060408201819052606082018190526080820181905260a0820181905260c0820181905260e08201526101000183600481111561038a5761038a611834565b8152426020808301829052604092830191909152336000908152808252919091208251815460ff19169015151781559082015160018201906103cc9082611b86565b5060408201518160020155606082015181600301556080820151816004015560a0820151816005015560c0820151816006015560e0820151816007015561010082015181600801556101208201518160090160006101000a81548160ff0219169083600481111561043f5761043f611834565b0217905550610140820151600a8083019190915561016090920151600b909101556005805460018101825560009182527f036b6384b5eca791c62761152d0c79bb0604c104a5fb6f4eb0703f3154bb3db00180546001600160a01b0319163390811790915560408051808201909152601681527557656c636f6d6520746f20566f636162436861696e2160501b60208201526104dd9391929161117f565b336001600160a01b03167fe20b9b482e07c25b19f43796e724ce7c83ddf9ef501d7de45c19c2f444d45b318585854260405161051c9493929190611c46565b60405180910390a250505050565b61055e6040518060a00160405280600081526020016000815260200160008152602001600081526020016000151581525090565b6001600160a01b0384166000908152600360205260409081902090516105879085908590611c8d565b90815260408051918290036020908101832060a08401835280548452600181015491840191909152600281015491830191909152600381015460608301526004015460ff161515608082015290509392505050565b3360009081526020819052604090205460ff1661060c57604051633f1cbc2d60e01b815260040160405180910390fd5b806004818181111561062057610620611834565b60ff16111561064257604051630b6193bd60e01b815260040160405180910390fd5b336000908152600160205260409020541561067057604051631800467960e21b815260040160405180910390fd5b600680546000918261068183611cb3565b919050559050604051806101400160405280828152602001336001600160a01b03168152602001428152602001600081526020016000815260200160008152602001600081526020018460048111156106dc576106dc611834565b8152600060208083018290526040928301829052338252600180825291839020845181559084015181830180546001600160a01b0319166001600160a01b0390921691909117905591830151600283015560608301516003830155608083015160048084019190915560a0840151600584015560c0840151600684015560e08401516007840180549193909260ff1990921691849081111561078057610780611834565b02179055506101008281015160078301805461ff00191691151590920217905561012090910151600890910155336000818152602081905260409081902042600b90910181905590518392917f89f4b1068c6332a669354bf23283c1f2961ae1feb0c454e0e37fe03dacf876b0916107f9918891611ccc565b60405180910390a3505050565b61080e6115e2565b6000828152600460208181526040928390208351610140810185528154815260018201546001600160a01b03169281019290925260028101549382019390935260038301546060820152828201546080820152600583015460a0820152600683015460c0820152600783015490929160e084019160ff169081111561089557610895611834565b60048111156108a6576108a6611834565b81526007820154610100900460ff161515602082015260089091015460409091015292915050565b6108d661164f565b6001600160a01b0382166000908152602081815260409182902082516101808101909352805460ff1615158352600181018054919284019161091790611afc565b80601f016020809104026020016040519081016040528092919081815260200182805461094390611afc565b80156109905780601f1061096557610100808354040283529160200191610990565b820191906000526020600020905b81548152906001019060200180831161097357829003601f168201915b50505091835250506002820154602082015260038201546040820152600480830154606083015260058301546080830152600683015460a0830152600783015460c0830152600883015460e083015260098301546101009092019160ff16908111156109fe576109fe611834565b6004811115610a0f57610a0f611834565b8152600a8201546020820152600b9091015460409091015292915050565b3360009081526020819052604090205460ff16610a5d57604051633f1cbc2d60e01b815260040160405180910390fd5b3360009081526001602052604081208054909103610a8e576040516348dc788760e11b815260040160405180910390fd5b600481018054906000610aa083611cb3565b91905055508115610ac757600581018054906000610abd83611cb3565b9190505550610adf565b600681018054906000610ad983611cb3565b91905055505b336000908152600360205260408082209051610afe9087908790611c8d565b9081526040519081900360200190208054909150816000610b1e83611cb3565b90915550504260038201558215610b7c57600181018054906000610b4183611cb3565b91905055506003816001015410158015610b62575080600201548160010154115b15610b775760048101805460ff191660011790555b610ba0565b600281018054906000610b8e83611cb3565b909155505060048101805460ff191690555b8484604051610bb0929190611c8d565b6040805191829003822085151583524260208401529133917f9946713a281c61c73de8aeb16f31cf3d5c7d87efcf086871111d3569e20ba0c891015b60405180910390a35050505050565b610c036115e2565b6001600160a01b03808316600090815260016020818152604092839020835161014081018552815481529281015490941690820152600283015491810191909152600382015460608201526004808301546080830152600583015460a0830152600683015460c0830152600783015491929160e084019160ff9091169081111561089557610895611834565b6001600160a01b0381166000908152600260209081526040808320805482518185028101850190935280835260609492939192909184015b82821015610dcc576000848152602090206040805160808101909152600484029091018054829060ff166005811115610d0257610d02611834565b6005811115610d1357610d13611834565b815260200160018201548152602001600282018054610d3190611afc565b80601f0160208091040260200160405190810160405280929190818152602001828054610d5d90611afc565b8015610daa5780601f10610d7f57610100808354040283529160200191610daa565b820191906000526020600020905b815481529060010190602001808311610d8d57829003601f168201915b5050505050815260200160038201548152505081526020019060010190610cc7565b505050509050919050565b3360009081526020819052604090205460ff16610e0757604051633f1cbc2d60e01b815260040160405180910390fd5b3360009081526001602052604081208054909103610e38576040516348dc788760e11b815260040160405180910390fd5b8060040154600003610e5d5760405163403647bd60e11b815260040160405180910390fd5b60008160050154600a610e709190611ce7565b905060008083600401541115610ee8576000836004015484600501546064610e989190611ce7565b610ea29190611d1a565b905080606403610ee657600a9150610ee63360036040518060400160405280601081526020016f506572666563742053657373696f6e2160801b815250603261117f565b505b33600090815260208190526040812060040154610f0790600290611ce7565b905080610f148385611d2e565b610f1e9190611d2e565b60088501554260038086019190915560078501805461ff001916610100179055336000908152602081905260408120600487015492810180549193929091610f67908490611d2e565b90915550506005850154600782018054600090610f85908490611d2e565b90915550506006850154600882018054600090610fa3908490611d2e565b9091555050600681018054906000610fba83611cb3565b909155505042600b8201556005850154610fd79033901515611289565b610fe0336113bf565b8454600081815260046020819052604090912091825560018088015481840180546001600160a01b0319166001600160a01b0390921691909117905560028089015490840155600380890154908401558188015483830155600580890154908401556006808901549084015560078089015490840180548a959460ff90931693919260ff199091169190849081111561107b5761107b611834565b0217905550600782810154828201805461ff0019166101009283900460ff161515909202919091179055600892830154929091019190915580549060006110c183611cb3565b909155505084546004860154600587015460088801546040805193845260208401929092529082015242606082015233907fbc2e4e046e4eb6289738c19436b358cc81427f603f16af425bb672a2f9c7e4149060800160405180910390a35050336000908152600160208190526040822082815590810180546001600160a01b0319169055600281018290556003810182905560048101829055600581018290556006810182905560078101805461ffff1916905560080155505050565b6000604051806080016040528085600581111561119e5761119e611834565b815242602080830191909152604080830187905260609092018590526001600160a01b038816600090815260028252918220805460018181018355918452919092208351600490920201805493945084939092839160ff19169083600581111561120a5761120a611834565b0217905550602082015160018201556040820151600282019061122d9082611b86565b5060608201518160030155505083600581111561124c5761124c611834565b856001600160a01b03167f86b1075150cd6bbad768bdcea8baa18e68a6eeae0e379f6284a20fd3a8b5b105858542604051610bec93929190611d41565b6001600160a01b0382166000908152602081905260408120908215611369576004820180549060006112ba83611cb3565b91905055508160050154826004015411156112dd57506004810154600582015560015b81600401546007036113215761131c8460016040518060400160405280600d81526020016c37204461792053747265616b2160981b815250606461117f565b611371565b8160040154601e0361131c5761131c846002604051806040016040528060158152602001743330204461792053747265616b204d61737465722160581b8152506101f461117f565b600060048301555b600482015460408051918252821515602083015242908201526001600160a01b038516907f0819c2be362f91ccf2d9e14fdbcf704aaeab3c69f1e4132421ecdde5a32b5c4a9060600161051c565b6001600160a01b038116600090815260208190526040812060038101549091906113eb90603290611d1a565b6113f6906001611d2e565b905081600201548111801561140c575060648111155b156114d4576002820180549082905561145a84600461142a856114d9565b60405160200161143a9190611d66565b60408051601f19818403018152919052611455866019611ce7565b61117f565b60648210611489576114898460056040518060600160405280602a8152602001611de5602a91396103e861117f565b604080518281526020810184905242918101919091526001600160a01b038516907f0ee22ce17ae6ff55501ec7491afa3f5397a17ee7cd88fe56c39569e2c13bd9189060600161051c565b505050565b6060816000036115005750506040805180820190915260018152600360fc1b602082015290565b8160005b811561152a578061151481611cb3565b91506115239050600a83611d1a565b9150611504565b60008167ffffffffffffffff81111561154557611545611ae6565b6040519080825280601f01601f19166020018201604052801561156f576020820181803683370190505b5090505b84156115da57611584600183611da7565b9150611591600a86611dba565b61159c906030611d2e565b60f81b8183815181106115b1576115b1611dce565b60200101906001600160f81b031916908160001a9053506115d3600a86611d1a565b9450611573565b949350505050565b6040518061014001604052806000815260200160006001600160a01b0316815260200160008152602001600081526020016000815260200160008152602001600081526020016000600481111561163b5761163b611834565b815260006020820181905260409091015290565b6040518061018001604052806000151581526020016060815260200160008152602001600081526020016000815260200160008152602001600081526020016000815260200160008152602001600060048111156116af576116af611834565b815260200160008152602001600081525090565b80356001600160a01b03811681146116da57600080fd5b919050565b6000602082840312156116f157600080fd5b6116fa826116c3565b9392505050565b60008083601f84011261171357600080fd5b50813567ffffffffffffffff81111561172b57600080fd5b60208301915083602082850101111561174357600080fd5b9250929050565b8035600581106116da57600080fd5b60008060006040848603121561176e57600080fd5b833567ffffffffffffffff81111561178557600080fd5b61179186828701611701565b90945092506117a490506020850161174a565b90509250925092565b6000806000604084860312156117c257600080fd5b6117cb846116c3565b9250602084013567ffffffffffffffff8111156117e757600080fd5b6117f386828701611701565b9497909650939450505050565b60006020828403121561181257600080fd5b6116fa8261174a565b60006020828403121561182d57600080fd5b5035919050565b634e487b7160e01b600052602160045260246000fd5b6005811061185a5761185a611834565b9052565b81518152602080830151610140830191611882908401826001600160a01b03169052565b5060408301516040830152606083015160608301526080830151608083015260a083015160a083015260c083015160c083015260e08301516118c760e084018261184a565b506101008381015180151584830152505061012092830151919092015290565b60005b838110156119025781810151838201526020016118ea565b50506000910152565b600081518084526119238160208601602086016118e7565b601f01601f19169290920160200192915050565b6020815261194a60208201835115159052565b600060208301516101808060408501526119686101a085018361190b565b91506040850151606085015260608501516080850152608085015160a085015260a085015160c085015260c085015160e085015260e08501516101008181870152808701519150506101208181870152808701519150506101406119ce8187018361184a565b860151610160868101919091529095015193019290925250919050565b600080600060408486031215611a0057600080fd5b833567ffffffffffffffff811115611a1757600080fd5b611a2386828701611701565b90945092505060208401358015158114611a3c57600080fd5b809150509250925092565b600060208083018184528085518083526040925060408601915060408160051b87010184880160005b83811015611ad857603f1989840301855281516080815160068110611a9757611a97611834565b8552818901518986015287820151888601829052611ab78287018261190b565b60609384015196909301959095525094870194925090860190600101611a70565b509098975050505050505050565b634e487b7160e01b600052604160045260246000fd5b600181811c90821680611b1057607f821691505b602082108103611b3057634e487b7160e01b600052602260045260246000fd5b50919050565b601f8211156114d4576000816000526020600020601f850160051c81016020861015611b5f5750805b601f850160051c820191505b81811015611b7e57828155600101611b6b565b505050505050565b815167ffffffffffffffff811115611ba057611ba0611ae6565b611bb481611bae8454611afc565b84611b36565b602080601f831160018114611be95760008415611bd15750858301515b600019600386901b1c1916600185901b178555611b7e565b600085815260208120601f198616915b82811015611c1857888601518255948401946001909101908401611bf9565b5085821015611c365787850151600019600388901b60f8161c191681555b5050505050600190811b01905550565b606081528360608201528385608083013760006080858301015260006080601f19601f8701168301019050611c7e602083018561184a565b82604083015295945050505050565b8183823760009101908152919050565b634e487b7160e01b600052601160045260246000fd5b600060018201611cc557611cc5611c9d565b5060010190565b60408101611cda828561184a565b8260208301529392505050565b8082028115828204841417611cfe57611cfe611c9d565b92915050565b634e487b7160e01b600052601260045260246000fd5b600082611d2957611d29611d04565b500490565b80820180821115611cfe57611cfe611c9d565b606081526000611d54606083018661190b565b60208301949094525060400152919050565b6d02932b0b1b432b2102632bb32b6160951b815260008251611d8f81600e8501602087016118e7565b602160f81b600e939091019283015250600f01919050565b81810381811115611cfe57611cfe611c9d565b600082611dc957611dc9611d04565b500690565b634e487b7160e01b600052603260045260246000fdfe566f636162756c617279204d6173746572202d204d6178696d756d204c6576656c205265616368656421a2646970667358221220a048097fa29402574f85e2afd5d8f746962161a76efb62416d710df9154933b264736f6c63430008190033",
+    "constructor_args": null,
+    "compiler_version": "v0.8.19",
+    "optimization_enabled": true,
+    "optimization_runs": 200,
+    "license_type": "MIT",
+    "tags": [],
+    "metadata": {}
+  },
+  "gas_used": 1748726,
+  "timestamp": "2025-09-11T06:00:06Z",
+  "tx_hash": "0xeb97346dd47e595ca43cad3b88af4399e57d7613ccc8e6b43767db659ddec249"
+}

@@ -1,0 +1,10 @@
+api:
+    base_url: http://localhost:8080/api
+gas:
+    limit: 3000000
+    price: "0"
+network:
+    name: hubweb3-besu-qbft
+    rpc_url: http://144.22.179.183:80/node2
+wallet:
+    private_key: 881d396b85acd82b8bf2615a8d14ffcce79b854f583bd599143ca75e7532f0bf

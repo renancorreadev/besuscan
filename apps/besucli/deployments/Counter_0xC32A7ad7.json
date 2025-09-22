@@ -1,0 +1,11 @@
+{
+  "address": "0xC32A7ad7DD8e5360329940ccfaE89A7cf617998f",
+  "blockNumber": 1689244,
+  "creator": "0xB40061C7bf8394eb130Fcb5EA06868064593BFAa",
+  "gasUsed": 184645,
+  "name": "Counter",
+  "timestamp": "2025-09-21T07:19:08Z",
+  "txHash": "0x18bde5d9b074a19aa2f05c48f2fefdedbdfea82fcdb089c1ba7365b1e5d4dc98",
+  "type": "Custom",
+  "verified": false
+}
