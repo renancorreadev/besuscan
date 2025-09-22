@@ -65,13 +65,14 @@ gas:
 # Command para solc
 
 ```sh
-solc --bin --abi --evm-version london templates/smart-contracts/ERC20.sol -o templates/abis/ --overwrite
+solc --evm-version london --bin --abi  templates/smart-contracts/ERC20Token.sol -o templates/abis/ --overwrite
 solc --bin --abi  templates/smart-contracts/VFinance.sol -o templates/abis/ --overwrite
 solc --bin --abi  templates/smart-contracts/DIDRegistry.sol -o templates/abis/ --overwrite
 solc --bin --abi  templates/smart-contracts/RegistryAccess.sol -o templates/abis/ --overwrite
 solc --bin --abi  templates/smart-contracts/StatusListManager.sol -o templates/abis/ --overwrite
 
-solc --evm-version london --bin --abi  templates/smart-contracts/IDBraDIDRegistry.sol -o templates/abis/ --overwrite --optimize
+solc --evm-version london --bin --abi  templates/smart-contracts/DIDW3C.sol -o templates/abis/ --overwrite --optimize
+
 
 solc --evm-version london --bin --abi  templates/smart-contracts/VocabChain.sol -o templates/abis/ --overwrite --optimize
 

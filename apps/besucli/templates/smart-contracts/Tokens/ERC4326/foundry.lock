@@ -1,0 +1,20 @@
+{
+  "../../../../../../lib/openzeppelin-contracts": {
+    "rev": "01ef448981be9d20ca85f2faf6ebdf591ce409f3"
+  },
+  "../ERC1155/lib/openzeppelin-contracts": {
+    "rev": "01ef448981be9d20ca85f2faf6ebdf591ce409f3"
+  },
+  "../ERC20/lib/openzeppelin-contracts": {
+    "rev": "01ef448981be9d20ca85f2faf6ebdf591ce409f3"
+  },
+  "../ERC721/lib/openzeppelin-contracts": {
+    "rev": "01ef448981be9d20ca85f2faf6ebdf591ce409f3"
+  },
+  "lib/openzeppelin-contracts": {
+    "tag": {
+      "name": "v5.0.1",
+      "rev": "01ef448981be9d20ca85f2faf6ebdf591ce409f3"
+    }
+  }
+}

@@ -1,0 +1,40 @@
+# BesuCLI - Deploy Configuration
+contract:
+  name: "DIDW3C"
+  symbol: "DID"
+  description: "Unified Contract EIP-1056 + StatusList + Revocation for Verifiable Credentials in Hyperledger Besu - Digital Banking Identity with Maximum Traceability"
+  type: "VC"
+
+files:
+  contract: "templates/smart-contracts/DIDW3C.sol"
+  abi: "templates/abis/DIDW3C.abi"
+  bytecode: "templates/abis/DIDW3C.bin"
+
+constructor_args:
+  - "0xB40061C7bf8394eb130Fcb5EA06868064593BFAa"
+
+compiler:
+  version: "v0.8.20"
+  optimization_enabled: true
+  optimization_runs: 200
+
+metadata:
+  license: "MIT"
+  website_url: "https://didw3c.eth"
+  github_url: "https://github.com/renancorreadev"
+  documentation_url: "https://hubweb3.com"
+  tags:
+    - "did"
+    - "identity"
+    - "eip-1056"
+    - "w3c"
+    - "kyc"
+    - "banking"
+    - "credentials"
+    - "revocation"
+    - "besu"
+
+deploy:
+  auto_verify: true
+  save_deployment: true
+  register_only_main: false

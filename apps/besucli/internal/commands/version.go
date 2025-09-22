@@ -3,15 +3,22 @@ package commands
 import (
 	"runtime"
 
-	"github.com/spf13/cobra"
 	"github.com/hubweb3/besucli/pkg/logger"
+	"github.com/spf13/cobra"
 )
 
 var (
-	Version    = "2.0.0"
-	BuildTime  = "development"
-	CommitHash = "dev"
+	version    = "2.0.0"
+	buildTime  = "development"
+	commitHash = "dev"
 )
+
+// SetVersionInfo sets the version information from main package
+func SetVersionInfo(v, bt, ch string) {
+	version = v
+	buildTime = bt
+	commitHash = ch
+}
 
 // NewVersionCommand creates the version command
 func NewVersionCommand(log *logger.Logger) *cobra.Command {
@@ -39,19 +46,19 @@ func showVersion(log *logger.Logger) error {
 	log.Banner("🚀 BesuCLI - Version Information")
 
 	log.Info("📋 VERSION:")
-	log.Info("   Version:", Version)
-	log.Info("   Build:", BuildTime)
-	log.Info("   Commit:", CommitHash)
+	log.Info("   Version: " + version)
+	log.Info("   Build: " + buildTime)
+	log.Info("   Commit: " + commitHash)
 
 	log.Info("💻 SYSTEM:")
-	log.Info("   OS:", runtime.GOOS)
-	log.Info("   Arch:", runtime.GOARCH)
-	log.Info("   Go:", runtime.Version())
+	log.Info("   OS: " + runtime.GOOS)
+	log.Info("   Arch: " + runtime.GOARCH)
+	log.Info("   Go: " + runtime.Version())
 
 	log.Info("🔗 LINKS:")
-	log.Info("   GitHub:", "https://github.com/hubweb3/besuscan")
-	log.Info("   Docs:", "https://docs.besuscan.com")
-	log.Info("   Explorer:", "https://besuscan.com")
+	log.Info("   GitHub: https://github.com/hubweb3/besuscan")
+	log.Info("   Docs: https://docs.besuscan.com")
+	log.Info("   Explorer: https://besuscan.com")
 
 	return nil
 }

@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 	"github.com/hubweb3/besucli/internal/models"
 	"github.com/hubweb3/besucli/pkg/logger"
+	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 )
 
 // fileExists checks if a file exists
@@ -51,8 +51,15 @@ Examples:
 func runValidate(cmd *cobra.Command, args []string, log *logger.Logger) error {
 	filename := args[0]
 
+	// Get flag values
+	strict, _ := cmd.Flags().GetBool("strict")
+	showWarnings, _ := cmd.Flags().GetBool("warnings")
+
 	log.Banner("✅ VALIDATING YAML CONFIGURATION")
 	log.Info("📄 File:", filename)
+	if strict {
+		log.Info("🔒 Mode: Strict validation enabled")
+	}
 
 	// Check if file exists
 	if !fileExists(filename) {
@@ -81,6 +88,12 @@ func runValidate(cmd *cobra.Command, args []string, log *logger.Logger) error {
 	log.Progress("🔍 Validating contract configuration...")
 	errors, warnings := validateContractConfig(&contract)
 
+	// In strict mode, treat warnings as errors
+	if strict && len(warnings) > 0 {
+		errors = append(errors, warnings...)
+		warnings = nil
+	}
+
 	// Validate referenced files
 	log.Progress("📁 Checking referenced files...")
 	fileErrors := validateReferencedFiles(&contract)
@@ -101,7 +114,8 @@ func runValidate(cmd *cobra.Command, args []string, log *logger.Logger) error {
 		return fmt.Errorf("validation failed with %d errors", len(errors))
 	}
 
-	if len(warnings) > 0 {
+	// Show warnings only if the flag is enabled
+	if showWarnings && len(warnings) > 0 {
 		log.Warning("⚠️ VALIDATION WARNINGS:")
 		for _, warning := range warnings {
 			log.Warning("   ", warning)
@@ -110,7 +124,7 @@ func runValidate(cmd *cobra.Command, args []string, log *logger.Logger) error {
 
 	log.Success("🎉 Configuration is valid!")
 
-	if len(warnings) > 0 {
+	if showWarnings && len(warnings) > 0 {
 		log.Info("💡 SUGGESTIONS FOR IMPROVEMENT:")
 		log.Info("   • Add a detailed contract description")
 		log.Info("   • Specify contract type for better categorization")
