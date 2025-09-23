@@ -1,4 +1,5 @@
 import cacheService, { CACHE_CONFIGS } from './cache-service';
+import { authService } from './auth';
 
 // API Configuration
 const getApiBaseUrl = () => {
@@ -495,6 +496,7 @@ class ApiService {
     const defaultOptions: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
+        ...authService.getAuthHeaders(), // Incluir token de autenticação automaticamente
       },
     };
 

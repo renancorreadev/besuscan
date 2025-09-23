@@ -738,7 +738,7 @@ func (h *SmartContractHandler) VerifySmartContract(c *gin.Context) {
 		OptimizationRuns:    &request.OptimizationRuns,
 		LicenseType:         &request.LicenseType,
 		SourceCode:          &request.SourceCode,
-		ABI:                 request.ABI,
+		ABI:                 &request.ABI,
 		Bytecode:            &request.Bytecode,
 		Description:         &request.Description,
 		WebsiteURL:          &request.WebsiteURL,

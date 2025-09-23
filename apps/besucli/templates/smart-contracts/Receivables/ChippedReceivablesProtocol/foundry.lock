@@ -1,0 +1,32 @@
+{
+  "../../../../../../lib/openzeppelin-contracts": {
+    "rev": "01ef448981be9d20ca85f2faf6ebdf591ce409f3"
+  },
+  "../../AA/AAManagment/lib/account-abstraction": {
+    "rev": "4cbc06072cdc19fd60f285c5997f4f7f57a588de"
+  },
+  "../../AA/AAManagment/lib/forge-std": {
+    "rev": "8bbcf6e3f8f62f419e5429a0bd89331c85c37824"
+  },
+  "../../AA/AAManagment/lib/openzeppelin-contracts": {
+    "rev": "c64a1edb67b6e3f4a15cca8909c9482ad33a02b0"
+  },
+  "../../Tokens/ERC1155/lib/openzeppelin-contracts": {
+    "rev": "01ef448981be9d20ca85f2faf6ebdf591ce409f3"
+  },
+  "../../Tokens/ERC20/lib/openzeppelin-contracts": {
+    "rev": "01ef448981be9d20ca85f2faf6ebdf591ce409f3"
+  },
+  "../../Tokens/ERC4326/lib/openzeppelin-contracts": {
+    "rev": "01ef448981be9d20ca85f2faf6ebdf591ce409f3"
+  },
+  "../../Tokens/ERC721/lib/openzeppelin-contracts": {
+    "rev": "01ef448981be9d20ca85f2faf6ebdf591ce409f3"
+  },
+  "lib/openzeppelin-contracts": {
+    "tag": {
+      "name": "v5.4.0",
+      "rev": "c64a1edb67b6e3f4a15cca8909c9482ad33a02b0"
+    }
+  }
+}

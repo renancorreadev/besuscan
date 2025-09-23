@@ -16,6 +16,7 @@ import (
 	"explorer-api/internal/infrastructure/queue"
 	"explorer-api/internal/infrastructure/websocket"
 	"explorer-api/internal/interfaces/http/handlers"
+	"explorer-api/internal/interfaces/http/middleware"
 )
 
 func main() {
@@ -24,7 +25,20 @@ func main() {
 	// Configurar Gin
 	r := gin.Default()
 
-	// CORS será tratado pelo nginx - não adicionar middleware de CORS aqui
+	// Middleware CORS para desenvolvimento
+	r.Use(func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+		c.Header("Access-Control-Allow-Credentials", "true")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	})
 
 	// Conectar ao banco de dados com retry
 	db := connectToDatabase()
@@ -89,11 +103,19 @@ func main() {
 	contractInteractionRepo := database.NewPostgresContractInteractionRepository(db)
 	tokenHoldingRepo := database.NewPostgresTokenHoldingRepository(db)
 	validatorRepo := database.NewPostgresValidatorRepository(db)
+	userRepo := database.NewPostgresUserRepository(db)
 
 	// Configurar URL do RPC Besu
 	rpcURL := os.Getenv("BESU_RPC_URL")
 	if rpcURL == "" {
-		rpcURL = "http://127.0.0.1:8545"
+		rpcURL = "http://89.117.33.254:8545"
+	}
+
+	// Configurar JWT Secret
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		jwtSecret = "besuscan-secret-key-change-in-production" // Chave padrão para desenvolvimento
+		log.Println("⚠️ Usando JWT_SECRET padrão. Configure JWT_SECRET no ambiente para produção!")
 	}
 
 	// Inicializar serviços
@@ -103,6 +125,7 @@ func main() {
 	accountService := services.NewAccountService(accountRepo, accountTagRepo, accountAnalyticsRepo, contractInteractionRepo, tokenHoldingRepo, db)
 	validatorService := services.NewValidatorService(validatorRepo, blockRepo, rpcURL)
 	eventService := services.NewEventService()
+	authService := services.NewAuthService(userRepo, jwtSecret)
 
 	// Inicializar serviço de fila (se AMQP Client estiver disponível)
 	var queueService *services.QueueService
@@ -117,6 +140,7 @@ func main() {
 	validatorHandler := handlers.NewValidatorHandler(validatorService)
 	eventHandler := handlers.NewEventHandler(eventService)
 	statsHandler := handlers.NewStatsHandler(blockService, transactionService, smartContractService, accountService, db)
+	authHandler := handlers.NewAuthHandler(authService)
 
 	// AccountHandler com ou sem queue service
 	accountHandler := handlers.NewAccountHandler(accountService, queueService, smartContractService)
@@ -125,6 +149,9 @@ func main() {
 	}
 
 	wsHandler := handlers.NewWebSocketHandler(hub)
+
+	// Inicializar middleware
+	authMiddleware := middleware.NewAuthMiddleware(authService)
 
 	// Rotas de saúde
 	r.GET("/health", func(c *gin.Context) {
@@ -142,7 +169,18 @@ func main() {
 	// Rotas da API v1
 	api := r.Group("/api")
 	{
-		// Rotas de estatísticas gerais
+		// Rotas de autenticação (públicas)
+		auth := api.Group("/auth")
+		{
+			auth.POST("/login", authHandler.Login)                    // POST /api/auth/login
+			auth.POST("/register", authHandler.Register)              // POST /api/auth/register
+			auth.POST("/logout", authMiddleware.RequireAuth(), authHandler.Logout) // POST /api/auth/logout
+			auth.GET("/me", authMiddleware.RequireAuth(), authHandler.Me)          // GET /api/auth/me
+			auth.POST("/change-password", authMiddleware.RequireAuth(), authHandler.ChangePassword) // POST /api/auth/change-password
+			auth.POST("/refresh", authMiddleware.RequireAuth(), authHandler.RefreshToken)           // POST /api/auth/refresh
+		}
+
+		// Rotas de estatísticas gerais (públicas)
 		api.GET("/stats", statsHandler.GetGeneralStats)                   // GET /api/stats
 		api.GET("/stats/recent-activity", statsHandler.GetRecentActivity) // GET /api/stats/recent-activity
 		// Rotas de blocos
@@ -190,8 +228,8 @@ func main() {
 			smartContracts.GET("/verified", smartContractHandler.GetVerifiedSmartContracts)           // GET /api/smart-contracts/verified
 			smartContracts.GET("/popular", smartContractHandler.GetPopularSmartContracts)             // GET /api/smart-contracts/popular
 			smartContracts.GET("/type/:type", smartContractHandler.GetSmartContractsByType)           // GET /api/smart-contracts/type/ERC-20
-			smartContracts.POST("/verify", smartContractHandler.VerifySmartContract)                  // POST /api/smart-contracts/verify
-			smartContracts.POST("/register", smartContractHandler.RegisterSmartContract)              // POST /api/smart-contracts/register
+			smartContracts.POST("/verify", smartContractHandler.VerifySmartContract)                  // POST /api/smart-contracts/verify - REMOVIDA AUTENTICAÇÃO
+			smartContracts.POST("/register", smartContractHandler.RegisterSmartContract)              // POST /api/smart-contracts/register - REMOVIDA AUTENTICAÇÃO
 			smartContracts.GET("/:address", smartContractHandler.GetSmartContractByAddress)           // GET /api/smart-contracts/0x...
 			smartContracts.GET("/:address/abi", smartContractHandler.GetSmartContractABI)             // GET /api/smart-contracts/0x.../abi
 			smartContracts.GET("/:address/source", smartContractHandler.GetSmartContractSourceCode)   // GET /api/smart-contracts/0x.../source
@@ -226,12 +264,12 @@ func main() {
 			accounts.GET("/:address/method-stats", accountHandler.GetAccountMethodStats)   // GET /api/accounts/0x.../method-stats?limit=20
 			accounts.GET("/:address/is-contract", accountHandler.IsContract)               // GET /api/accounts/0x.../is-contract
 
-			// ===== NOVAS ROTAS DE ESCRITA (VIA QUEUE) =====
+			// ===== NOVAS ROTAS DE ESCRITA (VIA QUEUE) - REQUEREM AUTENTICAÇÃO =====
 			if queueService != nil {
-				accounts.POST("", accountHandler.CreateAccount)                              // POST /api/accounts - Criar account
-				accounts.PUT("/:address", accountHandler.UpdateAccount)                      // PUT /api/accounts/:address - Atualizar account
-				accounts.POST("/:address/tags", accountHandler.AddAccountTags)               // POST /api/accounts/:address/tags - Gerenciar tags
-				accounts.PUT("/:address/compliance", accountHandler.UpdateAccountCompliance) // PUT /api/accounts/:address/compliance - Atualizar compliance
+				accounts.POST("", authMiddleware.RequireAuth(), accountHandler.CreateAccount)                              // POST /api/accounts - Criar account
+				accounts.PUT("/:address", authMiddleware.RequireAuth(), accountHandler.UpdateAccount)                      // PUT /api/accounts/:address - Atualizar account
+				accounts.POST("/:address/tags", authMiddleware.RequireAuth(), accountHandler.AddAccountTags)               // POST /api/accounts/:address/tags - Gerenciar tags
+				accounts.PUT("/:address/compliance", authMiddleware.RequireAuth(), accountHandler.UpdateAccountCompliance) // PUT /api/accounts/:address/compliance - Atualizar compliance
 			}
 		}
 
@@ -272,6 +310,16 @@ func main() {
 	log.Println("  GET /health - Status da API")
 	log.Println("  GET /ws - Conexão WebSocket")
 	log.Println("  GET /ws/stats - Estatísticas WebSocket")
+	log.Println("--------------------------------")
+	log.Println("🔐 ROTAS DE AUTENTICAÇÃO:")
+	log.Println("  POST /api/auth/login - Login de usuário")
+	log.Println("  POST /api/auth/register - Registro de usuário")
+	log.Println("  POST /api/auth/logout - Logout (requer auth)")
+	log.Println("  GET /api/auth/me - Informações do usuário (requer auth)")
+	log.Println("  POST /api/auth/change-password - Alterar senha (requer auth)")
+	log.Println("  POST /api/auth/refresh - Renovar token (requer auth)")
+	log.Println("--------------------------------")
+	log.Println("📊 ROTAS PÚBLICAS:")
 	log.Println("  GET /api/blocks - Lista de blocos recentes")
 	log.Println("  GET /api/blocks/search - Busca com filtros avançados")
 	log.Println("  GET /api/blocks/latest - Último bloco")
@@ -303,10 +351,13 @@ func main() {
 
 	if queueService != nil {
 		log.Println("--------------------------------")
+		log.Println("🔒 ROTAS PROTEGIDAS (requerem autenticação):")
 		log.Println("  POST /api/accounts - Criar account via queue")
 		log.Println("  PUT /api/accounts/:address - Atualizar account via queue")
 		log.Println("  POST /api/accounts/:address/tags - Gerenciar tags via queue")
 		log.Println("  PUT /api/accounts/:address/compliance - Atualizar compliance via queue")
+		log.Println("  POST /api/smart-contracts/verify - Verificar smart contract")
+		log.Println("  POST /api/smart-contracts/register - Registrar smart contract")
 	}
 
 	log.Fatal(r.Run(":" + port))

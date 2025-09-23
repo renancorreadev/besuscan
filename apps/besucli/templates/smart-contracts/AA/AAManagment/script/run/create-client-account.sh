@@ -16,7 +16,7 @@ export BANK_ADMIN="0xB40061C7bf8394eb130Fcb5EA06868064593BFAa"
 # Configurações do cliente (personalizar conforme necessário)
 # Se não fornecido, usa endereço padrão
 if [ -z "$1" ]; then
-    export CLIENT_ADDRESS="0x742d35Cc6634C0532925a3b8D7C9C0F4b8b8b8b8"
+    export CLIENT_ADDRESS="0x17E5545B11b468072283Cee1F066a059Fb0dbF24"
     echo "Usando endereço padrão: $CLIENT_ADDRESS"
 else
     export CLIENT_ADDRESS="$1"
@@ -24,7 +24,7 @@ else
 fi
 
 export BANK_ID="BRADESCO"
-export SALT="12345"
+export SALT="231235"
 
 # Limites da conta (em wei)
 export DAILY_LIMIT="10000000000000000000000"      # 10,000 ETH
@@ -36,7 +36,7 @@ export MULTISIG_THRESHOLD="10000000000000000000000" # 10,000 ETH
 # Configurações de compliance
 export REQUIRES_KYC="true"
 export REQUIRES_AML="true"
-export RISK_LEVEL="1"
+export RISK_LEVEL="2"
 
 echo "Creating AA account for client..."
 echo "Client: $CLIENT_ADDRESS"

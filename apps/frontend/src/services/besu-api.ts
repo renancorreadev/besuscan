@@ -58,7 +58,7 @@ class BesuApiService {
     }
 
     const data = await response.json();
-    
+
     if (data.error) {
       throw new Error(`RPC error: ${data.error.message}`);
     }
@@ -68,10 +68,10 @@ class BesuApiService {
 
   // Obter informações do bloco
   async getBlockByNumber(blockNumber: string | number = 'latest'): Promise<BesuBlockData> {
-    const blockNumberHex = typeof blockNumber === 'number' 
-      ? `0x${blockNumber.toString(16)}` 
+    const blockNumberHex = typeof blockNumber === 'number'
+      ? `0x${blockNumber.toString(16)}`
       : blockNumber;
-    
+
     return await this.makeRpcCall('eth_getBlockByNumber', [blockNumberHex, false]);
   }
 
@@ -188,7 +188,7 @@ class BesuApiService {
 
 // Instância do serviço (configurar com a URL do seu nó Besu)
 export const besuApi = new BesuApiService(
-  import.meta.env.VITE_BESU_RPC_URL || 'http://localhost:8545'
+  import.meta.env.VITE_BESU_RPC_URL || 'http://144.22.179.183'
 );
 
-export default BesuApiService; 
+export default BesuApiService;

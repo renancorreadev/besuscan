@@ -20,7 +20,7 @@ const Footer = () => {
       <div className="relative container mx-auto px-6 py-16">
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-          
+
           {/* Brand Section */}
           <div className="lg:col-span-1 space-y-6">
             <div className="space-y-4">
@@ -38,9 +38,9 @@ const Footer = () => {
                   <p className="text-xs text-gray-500 dark:text-gray-400">Hyperledger Besu Explorer</p>
                 </div>
               </div>
-              
+
               <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                The most trusted and comprehensive block explorer for Hyperledger Besu networks. 
+                The most trusted and comprehensive block explorer for Hyperledger Besu networks.
                 Explore transactions, blocks, and smart contracts with ease.
               </p>
             </div>
@@ -181,9 +181,9 @@ const Footer = () => {
 
             {/* Back to Top Button */}
             <div className="pt-4">
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={scrollToTop}
                 className="w-full bg-white/50 dark:bg-gray-800/50 border-gray-200/50 dark:border-gray-700/50 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300 group text-gray-900 dark:text-white"
               >
@@ -197,13 +197,13 @@ const Footer = () => {
         {/* Bottom Section */}
         <div className="mt-16 pt-8 border-t border-gray-200/50 dark:border-gray-700/50">
           <div className="flex flex-col lg:flex-row justify-between items-center space-y-6 lg:space-y-0">
-            
+
             {/* Copyright */}
             <div className="flex items-center space-x-4">
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 © {currentYear} BesuScan. All rights reserved.
               </div>
-              <div className="hidden lg:flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-500">
+              {/* <div className="hidden lg:flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-500">
                 <span>Powered by</span>
                 <div className="flex items-center gap-1">
                   <div className="w-4 h-4 rounded bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
@@ -211,11 +211,11 @@ const Footer = () => {
                   </div>
                   <span className="font-medium">Hyperledger Besu</span>
                 </div>
-              </div>
+              </div> */}
             </div>
 
             {/* Donation Section */}
-            <div className="flex items-center space-x-4">
+            {/* <div className="flex items-center space-x-4">
               <div className="flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-pink-50 to-red-50 dark:from-pink-900/20 dark:to-red-900/20 rounded-lg border border-pink-200/50 dark:border-pink-700/50">
                 <Heart className="h-4 w-4 text-pink-500 animate-pulse" />
                 <div className="text-sm">
@@ -225,11 +225,11 @@ const Footer = () => {
                   </button>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Network Status */}
-          <div className="mt-6 flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-6 text-xs text-gray-500 dark:text-gray-500">
+          {/* <div className="mt-6 flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-6 text-xs text-gray-500 dark:text-gray-500">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
               <span>Network Status: Operational</span>
@@ -242,7 +242,7 @@ const Footer = () => {
               <TrendingUp className="h-3 w-3 text-green-500" />
               <span>Gas Price: 12 Gwei</span>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </footer>

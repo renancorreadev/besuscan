@@ -42,7 +42,7 @@ const Blocks = () => {
   const { toast } = useToast();
   const { toasts, addToast, removeToast } = useGlassToast();
 
-  // Polling para simular atualizações em tempo real
+  // Polling to simulate real-time updates
   const pollForNewBlocks = useCallback(async () => {
     if (!isPolling || currentPage !== 1) return;
 
@@ -51,18 +51,18 @@ const Blocks = () => {
       if (latestBlockResponse.success) {
         const newLatestBlock = latestBlockResponse.data.number;
 
-        // Se há um novo bloco
+        // If there's a new block
         if (lastBlockNumber && newLatestBlock > lastBlockNumber) {
           setLatestBlock(newLatestBlock);
 
-          // Buscar o novo bloco específico
+          // Fetch the specific new block
           const newBlockResponse = await apiService.getBlock(newLatestBlock.toString());
           if (newBlockResponse.success) {
             const newBlock = newBlockResponse.data;
 
-            // Adicionar novo bloco no topo da lista apenas se estivermos na primeira página
+            // Add new block to the top of the list only if we're on the first page
             setBlocks(prev => {
-              // Adicionar o novo bloco e remover o último para manter o tamanho
+              // Add the new block and remove the last one to maintain size
               const updatedBlocks = [newBlock, ...prev.slice(0, itemsPerPage - 1)];
               return updatedBlocks.map(block => ({
                 ...block,
@@ -70,10 +70,10 @@ const Blocks = () => {
               }));
             });
 
-            // Marcar como novo bloco para destacar
+            // Mark as new block for highlighting
             setNewBlockNumbers(prev => new Set(prev).add(newBlock.number));
 
-            // Remover destaque após 5 segundos
+            // Remove highlight after 5 seconds
             setTimeout(() => {
               setNewBlockNumbers(prev => {
                 const newSet = new Set(prev);
@@ -82,50 +82,50 @@ const Blocks = () => {
               });
             }, 5000);
 
-            // Recarregar estatísticas automaticamente
+            // Automatically reload statistics
             loadStats();
 
-            // Mostrar notificação
-            //const minerInfo = newBlock.miner ? ` por ${formatHash(newBlock.miner, 8)}` : '';
+            // Show notification
+            //const minerInfo = newBlock.miner ? ` by ${formatHash(newBlock.miner, 8)}` : '';
             // addToast({
-            //   title: "🎉 Novo Bloco Minerado!",
-            //   description: `Bloco #${newBlock.number.toLocaleString()} foi minerado${minerInfo} com ${newBlock.tx_count || 0} transações`,
+            //   title: "🎉 New Block Mined!",
+            //   description: `Block #${newBlock.number.toLocaleString()} was mined${minerInfo} with ${newBlock.tx_count || 0} transactions`,
             //   type: 'block',
             //   duration: 5000,
             // });
           }
         } else if (!lastBlockNumber) {
-          // Primeira verificação
+          // First check
           setLatestBlock(newLatestBlock);
         }
 
         setLastBlockNumber(newLatestBlock);
       }
     } catch (error) {
-      console.error('Erro no polling de novos blocos:', error);
+      console.error('Error polling for new blocks:', error);
     }
   }, [isPolling, currentPage, lastBlockNumber, itemsPerPage, addToast]);
 
-  // Reagir ao último bloco da store
+  // React to the latest block from store
   useEffect(() => {
     if (storeLatestBlock && storeLatestBlock.number !== lastBlockNumber) {
       pollForNewBlocks();
     }
   }, [storeLatestBlock?.number]);
 
-  // Usar stats da store quando disponível
+  // Use stats from store when available
   useEffect(() => {
     if (storeNetworkStats) {
       setStats(storeNetworkStats);
     }
   }, [storeNetworkStats]);
 
-  // Carregar dados iniciais via API REST
+  // Load initial data via REST API
   useEffect(() => {
     loadInitialData();
   }, [currentPage, itemsPerPage]);
 
-  // Função separada para carregar apenas as estatísticas
+  // Separate function to load only statistics
   const loadStats = async () => {
     try {
       setUpdating(true);
@@ -134,7 +134,7 @@ const Blocks = () => {
         setStats(statsResponse.data);
       }
     } catch (err) {
-      console.error('Erro ao carregar estatísticas:', err);
+      console.error('Error loading statistics:', err);
     } finally {
       setUpdating(false);
     }
@@ -145,7 +145,7 @@ const Blocks = () => {
       setLoading(true);
       setError(null);
 
-      // Carregar blocos, estatísticas e último bloco em paralelo
+      // Load blocks, statistics and latest block in parallel
       const [blocksResponse, statsResponse, latestBlockResponse] = await Promise.all([
         apiService.getBlocks({
           limit: itemsPerPage,
@@ -157,7 +157,7 @@ const Blocks = () => {
       ]);
 
       if (blocksResponse.success) {
-        // Adicionar campo 'age' calculado para cada bloco
+        // Add calculated 'age' field for each block
         const blocksWithAge = blocksResponse.data.map(block => ({
           ...block,
           age: formatTimeAgo(block.timestamp)
@@ -169,7 +169,7 @@ const Blocks = () => {
           setTotalPages(blocksResponse.pagination.total_pages);
           setTotalItems(blocksResponse.pagination.total);
         } else {
-          // Fallback: calcular paginação baseado no total de blocos das estatísticas
+          // Fallback: calculate pagination based on total blocks from statistics
           if (statsResponse.success && statsResponse.data.total_blocks) {
             const totalBlocks = statsResponse.data.total_blocks;
             const calculatedTotalPages = Math.ceil(totalBlocks / itemsPerPage);
@@ -178,7 +178,7 @@ const Blocks = () => {
           }
         }
       } else {
-        throw new Error('Falha ao carregar blocos');
+        throw new Error('Failed to load blocks');
       }
 
       if (statsResponse.success) {
@@ -192,11 +192,11 @@ const Blocks = () => {
       }
 
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido';
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       setError(errorMessage);
       toast({
-        title: "Erro",
-        description: `Falha ao carregar dados: ${errorMessage}`,
+        title: "Error",
+        description: `Failed to load data: ${errorMessage}`,
         variant: "destructive",
       });
     } finally {
@@ -207,8 +207,8 @@ const Blocks = () => {
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
-      title: "Copiado!",
-      description: "Endereço copiado para a área de transferência",
+      title: "Copied!",
+      description: "Address copied to clipboard",
       duration: 2000,
     });
   };
@@ -220,7 +220,7 @@ const Blocks = () => {
   };
 
   const calculateGasPercentage = (gasUsed: number | undefined | null, gasLimit: number | undefined | null): number => {
-    // Se gas_limit não estiver presente, assumir um valor padrão ou retornar 0
+    // If gas_limit is not present, assume a default value or return 0
     if (!gasUsed || !gasLimit || isNaN(gasUsed) || isNaN(gasLimit) || gasLimit === 0) {
       return 0;
     }
@@ -229,7 +229,7 @@ const Blocks = () => {
     return isNaN(percentage) ? 0 : percentage;
   };
 
-  // Calcular utilização média da rede baseada nos blocos atuais
+  // Calculate average network utilization based on current blocks
   const calculateNetworkUtilization = (): string => {
     if (blocks.length === 0) return 'N/A';
 
@@ -244,7 +244,7 @@ const Blocks = () => {
     return `${averageUtilization.toFixed(1)}%`;
   };
 
-  // Calcular TPS (Transações Por Segundo) estimado
+  // Calculate estimated TPS (Transactions Per Second)
   const calculateTPS = (): string => {
     if (blocks.length < 2) return '0.0';
 
@@ -256,11 +256,11 @@ const Blocks = () => {
     return tps.toFixed(1);
   };
 
-  // Calcular tempo médio de bloco baseado nos blocos atuais
+  // Calculate average block time based on current blocks
   const calculateAverageBlockTime = (): number => {
-    if (blocks.length < 2) return 12; // valor padrão
+    if (blocks.length < 2) return 12; // default value
 
-    // Calcular diferenças de tempo entre blocos consecutivos
+    // Calculate time differences between consecutive blocks
     const timeDiffs: number[] = [];
     for (let i = 0; i < blocks.length - 1; i++) {
       const currentBlock = blocks[i];
@@ -269,20 +269,20 @@ const Blocks = () => {
       const currentTime = new Date(currentBlock.timestamp).getTime();
       const nextTime = new Date(nextBlock.timestamp).getTime();
 
-      const diff = Math.abs(currentTime - nextTime) / 1000; // em segundos
-      if (diff > 0 && diff < 300) { // filtrar valores anômalos (menos de 5 min)
+      const diff = Math.abs(currentTime - nextTime) / 1000; // in seconds
+      if (diff > 0 && diff < 300) { // filter anomalous values (less than 5 min)
         timeDiffs.push(diff);
       }
     }
 
     if (timeDiffs.length === 0) return 12;
 
-    // Calcular média
+    // Calculate average
     const average = timeDiffs.reduce((sum, diff) => sum + diff, 0) / timeDiffs.length;
-    return Math.round(average * 10) / 10; // arredondar para 1 casa decimal
+    return Math.round(average * 10) / 10; // round to 1 decimal place
   };
 
-  // Obter tempo médio de bloco (da API ou calculado)
+  // Get average block time (from API or calculated)
   const getAverageBlockTime = (): number => {
     if (stats?.avg_block_time && !isNaN(stats.avg_block_time)) {
       return stats.avg_block_time;
@@ -290,24 +290,24 @@ const Blocks = () => {
     return calculateAverageBlockTime();
   };
 
-  // Função para mudar itens por página
+  // Function to change items per page
   const handleItemsPerPageChange = (newItemsPerPage: number) => {
     setItemsPerPage(newItemsPerPage);
-    setCurrentPage(1); // Voltar para primeira página
-    // Fazer fetch com novos parâmetros
+    setCurrentPage(1); // Go back to first page
+    // Fetch with new parameters
     loadInitialData();
   };
 
-  // Função para navegar para uma página específica
+  // Function to navigate to a specific page
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
-      // Fazer fetch da nova página
+      // Fetch the new page
       loadInitialData();
     }
   };
 
-  // Calcular informações de paginação
+  // Calculate pagination information
   const getPaginationInfo = () => {
     const startItem = (currentPage - 1) * itemsPerPage + 1;
     const endItem = Math.min(currentPage * itemsPerPage, totalItems);
@@ -322,7 +322,7 @@ const Blocks = () => {
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600 dark:text-gray-400">Carregando blocos...</p>
+              <p className="text-gray-600 dark:text-gray-400">Loading blocks...</p>
             </div>
           </div>
         </main>
@@ -338,9 +338,9 @@ const Blocks = () => {
         <main className="container mx-auto px-6 py-8 max-w-7xl">
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
-              <p className="text-red-600 dark:text-red-400 mb-4">Erro ao carregar dados</p>
+              <p className="text-red-600 dark:text-red-400 mb-4">Error loading data</p>
               <GlassButton onClick={loadInitialData} variant="primary">
-                Tentar Novamente
+                Try Again
               </GlassButton>
             </div>
           </div>
@@ -355,51 +355,51 @@ const Blocks = () => {
       <Header />
 
       <main className="container mx-auto px-6 py-8 max-w-7xl">
-        {/* Header com título e controles */}
+        {/* Header with title and controls */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Blocos da Blockchain
+              Blockchain Blocks
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Explore todos os blocos minerados na rede
+              Explore all blocks mined on the network
             </p>
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Status do sistema de atualização */}
+            {/* Update system status */}
             <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
               {isPolling ? (
                 <>
                   <Activity className={`h-4 w-4 text-green-500 ${updating ? 'animate-pulse' : ''}`} />
                   <span className="text-sm text-green-600 dark:text-green-400 font-medium">
-                    {updating ? 'Atualizando...' : 'Ativo'}
+                    {updating ? 'Updating...' : 'Active'}
                   </span>
                 </>
               ) : (
                 <>
                   <WifiOff className="h-4 w-4 text-red-500" />
-                  <span className="text-sm text-red-600 dark:text-red-400 font-medium">Pausado</span>
+                  <span className="text-sm text-red-600 dark:text-red-400 font-medium">Paused</span>
                 </>
               )}
             </div>
 
-            {/* Botão para pausar/retomar polling */}
+            {/* Button to pause/resume polling */}
             <GlassButton
               onClick={() => setIsPolling(!isPolling)}
               variant={isPolling ? "secondary" : "primary"}
               icon={isPolling ? WifiOff : Wifi}
             >
-              {isPolling ? 'Pausar' : 'Retomar'}
+              {isPolling ? 'Pause' : 'Resume'}
             </GlassButton>
 
-            {/* Botão de atualização manual */}
+            {/* Manual update button */}
             <GlassButton
               onClick={() => {
                 loadInitialData();
                 addToast({
-                  title: "🔄 Dados Atualizados",
-                  description: "Lista de blocos foi atualizada manualmente",
+                  title: "🔄 Data Updated",
+                  description: "Block list has been manually updated",
                   type: 'info',
                   duration: 2000,
                 });
@@ -408,15 +408,15 @@ const Blocks = () => {
               variant="primary"
               icon={Activity}
             >
-              Atualizar
+              Update
             </GlassButton>
 
-            {/* Botão de download */}
+            {/* Download button */}
             <GlassButton
               variant="success"
               icon={Download}
             >
-              Exportar
+              Export
             </GlassButton>
           </div>
         </div>
@@ -430,7 +430,7 @@ const Blocks = () => {
                   <Activity className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div className="text-gray-600 dark:text-gray-400 text-sm font-medium uppercase tracking-wide">
-                  Utilização da Rede
+                  Network Utilization
                 </div>
               </div>
               <div className="text-2xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
@@ -447,7 +447,7 @@ const Blocks = () => {
                   <Box className="h-5 w-5 text-green-600 dark:text-green-400" />
                 </div>
                 <div className="text-gray-600 dark:text-gray-400 text-sm font-medium uppercase tracking-wide">
-                  Último Bloco
+                  Latest Block
                 </div>
               </div>
               <div className="text-2xl font-bold text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
@@ -461,7 +461,7 @@ const Blocks = () => {
                   <Zap className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                 </div>
                 <div className="text-gray-600 dark:text-gray-400 text-sm font-medium uppercase tracking-wide">
-                  Tempo Médio de Bloco
+                  Average Block Time
                 </div>
               </div>
               <div className="text-2xl font-bold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
@@ -475,7 +475,7 @@ const Blocks = () => {
                   <span className="text-orange-600 dark:text-orange-400 text-lg">📊</span>
                 </div>
                 <div className="text-gray-600 dark:text-gray-400 text-sm font-medium uppercase tracking-wide">
-                  Total de Blocos
+                  Total Blocks
                 </div>
               </div>
               <div className="text-2xl font-bold text-gray-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
@@ -491,14 +491,14 @@ const Blocks = () => {
             <p className="font-medium">
               {totalItems > 0 ? (
                 <>
-                  Últimos blocos da rede Hyperledger Besu
+                  Latest blocks from Hyperledger Besu network
                 </>
               ) : (
-                'Carregando...'
+                'Loading...'
               )}
             </p>
             <p className="text-sm">
-              Atualizações automáticas a cada 5 segundos
+              Automatic updates every 5 seconds
             </p>
           </div>
 
@@ -510,7 +510,7 @@ const Blocks = () => {
               onClick={loadInitialData}
               loading={loading}
             >
-              {loading ? 'Carregando...' : 'Atualizar'}
+              {loading ? 'Loading...' : 'Update'}
             </GlassButton>
           </div>
         </div>
@@ -526,13 +526,13 @@ const Blocks = () => {
                       <div className="p-1 rounded bg-blue-100 dark:bg-blue-900/30">
                         <Box className="h-3 w-3 text-blue-600 dark:text-blue-400" />
                       </div>
-                      <span>Bloco</span>
+                      <span>Block</span>
                     </div>
                   </TableHead>
                   <TableHead className="text-gray-700 dark:text-gray-300 font-semibold py-4 px-6 w-[100px]">
                     <div className="flex items-center gap-2">
                       <Clock className="h-3 w-3 text-gray-500" />
-                      <span>Idade</span>
+                      <span>Age</span>
                     </div>
                   </TableHead>
                   <TableHead className="text-gray-700 dark:text-gray-300 font-semibold py-4 px-6 w-[60px]">
@@ -543,16 +543,16 @@ const Blocks = () => {
                   </TableHead>
                   <TableHead className="text-gray-700 dark:text-gray-300 font-semibold py-4 px-6 w-[160px]">
                     <div className="flex items-center gap-2">
-                      <span>Minerador</span>
+                      <span>Miner</span>
                     </div>
                   </TableHead>
                   <TableHead className="text-gray-700 dark:text-gray-300 font-semibold py-4 px-6 w-[140px]">
                     <div className="flex items-center gap-2">
                       <Zap className="h-3 w-3 text-gray-500" />
-                      <span>Gas Usado</span>
+                      <span>Gas Used</span>
                     </div>
                   </TableHead>
-                  <TableHead className="text-gray-700 dark:text-gray-300 font-semibold py-4 px-6 w-[100px]">Limite de Gas</TableHead>
+                  <TableHead className="text-gray-700 dark:text-gray-300 font-semibold py-4 px-6 w-[100px]">Gas Limit</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -615,7 +615,7 @@ const Blocks = () => {
                               </button>
                             </>
                           ) : (
-                            <span className="text-gray-400 text-sm italic">Carregando...</span>
+                            <span className="text-gray-400 text-sm italic">Loading...</span>
                           )}
                         </div>
                       </TableCell>

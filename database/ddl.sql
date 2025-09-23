@@ -19,6 +19,21 @@ CREATE SEQUENCE public.account_events_id_seq
 ALTER SEQUENCE public.account_events_id_seq OWNER TO explorer;
 GRANT ALL ON SEQUENCE public.account_events_id_seq TO explorer;
 
+-- DROP SEQUENCE public.account_events_id_seq1;
+
+CREATE SEQUENCE public.account_events_id_seq1
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+-- Permissions
+
+ALTER SEQUENCE public.account_events_id_seq1 OWNER TO explorer;
+GRANT ALL ON SEQUENCE public.account_events_id_seq1 TO explorer;
+
 -- DROP SEQUENCE public.account_method_stats_id_seq;
 
 CREATE SEQUENCE public.account_method_stats_id_seq
@@ -33,6 +48,21 @@ CREATE SEQUENCE public.account_method_stats_id_seq
 
 ALTER SEQUENCE public.account_method_stats_id_seq OWNER TO explorer;
 GRANT ALL ON SEQUENCE public.account_method_stats_id_seq TO explorer;
+
+-- DROP SEQUENCE public.account_method_stats_id_seq1;
+
+CREATE SEQUENCE public.account_method_stats_id_seq1
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+-- Permissions
+
+ALTER SEQUENCE public.account_method_stats_id_seq1 OWNER TO explorer;
+GRANT ALL ON SEQUENCE public.account_method_stats_id_seq1 TO explorer;
 
 -- DROP SEQUENCE public.account_transactions_id_seq;
 
@@ -49,6 +79,21 @@ CREATE SEQUENCE public.account_transactions_id_seq
 ALTER SEQUENCE public.account_transactions_id_seq OWNER TO explorer;
 GRANT ALL ON SEQUENCE public.account_transactions_id_seq TO explorer;
 
+-- DROP SEQUENCE public.account_transactions_id_seq1;
+
+CREATE SEQUENCE public.account_transactions_id_seq1
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+-- Permissions
+
+ALTER SEQUENCE public.account_transactions_id_seq1 OWNER TO explorer;
+GRANT ALL ON SEQUENCE public.account_transactions_id_seq1 TO explorer;
+
 -- DROP SEQUENCE public.contract_interactions_id_seq;
 
 CREATE SEQUENCE public.contract_interactions_id_seq
@@ -63,6 +108,21 @@ CREATE SEQUENCE public.contract_interactions_id_seq
 
 ALTER SEQUENCE public.contract_interactions_id_seq OWNER TO explorer;
 GRANT ALL ON SEQUENCE public.contract_interactions_id_seq TO explorer;
+
+-- DROP SEQUENCE public.contract_interactions_id_seq1;
+
+CREATE SEQUENCE public.contract_interactions_id_seq1
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+-- Permissions
+
+ALTER SEQUENCE public.contract_interactions_id_seq1 OWNER TO explorer;
+GRANT ALL ON SEQUENCE public.contract_interactions_id_seq1 TO explorer;
 
 -- DROP SEQUENCE public.smart_contract_daily_metrics_id_seq;
 
@@ -79,6 +139,21 @@ CREATE SEQUENCE public.smart_contract_daily_metrics_id_seq
 ALTER SEQUENCE public.smart_contract_daily_metrics_id_seq OWNER TO explorer;
 GRANT ALL ON SEQUENCE public.smart_contract_daily_metrics_id_seq TO explorer;
 
+-- DROP SEQUENCE public.smart_contract_daily_metrics_id_seq1;
+
+CREATE SEQUENCE public.smart_contract_daily_metrics_id_seq1
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 2147483647
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+-- Permissions
+
+ALTER SEQUENCE public.smart_contract_daily_metrics_id_seq1 OWNER TO explorer;
+GRANT ALL ON SEQUENCE public.smart_contract_daily_metrics_id_seq1 TO explorer;
+
 -- DROP SEQUENCE public.smart_contract_events_id_seq;
 
 CREATE SEQUENCE public.smart_contract_events_id_seq
@@ -93,6 +168,21 @@ CREATE SEQUENCE public.smart_contract_events_id_seq
 
 ALTER SEQUENCE public.smart_contract_events_id_seq OWNER TO explorer;
 GRANT ALL ON SEQUENCE public.smart_contract_events_id_seq TO explorer;
+
+-- DROP SEQUENCE public.smart_contract_events_id_seq1;
+
+CREATE SEQUENCE public.smart_contract_events_id_seq1
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 2147483647
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+-- Permissions
+
+ALTER SEQUENCE public.smart_contract_events_id_seq1 OWNER TO explorer;
+GRANT ALL ON SEQUENCE public.smart_contract_events_id_seq1 TO explorer;
 
 -- DROP SEQUENCE public.smart_contract_functions_id_seq;
 
@@ -109,6 +199,21 @@ CREATE SEQUENCE public.smart_contract_functions_id_seq
 ALTER SEQUENCE public.smart_contract_functions_id_seq OWNER TO explorer;
 GRANT ALL ON SEQUENCE public.smart_contract_functions_id_seq TO explorer;
 
+-- DROP SEQUENCE public.smart_contract_functions_id_seq1;
+
+CREATE SEQUENCE public.smart_contract_functions_id_seq1
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 2147483647
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+-- Permissions
+
+ALTER SEQUENCE public.smart_contract_functions_id_seq1 OWNER TO explorer;
+GRANT ALL ON SEQUENCE public.smart_contract_functions_id_seq1 TO explorer;
+
 -- DROP SEQUENCE public.transaction_methods_id_seq;
 
 CREATE SEQUENCE public.transaction_methods_id_seq
@@ -123,6 +228,51 @@ CREATE SEQUENCE public.transaction_methods_id_seq
 
 ALTER SEQUENCE public.transaction_methods_id_seq OWNER TO explorer;
 GRANT ALL ON SEQUENCE public.transaction_methods_id_seq TO explorer;
+
+-- DROP SEQUENCE public.transaction_methods_id_seq1;
+
+CREATE SEQUENCE public.transaction_methods_id_seq1
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+-- Permissions
+
+ALTER SEQUENCE public.transaction_methods_id_seq1 OWNER TO explorer;
+GRANT ALL ON SEQUENCE public.transaction_methods_id_seq1 TO explorer;
+
+-- DROP SEQUENCE public.user_sessions_id_seq;
+
+CREATE SEQUENCE public.user_sessions_id_seq
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 2147483647
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+-- Permissions
+
+ALTER SEQUENCE public.user_sessions_id_seq OWNER TO explorer;
+GRANT ALL ON SEQUENCE public.user_sessions_id_seq TO explorer;
+
+-- DROP SEQUENCE public.users_id_seq;
+
+CREATE SEQUENCE public.users_id_seq
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 2147483647
+	START 1
+	CACHE 1
+	NO CYCLE;
+
+-- Permissions
+
+ALTER SEQUENCE public.users_id_seq OWNER TO explorer;
+GRANT ALL ON SEQUENCE public.users_id_seq TO explorer;
 -- public.account_events definition
 
 -- Drop table
@@ -145,8 +295,8 @@ CREATE TABLE public.account_events (
 	decoded_data jsonb NULL, -- Dados do evento decodificados em formato JSON
 	"timestamp" timestamptz DEFAULT now() NOT NULL,
 	created_at timestamptz DEFAULT now() NOT NULL,
-	raw_data bytea NULL, -- Dados brutos do evento em hexadecimal
-	updated_at timestamptz DEFAULT now() NOT NULL, -- Data da última atualização do registro
+	raw_data bytea NULL, -- Dados brutos do evento em formato binário
+	updated_at timestamptz DEFAULT now() NOT NULL, -- Data e hora da última atualização do registro
 	CONSTRAINT account_events_pkey PRIMARY KEY (id),
 	CONSTRAINT unique_account_event UNIQUE (account_address, event_id)
 );
@@ -164,13 +314,17 @@ COMMENT ON TABLE public.account_events IS 'Tabela para tracking de eventos de sm
 COMMENT ON COLUMN public.account_events.involvement_type IS 'Tipo de envolvimento da conta no evento: emitter, participant, recipient';
 COMMENT ON COLUMN public.account_events.topics IS 'Topics do evento em formato JSON';
 COMMENT ON COLUMN public.account_events.decoded_data IS 'Dados do evento decodificados em formato JSON';
-COMMENT ON COLUMN public.account_events.raw_data IS 'Dados brutos do evento em hexadecimal';
-COMMENT ON COLUMN public.account_events.updated_at IS 'Data da última atualização do registro';
+COMMENT ON COLUMN public.account_events.raw_data IS 'Dados brutos do evento em formato binário';
+COMMENT ON COLUMN public.account_events.updated_at IS 'Data e hora da última atualização do registro';
+
+-- Constraint comments
+
+COMMENT ON CONSTRAINT unique_account_event ON public.account_events IS 'Garante que cada evento é único por conta';
 
 -- Permissions
 
 ALTER TABLE public.account_events OWNER TO explorer;
-GRANT ALL ON TABLE public.account_events TO explorer;
+GRANT DELETE, INSERT, REFERENCES, TRIGGER, UPDATE, SELECT, TRUNCATE ON TABLE public.account_events TO explorer;
 
 
 -- public.account_method_stats definition
@@ -220,7 +374,7 @@ COMMENT ON COLUMN public.account_method_stats.created_at IS 'Data de criação d
 -- Permissions
 
 ALTER TABLE public.account_method_stats OWNER TO explorer;
-GRANT ALL ON TABLE public.account_method_stats TO explorer;
+GRANT DELETE, INSERT, REFERENCES, TRIGGER, UPDATE, SELECT, TRUNCATE ON TABLE public.account_method_stats TO explorer;
 
 
 -- public.account_transactions definition
@@ -274,7 +428,7 @@ COMMENT ON COLUMN public.account_transactions.decoded_input IS 'Input da transa�
 -- Permissions
 
 ALTER TABLE public.account_transactions OWNER TO explorer;
-GRANT ALL ON TABLE public.account_transactions TO explorer;
+GRANT DELETE, INSERT, REFERENCES, TRIGGER, UPDATE, SELECT, TRUNCATE ON TABLE public.account_transactions TO explorer;
 
 
 -- public.accounts definition
@@ -342,17 +496,10 @@ COMMENT ON COLUMN public.accounts.risk_score IS 'Score de risco (0-10)';
 COMMENT ON COLUMN public.accounts.compliance_status IS 'Status de compliance';
 COMMENT ON COLUMN public.accounts.compliance_notes IS 'Notas de compliance';
 
--- Table Triggers
-
-create trigger update_accounts_updated_at before
-update
-    on
-    public.accounts for each row execute function update_updated_at_column();
-
 -- Permissions
 
 ALTER TABLE public.accounts OWNER TO explorer;
-GRANT ALL ON TABLE public.accounts TO explorer;
+GRANT DELETE, INSERT, REFERENCES, TRIGGER, UPDATE, SELECT, TRUNCATE ON TABLE public.accounts TO explorer;
 
 
 -- public.blocks definition
@@ -426,7 +573,7 @@ COMMENT ON COLUMN public.blocks.tx_hash IS 'Hash da árvore Merkle das transaç�
 -- Permissions
 
 ALTER TABLE public.blocks OWNER TO explorer;
-GRANT ALL ON TABLE public.blocks TO explorer;
+GRANT DELETE, INSERT, REFERENCES, TRIGGER, UPDATE, SELECT, TRUNCATE ON TABLE public.blocks TO explorer;
 
 
 -- public.events definition
@@ -476,17 +623,10 @@ CREATE INDEX idx_events_topics_gin ON public.events USING gin (topics);
 CREATE INDEX idx_events_transaction_hash ON public.events USING btree (transaction_hash);
 CREATE INDEX idx_events_tx_hash ON public.events USING btree (transaction_hash);
 
--- Table Triggers
-
-create trigger trigger_events_updated_at before
-update
-    on
-    public.events for each row execute function update_events_updated_at();
-
 -- Permissions
 
 ALTER TABLE public.events OWNER TO explorer;
-GRANT ALL ON TABLE public.events TO explorer;
+GRANT DELETE, INSERT, REFERENCES, TRIGGER, UPDATE, SELECT, TRUNCATE ON TABLE public.events TO explorer;
 
 
 -- public.smart_contracts definition
@@ -562,17 +702,10 @@ COMMENT ON COLUMN public.smart_contracts.total_value_transferred IS 'Valor total
 COMMENT ON COLUMN public.smart_contracts.is_proxy IS 'Indica se o contrato é um proxy (EIP-1967, etc.)';
 COMMENT ON COLUMN public.smart_contracts.proxy_implementation IS 'Endereço da implementação se for um proxy';
 
--- Table Triggers
-
-create trigger update_smart_contracts_updated_at before
-update
-    on
-    public.smart_contracts for each row execute function update_updated_at_column();
-
 -- Permissions
 
 ALTER TABLE public.smart_contracts OWNER TO explorer;
-GRANT ALL ON TABLE public.smart_contracts TO explorer;
+GRANT DELETE, INSERT, REFERENCES, TRIGGER, UPDATE, SELECT, TRUNCATE ON TABLE public.smart_contracts TO explorer;
 
 
 -- public.transactions definition
@@ -654,7 +787,44 @@ COMMENT ON COLUMN public.transactions.mined_at IS 'Timestamp de quando a transa�
 -- Permissions
 
 ALTER TABLE public.transactions OWNER TO explorer;
-GRANT ALL ON TABLE public.transactions TO explorer;
+GRANT DELETE, INSERT, REFERENCES, TRIGGER, UPDATE, SELECT, TRUNCATE ON TABLE public.transactions TO explorer;
+
+
+-- public.users definition
+
+-- Drop table
+
+-- DROP TABLE public.users;
+
+CREATE TABLE public.users (
+	id serial4 NOT NULL,
+	username varchar(50) NOT NULL,
+	email varchar(255) NOT NULL,
+	password_hash varchar(255) NOT NULL,
+	is_active bool DEFAULT true NULL,
+	is_admin bool DEFAULT false NULL,
+	last_login timestamp NULL,
+	created_at timestamp DEFAULT CURRENT_TIMESTAMP NULL,
+	updated_at timestamp DEFAULT CURRENT_TIMESTAMP NULL,
+	CONSTRAINT users_email_key UNIQUE (email),
+	CONSTRAINT users_pkey PRIMARY KEY (id),
+	CONSTRAINT users_username_key UNIQUE (username)
+);
+CREATE INDEX idx_users_email ON public.users USING btree (email);
+CREATE INDEX idx_users_is_active ON public.users USING btree (is_active);
+CREATE INDEX idx_users_username ON public.users USING btree (username);
+
+-- Table Triggers
+
+create trigger update_users_updated_at before
+update
+    on
+    public.users for each row execute function update_updated_at_column();
+
+-- Permissions
+
+ALTER TABLE public.users OWNER TO explorer;
+GRANT ALL ON TABLE public.users TO explorer;
 
 
 -- public.validators definition
@@ -682,17 +852,10 @@ CREATE INDEX idx_validators_last_seen ON public.validators USING btree (last_see
 CREATE INDEX idx_validators_status ON public.validators USING btree (status);
 CREATE INDEX idx_validators_uptime ON public.validators USING btree (uptime DESC);
 
--- Table Triggers
-
-create trigger update_validators_updated_at_trigger before
-update
-    on
-    public.validators for each row execute function update_validators_updated_at();
-
 -- Permissions
 
 ALTER TABLE public.validators OWNER TO explorer;
-GRANT ALL ON TABLE public.validators TO explorer;
+GRANT DELETE, INSERT, REFERENCES, TRIGGER, UPDATE, SELECT, TRUNCATE ON TABLE public.validators TO explorer;
 
 
 -- public.account_analytics definition
@@ -722,17 +885,10 @@ CREATE INDEX idx_account_analytics_transactions_count ON public.account_analytic
 CREATE INDEX idx_account_analytics_value_transferred ON public.account_analytics USING btree (value_transferred);
 COMMENT ON TABLE public.account_analytics IS 'Métricas analíticas diárias das contas';
 
--- Table Triggers
-
-create trigger update_account_analytics_updated_at before
-update
-    on
-    public.account_analytics for each row execute function update_updated_at_column();
-
 -- Permissions
 
 ALTER TABLE public.account_analytics OWNER TO explorer;
-GRANT ALL ON TABLE public.account_analytics TO explorer;
+GRANT DELETE, INSERT, REFERENCES, TRIGGER, UPDATE, SELECT, TRUNCATE ON TABLE public.account_analytics TO explorer;
 
 
 -- public.account_tags definition
@@ -756,7 +912,7 @@ COMMENT ON TABLE public.account_tags IS 'Tags associadas às contas';
 -- Permissions
 
 ALTER TABLE public.account_tags OWNER TO explorer;
-GRANT ALL ON TABLE public.account_tags TO explorer;
+GRANT DELETE, INSERT, REFERENCES, TRIGGER, UPDATE, SELECT, TRUNCATE ON TABLE public.account_tags TO explorer;
 
 
 -- public.contract_interactions definition
@@ -788,17 +944,10 @@ CREATE INDEX idx_contract_interactions_last_interaction ON public.contract_inter
 CREATE INDEX idx_contract_interactions_method ON public.contract_interactions USING btree (method);
 COMMENT ON TABLE public.contract_interactions IS 'Interações das contas com contratos';
 
--- Table Triggers
-
-create trigger update_contract_interactions_updated_at before
-update
-    on
-    public.contract_interactions for each row execute function update_updated_at_column();
-
 -- Permissions
 
 ALTER TABLE public.contract_interactions OWNER TO explorer;
-GRANT ALL ON TABLE public.contract_interactions TO explorer;
+GRANT DELETE, INSERT, REFERENCES, TRIGGER, UPDATE, SELECT, TRUNCATE ON TABLE public.contract_interactions TO explorer;
 
 
 -- public.smart_contract_daily_metrics definition
@@ -831,7 +980,7 @@ COMMENT ON TABLE public.smart_contract_daily_metrics IS 'Métricas diárias agre
 -- Permissions
 
 ALTER TABLE public.smart_contract_daily_metrics OWNER TO explorer;
-GRANT ALL ON TABLE public.smart_contract_daily_metrics TO explorer;
+GRANT DELETE, INSERT, REFERENCES, TRIGGER, UPDATE, SELECT, TRUNCATE ON TABLE public.smart_contract_daily_metrics TO explorer;
 
 
 -- public.smart_contract_events definition
@@ -860,17 +1009,10 @@ CREATE INDEX idx_contract_events_name ON public.smart_contract_events USING btre
 CREATE INDEX idx_contract_events_signature ON public.smart_contract_events USING btree (event_signature);
 COMMENT ON TABLE public.smart_contract_events IS 'Eventos definidos em cada smart contract (parsed do ABI)';
 
--- Table Triggers
-
-create trigger update_contract_events_updated_at before
-update
-    on
-    public.smart_contract_events for each row execute function update_updated_at_column();
-
 -- Permissions
 
 ALTER TABLE public.smart_contract_events OWNER TO explorer;
-GRANT ALL ON TABLE public.smart_contract_events TO explorer;
+GRANT DELETE, INSERT, REFERENCES, TRIGGER, UPDATE, SELECT, TRUNCATE ON TABLE public.smart_contract_events TO explorer;
 
 
 -- public.smart_contract_functions definition
@@ -902,17 +1044,10 @@ CREATE INDEX idx_contract_functions_signature ON public.smart_contract_functions
 CREATE INDEX idx_contract_functions_type ON public.smart_contract_functions USING btree (function_type);
 COMMENT ON TABLE public.smart_contract_functions IS 'Funções disponíveis em cada smart contract (parsed do ABI)';
 
--- Table Triggers
-
-create trigger update_contract_functions_updated_at before
-update
-    on
-    public.smart_contract_functions for each row execute function update_updated_at_column();
-
 -- Permissions
 
 ALTER TABLE public.smart_contract_functions OWNER TO explorer;
-GRANT ALL ON TABLE public.smart_contract_functions TO explorer;
+GRANT DELETE, INSERT, REFERENCES, TRIGGER, UPDATE, SELECT, TRUNCATE ON TABLE public.smart_contract_functions TO explorer;
 
 
 -- public.token_holdings definition
@@ -942,17 +1077,10 @@ CREATE INDEX idx_token_holdings_token_symbol ON public.token_holdings USING btre
 CREATE INDEX idx_token_holdings_value_usd ON public.token_holdings USING btree (value_usd);
 COMMENT ON TABLE public.token_holdings IS 'Holdings de tokens das contas';
 
--- Table Triggers
-
-create trigger update_token_holdings_updated_at before
-update
-    on
-    public.token_holdings for each row execute function update_updated_at_column();
-
 -- Permissions
 
 ALTER TABLE public.token_holdings OWNER TO explorer;
-GRANT ALL ON TABLE public.token_holdings TO explorer;
+GRANT DELETE, INSERT, REFERENCES, TRIGGER, UPDATE, SELECT, TRUNCATE ON TABLE public.token_holdings TO explorer;
 
 
 -- public.transaction_methods definition
@@ -993,76 +1121,35 @@ COMMENT ON COLUMN public.transaction_methods.decoded_params IS 'Parâmetros deco
 -- Permissions
 
 ALTER TABLE public.transaction_methods OWNER TO explorer;
-GRANT ALL ON TABLE public.transaction_methods TO explorer;
+GRANT DELETE, INSERT, REFERENCES, TRIGGER, UPDATE, SELECT, TRUNCATE ON TABLE public.transaction_methods TO explorer;
 
 
--- public.pg_stat_statements source
+-- public.user_sessions definition
 
-CREATE OR REPLACE VIEW public.pg_stat_statements
-AS SELECT pg_stat_statements.userid,
-    pg_stat_statements.dbid,
-    pg_stat_statements.toplevel,
-    pg_stat_statements.queryid,
-    pg_stat_statements.query,
-    pg_stat_statements.plans,
-    pg_stat_statements.total_plan_time,
-    pg_stat_statements.min_plan_time,
-    pg_stat_statements.max_plan_time,
-    pg_stat_statements.mean_plan_time,
-    pg_stat_statements.stddev_plan_time,
-    pg_stat_statements.calls,
-    pg_stat_statements.total_exec_time,
-    pg_stat_statements.min_exec_time,
-    pg_stat_statements.max_exec_time,
-    pg_stat_statements.mean_exec_time,
-    pg_stat_statements.stddev_exec_time,
-    pg_stat_statements.rows,
-    pg_stat_statements.shared_blks_hit,
-    pg_stat_statements.shared_blks_read,
-    pg_stat_statements.shared_blks_dirtied,
-    pg_stat_statements.shared_blks_written,
-    pg_stat_statements.local_blks_hit,
-    pg_stat_statements.local_blks_read,
-    pg_stat_statements.local_blks_dirtied,
-    pg_stat_statements.local_blks_written,
-    pg_stat_statements.temp_blks_read,
-    pg_stat_statements.temp_blks_written,
-    pg_stat_statements.blk_read_time,
-    pg_stat_statements.blk_write_time,
-    pg_stat_statements.temp_blk_read_time,
-    pg_stat_statements.temp_blk_write_time,
-    pg_stat_statements.wal_records,
-    pg_stat_statements.wal_fpi,
-    pg_stat_statements.wal_bytes,
-    pg_stat_statements.jit_functions,
-    pg_stat_statements.jit_generation_time,
-    pg_stat_statements.jit_inlining_count,
-    pg_stat_statements.jit_inlining_time,
-    pg_stat_statements.jit_optimization_count,
-    pg_stat_statements.jit_optimization_time,
-    pg_stat_statements.jit_emission_count,
-    pg_stat_statements.jit_emission_time
-   FROM pg_stat_statements(true) pg_stat_statements(userid, dbid, toplevel, queryid, query, plans, total_plan_time, min_plan_time, max_plan_time, mean_plan_time, stddev_plan_time, calls, total_exec_time, min_exec_time, max_exec_time, mean_exec_time, stddev_exec_time, rows, shared_blks_hit, shared_blks_read, shared_blks_dirtied, shared_blks_written, local_blks_hit, local_blks_read, local_blks_dirtied, local_blks_written, temp_blks_read, temp_blks_written, blk_read_time, blk_write_time, temp_blk_read_time, temp_blk_write_time, wal_records, wal_fpi, wal_bytes, jit_functions, jit_generation_time, jit_inlining_count, jit_inlining_time, jit_optimization_count, jit_optimization_time, jit_emission_count, jit_emission_time);
+-- Drop table
+
+-- DROP TABLE public.user_sessions;
+
+CREATE TABLE public.user_sessions (
+	id serial4 NOT NULL,
+	user_id int4 NOT NULL,
+	"token" varchar(500) NOT NULL,
+	expires_at timestamp NOT NULL,
+	created_at timestamp DEFAULT CURRENT_TIMESTAMP NULL,
+	is_active bool DEFAULT true NULL,
+	CONSTRAINT user_sessions_pkey PRIMARY KEY (id),
+	CONSTRAINT user_sessions_token_key UNIQUE (token),
+	CONSTRAINT user_sessions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE
+);
+CREATE INDEX idx_user_sessions_expires_at ON public.user_sessions USING btree (expires_at);
+CREATE INDEX idx_user_sessions_is_active ON public.user_sessions USING btree (is_active);
+CREATE INDEX idx_user_sessions_token ON public.user_sessions USING btree (token);
+CREATE INDEX idx_user_sessions_user_id ON public.user_sessions USING btree (user_id);
 
 -- Permissions
 
-ALTER TABLE public.pg_stat_statements OWNER TO explorer;
-GRANT ALL ON TABLE public.pg_stat_statements TO explorer;
-GRANT SELECT ON TABLE public.pg_stat_statements TO public;
-
-
--- public.pg_stat_statements_info source
-
-CREATE OR REPLACE VIEW public.pg_stat_statements_info
-AS SELECT pg_stat_statements_info.dealloc,
-    pg_stat_statements_info.stats_reset
-   FROM pg_stat_statements_info() pg_stat_statements_info(dealloc, stats_reset);
-
--- Permissions
-
-ALTER TABLE public.pg_stat_statements_info OWNER TO explorer;
-GRANT ALL ON TABLE public.pg_stat_statements_info TO explorer;
-GRANT SELECT ON TABLE public.pg_stat_statements_info TO public;
+ALTER TABLE public.user_sessions OWNER TO explorer;
+GRANT ALL ON TABLE public.user_sessions TO explorer;
 
 
 
@@ -1078,6 +1165,7 @@ AS '$libdir/pg_stat_statements', $function$pg_stat_statements_1_10$function$
 -- Permissions
 
 ALTER FUNCTION public.pg_stat_statements(in bool, out oid, out oid, out bool, out int8, out text, out int8, out float8, out float8, out float8, out float8, out float8, out int8, out float8, out float8, out float8, out float8, out float8, out int8, out int8, out int8, out int8, out int8, out int8, out int8, out int8, out int8, out int8, out int8, out float8, out float8, out float8, out float8, out int8, out int8, out numeric, out int8, out float8, out int8, out float8, out int8, out float8, out int8, out float8) OWNER TO explorer;
+GRANT ALL ON FUNCTION public.pg_stat_statements(in bool, out oid, out oid, out bool, out int8, out text, out int8, out float8, out float8, out float8, out float8, out float8, out int8, out float8, out float8, out float8, out float8, out float8, out int8, out int8, out int8, out int8, out int8, out int8, out int8, out int8, out int8, out int8, out int8, out float8, out float8, out float8, out float8, out int8, out int8, out numeric, out int8, out float8, out int8, out float8, out int8, out float8, out int8, out float8) TO public;
 GRANT ALL ON FUNCTION public.pg_stat_statements(in bool, out oid, out oid, out bool, out int8, out text, out int8, out float8, out float8, out float8, out float8, out float8, out int8, out float8, out float8, out float8, out float8, out float8, out int8, out int8, out int8, out int8, out int8, out int8, out int8, out int8, out int8, out int8, out int8, out float8, out float8, out float8, out float8, out int8, out int8, out numeric, out int8, out float8, out int8, out float8, out int8, out float8, out int8, out float8) TO explorer;
 
 -- DROP FUNCTION public.pg_stat_statements_info(out int8, out timestamptz);
@@ -1092,6 +1180,7 @@ AS '$libdir/pg_stat_statements', $function$pg_stat_statements_info$function$
 -- Permissions
 
 ALTER FUNCTION public.pg_stat_statements_info(out int8, out timestamptz) OWNER TO explorer;
+GRANT ALL ON FUNCTION public.pg_stat_statements_info(out int8, out timestamptz) TO public;
 GRANT ALL ON FUNCTION public.pg_stat_statements_info(out int8, out timestamptz) TO explorer;
 
 -- DROP FUNCTION public.pg_stat_statements_reset(oid, oid, int8);
@@ -1106,6 +1195,7 @@ AS '$libdir/pg_stat_statements', $function$pg_stat_statements_reset_1_7$function
 -- Permissions
 
 ALTER FUNCTION public.pg_stat_statements_reset(oid, oid, int8) OWNER TO explorer;
+GRANT ALL ON FUNCTION public.pg_stat_statements_reset(oid, oid, int8) TO public;
 GRANT ALL ON FUNCTION public.pg_stat_statements_reset(oid, oid, int8) TO explorer;
 
 -- DROP FUNCTION public.update_events_updated_at();
@@ -1124,6 +1214,7 @@ $function$
 -- Permissions
 
 ALTER FUNCTION public.update_events_updated_at() OWNER TO explorer;
+GRANT ALL ON FUNCTION public.update_events_updated_at() TO public;
 GRANT ALL ON FUNCTION public.update_events_updated_at() TO explorer;
 
 -- DROP FUNCTION public.update_updated_at_column();
@@ -1133,7 +1224,7 @@ CREATE OR REPLACE FUNCTION public.update_updated_at_column()
  LANGUAGE plpgsql
 AS $function$
 BEGIN
-    NEW.updated_at = NOW();
+    NEW.updated_at = CURRENT_TIMESTAMP;
     RETURN NEW;
 END;
 $function$
@@ -1142,6 +1233,7 @@ $function$
 -- Permissions
 
 ALTER FUNCTION public.update_updated_at_column() OWNER TO explorer;
+GRANT ALL ON FUNCTION public.update_updated_at_column() TO public;
 GRANT ALL ON FUNCTION public.update_updated_at_column() TO explorer;
 
 -- DROP FUNCTION public.update_validators_updated_at();
@@ -1155,6 +1247,7 @@ AS $function$ BEGIN NEW.updated_at = CURRENT_TIMESTAMP; RETURN NEW; END; $functi
 -- Permissions
 
 ALTER FUNCTION public.update_validators_updated_at() OWNER TO explorer;
+GRANT ALL ON FUNCTION public.update_validators_updated_at() TO public;
 GRANT ALL ON FUNCTION public.update_validators_updated_at() TO explorer;
 
 

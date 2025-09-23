@@ -3,14 +3,15 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Search, Menu, Moon, Sun, Globe, ChevronDown, X, Home, Blocks, ArrowUpRight, Zap, Users, Activity, Eye, Hash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { CacheIndicator } from '@/components/ui/cache-indicator';
 import { CompactConnectButton } from '@/components/ui/connect-button';
+import { AuthButton } from '@/components/auth/AuthButton';
 
 import { API_BASE_URL } from '@/services/api';
 
@@ -18,7 +19,7 @@ import { API_BASE_URL } from '@/services/api';
 
 const Header = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  // Modo escuro removido - apenas modo claro
   const [selectedNetwork, setSelectedNetwork] = useState('MainNet');
   const [selectedLanguage, setSelectedLanguage] = useState('EN');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -30,7 +31,7 @@ const Header = () => {
     const updateCurrentPath = () => {
       const newPath = window.location.pathname;
       setCurrentPath(newPath);
-   
+
     };
 
     // Atualizar no carregamento inicial
@@ -39,10 +40,10 @@ const Header = () => {
     // Escutar mudanças de rota
     window.addEventListener('popstate', updateCurrentPath);
     window.addEventListener('hashchange', updateCurrentPath);
-    
+
     // Verificar periodicamente para SPAs (React Router)
     const interval = setInterval(updateCurrentPath, 100);
-    
+
     // Observar mudanças no DOM para SPAs
     const observer = new MutationObserver(updateCurrentPath);
     observer.observe(document.body, { childList: true, subtree: true });
@@ -60,24 +61,24 @@ const Header = () => {
     if (path === '/') {
       return currentPath === '/' || currentPath === '';
     }
-    
+
     // Casos especiais para rotas dinâmicas
     if (path === '/blocks') {
       return currentPath.startsWith('/block') || currentPath.startsWith('/blocks/');
     }
-    
+
     if (path === '/transactions') {
       return currentPath.startsWith('/transactions') || currentPath.startsWith('/tx/');
     }
-    
+
     if (path === '/accounts') {
       return currentPath.startsWith('/accounts') || currentPath.startsWith('/account/');
     }
-    
+
     if (path === '/events') {
       return currentPath.startsWith('/events') || currentPath.startsWith('/event/');
     }
-    
+
     return currentPath.startsWith(path);
   };
 
@@ -86,7 +87,7 @@ const Header = () => {
     const baseClasses = "text-sm font-medium transition-colors duration-300 relative group py-2";
     const activeClasses = "text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300";
     const inactiveClasses = "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400";
-    
+
     return `${baseClasses} ${isActiveRoute(path) ? activeClasses : inactiveClasses}`;
   };
 
@@ -98,42 +99,12 @@ const Header = () => {
     return "absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 group-hover:w-full transition-all duration-300";
   };
 
-  // Initialize theme on component mount
+  // Forçar modo claro
   useEffect(() => {
-    // Check localStorage first, then system preference
-    const savedTheme = localStorage.getItem('theme');
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    const shouldUseDarkMode = savedTheme === 'dark' || (!savedTheme && systemPrefersDark);
-    
-    setIsDarkMode(shouldUseDarkMode);
     const htmlElement = document.documentElement;
-    
-    if (shouldUseDarkMode) {
-      htmlElement.classList.remove('light');
-      htmlElement.classList.add('dark');
-    } else {
-      htmlElement.classList.add('light');
-      htmlElement.classList.remove('dark');
-    }
+    htmlElement.classList.remove('dark');
+    htmlElement.classList.add('light');
   }, []);
-
-  const toggleTheme = () => {
-    const htmlElement = document.documentElement;
-    const newDarkMode = !isDarkMode;
-    
-    setIsDarkMode(newDarkMode);
-    
-    if (newDarkMode) {
-      htmlElement.classList.remove('light');
-      htmlElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      htmlElement.classList.add('light');
-      htmlElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  };
 
   const isSmartContract = async (address: string): Promise<boolean> => {
     try {
@@ -149,12 +120,12 @@ const Header = () => {
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!searchQuery.trim()) return;
-    
+
     setIsSearching(true);
     const searchValue = searchQuery.trim();
-    
+
     try {
       // Detectar tipo de busca e redirecionar para página específica
       if (searchValue.startsWith('0x') && searchValue.length === 66) {
@@ -210,14 +181,11 @@ const Header = () => {
             {/* Logo section - make it smaller on mobile */}
             <div className="flex items-center space-x-4">
               <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity duration-200">
-                <img 
-                  src="/Logo.png" 
-                  alt="BesuScan" 
-                  className="w-[60px] h-[60px] md:w-[80px] md:h-[80px] rounded-xl object-contain flex-shrink-0" 
+                <img
+                  src="/Logo.png"
+                  alt="BesuScan"
+                  className="w-[100%] h-[80px] rounded-xl object-contain flex-shrink-0 p-4"
                 />
-                <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  BesuScan
-                </span>
               </Link>
             </div>
 
@@ -294,19 +262,12 @@ const Header = () => {
                 </DropdownMenu>
               </div> */}
 
-              {/* Theme Toggle - Keep on mobile */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleTheme}
-                className="h-8 w-8 md:h-10 md:w-10 px-0 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 rounded-lg"
-              >
-                {isDarkMode ? (
-                  <Sun className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                ) : (
-                  <Moon className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                )}
-              </Button>
+              {/* Theme toggle removido - apenas modo claro */}
+
+              {/* Auth Button */}
+              <div className="hidden md:block">
+                <AuthButton />
+              </div>
 
               {/* Connect Wallet - Hide on mobile */}
               <div className="hidden md:block">
@@ -314,9 +275,9 @@ const Header = () => {
               </div>
 
               {/* Mobile Menu Button */}
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={toggleMobileMenu}
                 className="md:hidden h-8 w-8 px-0 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
               >
@@ -331,64 +292,64 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8 py-4 border-t border-gray-100 dark:border-gray-800">
-            <a 
-              href="/" 
+            <a
+              href="/"
               className={getNavItemClasses('/')}
             >
               Home
               <div className={getIndicatorClasses('/')}></div>
             </a>
-            <a 
-              href="/blocks" 
+            <a
+              href="/blocks"
               className={getNavItemClasses('/blocks')}
             >
               Blocks
               <div className={getIndicatorClasses('/blocks')}></div>
             </a>
-            <a 
-              href="/transactions" 
+            <a
+              href="/transactions"
               className={getNavItemClasses('/transactions')}
             >
               Transactions
               <div className={getIndicatorClasses('/transactions')}></div>
             </a>
-            <a 
-              href="/accounts" 
+            <a
+              href="/accounts"
               className={getNavItemClasses('/accounts')}
             >
               Accounts
               <div className={getIndicatorClasses('/accounts')}></div>
             </a>
-            <a 
-              href="/validators" 
+            <a
+              href="/validators"
               className={getNavItemClasses('/validators')}
             >
               Validators
               <div className={getIndicatorClasses('/validators')}></div>
             </a>
-            <a 
-              href="/events" 
+            <a
+              href="/events"
               className={getNavItemClasses('/events')}
             >
               Events
               <div className={getIndicatorClasses('/events')}></div>
             </a>
-            <a 
-              href="/contracts" 
+            <a
+              href="/contracts"
               className={getNavItemClasses('/contracts')}
             >
               Smart Contracts
               <div className={getIndicatorClasses('/contracts')}></div>
             </a>
-            {/* <a 
-              href="/apis" 
+            {/* <a
+              href="/apis"
               className={getNavItemClasses('/apis')}
             >
               APIs
               <div className={getIndicatorClasses('/apis')}></div>
             </a>
-            <a 
-              href="/charts" 
+            <a
+              href="/charts"
               className={getNavItemClasses('/charts')}
             >
               Charts & Stats
@@ -401,7 +362,7 @@ const Header = () => {
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 bg-black/50 z-50 md:hidden" onClick={toggleMobileMenu}>
-          <div 
+          <div
             className="fixed inset-y-0 right-0 w-64 bg-white dark:bg-gray-900 shadow-xl p-6"
             onClick={e => e.stopPropagation()}
           >
@@ -508,7 +469,10 @@ const Header = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <CompactConnectButton className="w-full" />
+              <div className="space-y-2">
+                <AuthButton />
+                <CompactConnectButton className="w-full" />
+              </div>
             </div>
           </div>
         </div>

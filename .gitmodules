@@ -22,3 +22,6 @@
 [submodule "apps/besucli/templates/smart-contracts/AA/AAManagment/lib/account-abstraction"]
 	path = apps/besucli/templates/smart-contracts/AA/AAManagment/lib/account-abstraction
 	url = https://github.com/eth-infinitism/account-abstraction
+[submodule "apps/besucli/templates/smart-contracts/Receivables/ChippedReceivablesProtocol/lib/openzeppelin-contracts"]
+	path = apps/besucli/templates/smart-contracts/Receivables/ChippedReceivablesProtocol/lib/openzeppelin-contracts
+	url = https://github.com/openzeppelin/openzeppelin-contracts

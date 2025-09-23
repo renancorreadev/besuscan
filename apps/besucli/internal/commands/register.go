@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math/big"
 	"net/http"
 	"os"
 	"strings"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 
@@ -25,12 +27,20 @@ import (
 // ContractRegisterConfig representa a configuração para registro de contratos já deployados
 type ContractRegisterConfig struct {
 	Contract struct {
-		Address     string `yaml:"address"`     // Endereço do contrato já deployado
+		Address     string `yaml:"address"` // Endereço do contrato já deployado
 		Name        string `yaml:"name"`
 		Symbol      string `yaml:"symbol"`
 		Description string `yaml:"description"`
 		Type        string `yaml:"type"`
 	} `yaml:"contract"`
+
+	Deployment struct {
+		TxHash         string `yaml:"tx_hash,omitempty"`         // Hash da transação de deploy (opcional)
+		CreatorAddress string `yaml:"creator_address,omitempty"` // Endereço do criador (opcional)
+		BlockNumber    int64  `yaml:"block_number,omitempty"`    // Número do bloco (opcional)
+		GasUsed        int64  `yaml:"gas_used,omitempty"`        // Gas usado (opcional)
+		Timestamp      string `yaml:"timestamp,omitempty"`       // Timestamp (opcional)
+	} `yaml:"deployment,omitempty"`
 
 	Files struct {
 		Contract string `yaml:"contract,omitempty"`
@@ -225,7 +235,13 @@ func registerFromYAML(client *blockchain.Client, cfg *config.Config, configFile 
 	log.Section("🔍 Blockchain Verification")
 	log.Step(4, 5, "Verifying contract exists on blockchain...")
 
-	deploymentInfo, err := getContractDeploymentInfo(client, contractAddress)
+	deploymentInfo, err := getContractDeploymentInfo(client, contractAddress, &DeploymentInfo{
+		TxHash:         registerConfig.Deployment.TxHash,
+		CreatorAddress: registerConfig.Deployment.CreatorAddress,
+		BlockNumber:    registerConfig.Deployment.BlockNumber,
+		GasUsed:        registerConfig.Deployment.GasUsed,
+		Timestamp:      registerConfig.Deployment.Timestamp,
+	})
 	if err != nil {
 		log.Error("Failed to verify contract on blockchain", "error", err)
 		return fmt.Errorf("contract verification failed: %w", err)
@@ -446,7 +462,7 @@ func registerFromFlags(client *blockchain.Client, cfg *config.Config, address, c
 	// Verify contract exists on blockchain
 	log.Step(4, 5, "Verifying contract exists on blockchain...")
 
-	deploymentInfo, err := getContractDeploymentInfo(client, contractAddress)
+	deploymentInfo, err := getContractDeploymentInfo(client, contractAddress, nil)
 	if err != nil {
 		log.Error("Failed to verify contract on blockchain", "error", err)
 		return fmt.Errorf("contract verification failed: %w", err)
@@ -646,7 +662,7 @@ func validateFileExists(filePath, fileType string) error {
 	return nil
 }
 
-func getContractDeploymentInfo(client *blockchain.Client, contractAddress common.Address) (*models.DeploymentInfo, error) {
+func getContractDeploymentInfo(client *blockchain.Client, contractAddress common.Address, deploymentInfo *DeploymentInfo) (*models.DeploymentInfo, error) {
 	ctx := context.Background()
 	ethClient := client.GetClient()
 
@@ -662,29 +678,87 @@ func getContractDeploymentInfo(client *blockchain.Client, contractAddress common
 
 	log.Success("Contract found on blockchain", "address", contractAddress.Hex(), "codeSize", len(code))
 
-	// Try to get creation transaction info
-	// Note: This is a simplified approach. In a real implementation, you might need to:
-	// 1. Use trace APIs to find the creation transaction
-	// 2. Scan blocks from a certain range
-	// 3. Use external services or indexed data
+	// Check if deployment info is provided in YAML
+	if deploymentInfo != nil && deploymentInfo.TxHash != "" {
+		log.Info("Using deployment info from YAML configuration")
 
-	// For now, we'll create basic deployment info
-	deployInfo := &models.DeploymentInfo{
-		CreatorAddress: "0x0000000000000000000000000000000000000000", // Unknown
-		TxHash:         "0x0000000000000000000000000000000000000000000000000000000000000000", // Unknown
-		BlockNumber:    0, // Unknown
-		Timestamp:      time.Now(),
-		GasUsed:        0, // Unknown
+		// Parse timestamp if provided
+		var timestamp time.Time
+		if deploymentInfo.Timestamp != "" {
+			var err error
+			timestamp, err = time.Parse(time.RFC3339, deploymentInfo.Timestamp)
+			if err != nil {
+				log.Warning("Failed to parse timestamp, using current time", "error", err)
+				timestamp = time.Now()
+			}
+		} else {
+			timestamp = time.Now()
+		}
+
+		// Use provided deployment info
+		deployInfo := &models.DeploymentInfo{
+			CreatorAddress: deploymentInfo.CreatorAddress,
+			TxHash:         deploymentInfo.TxHash,
+			BlockNumber:    deploymentInfo.BlockNumber,
+			Timestamp:      timestamp,
+			GasUsed:        deploymentInfo.GasUsed,
+		}
+
+		// If only tx_hash is provided, try to get additional info from blockchain
+		if deploymentInfo.CreatorAddress == "" || deploymentInfo.BlockNumber == 0 {
+			log.Info("Fetching additional deployment info from blockchain...")
+			txInfo, err := getTransactionInfo(client, common.HexToHash(deploymentInfo.TxHash))
+			if err == nil {
+				if deploymentInfo.CreatorAddress == "" {
+					deployInfo.CreatorAddress = txInfo.From.Hex()
+				}
+				if deploymentInfo.BlockNumber == 0 {
+					deployInfo.BlockNumber = int64(txInfo.BlockNumber)
+				}
+				if deploymentInfo.GasUsed == 0 {
+					deployInfo.GasUsed = int64(txInfo.GasUsed)
+				}
+				if deploymentInfo.Timestamp == "" {
+					deployInfo.Timestamp = time.Unix(int64(txInfo.Time), 0)
+				}
+			}
+		}
+
+		return deployInfo, nil
 	}
 
-	// TODO: Implement proper creation transaction detection
-	// This could involve:
-	// - Using debug_traceTransaction or similar RPC methods
-	// - Scanning recent blocks for contract creation
-	// - Using external indexing services
+	// Fallback: Try to find creation transaction by scanning recent blocks
+	log.Info("No deployment info provided, scanning blockchain for creation transaction...")
 
-	log.Info("Note: Creation transaction details not available via standard RPC")
-	log.Info("Consider providing this information manually or using block explorer APIs")
+	// Get current block info as fallback
+	header, err := ethClient.HeaderByNumber(ctx, nil)
+	if err != nil {
+		log.Warning("Failed to get current block header", "error", err)
+		header = &types.Header{Number: big.NewInt(0)}
+	}
+
+	// Try to find creation transaction by scanning recent blocks
+	creationInfo, err := findContractCreationTransaction(client, contractAddress, header.Number)
+	if err != nil {
+		log.Warning("Could not find creation transaction, using current block info", "error", err)
+		// Use current block as fallback
+		deployInfo := &models.DeploymentInfo{
+			CreatorAddress: "0x0000000000000000000000000000000000000000",                         // Unknown
+			TxHash:         "0x0000000000000000000000000000000000000000000000000000000000000000", // Unknown
+			BlockNumber:    int64(header.Number.Uint64()),
+			Timestamp:      time.Unix(int64(header.Time), 0),
+			GasUsed:        0,
+		}
+		return deployInfo, nil
+	}
+
+	deployInfo := &models.DeploymentInfo{
+		CreatorAddress: creationInfo.From.Hex(),
+		TxHash:         creationInfo.Hash.Hex(),
+		BlockNumber:    int64(creationInfo.BlockNumber),
+		Timestamp:      time.Unix(int64(creationInfo.Time), 0),
+		GasUsed:        int64(creationInfo.GasUsed),
+	}
 
 	return deployInfo, nil
 }
@@ -780,4 +854,129 @@ func registerContractViaAPI(apiURL string, deployment *models.ContractDeployment
 
 	log.Success("Contract registered successfully in database")
 	return nil
+}
+
+// ContractCreationInfo holds information about contract creation
+type ContractCreationInfo struct {
+	Hash        common.Hash
+	From        common.Address
+	BlockNumber uint64
+	Time        uint64
+	GasUsed     uint64
+}
+
+// DeploymentInfo holds deployment information from YAML
+type DeploymentInfo struct {
+	TxHash         string `yaml:"tx_hash,omitempty"`
+	CreatorAddress string `yaml:"creator_address,omitempty"`
+	BlockNumber    int64  `yaml:"block_number,omitempty"`
+	GasUsed        int64  `yaml:"gas_used,omitempty"`
+	Timestamp      string `yaml:"timestamp,omitempty"`
+}
+
+// findContractCreationTransaction attempts to find the transaction that created the contract
+func findContractCreationTransaction(client *blockchain.Client, contractAddress common.Address, currentBlock *big.Int) (*ContractCreationInfo, error) {
+	ctx := context.Background()
+	ethClient := client.GetClient()
+
+	// Scan backwards from current block, checking up to 1000 blocks
+	scanBlocks := int64(1000)
+	startBlock := new(big.Int).Sub(currentBlock, big.NewInt(scanBlocks))
+	if startBlock.Cmp(big.NewInt(0)) < 0 {
+		startBlock = big.NewInt(0)
+	}
+
+	log.Info("Scanning blocks for contract creation",
+		"contract", contractAddress.Hex(),
+		"from", startBlock.Uint64(),
+		"to", currentBlock.Uint64())
+
+	for blockNum := currentBlock; blockNum.Cmp(startBlock) >= 0; blockNum.Sub(blockNum, big.NewInt(1)) {
+		block, err := ethClient.BlockByNumber(ctx, blockNum)
+		if err != nil {
+			log.Warning("Failed to get block", "block", blockNum.Uint64(), "error", err)
+			continue
+		}
+
+		// Check each transaction in the block
+		for _, tx := range block.Transactions() {
+			// Check if this transaction created the contract
+			if tx.To() == nil && len(tx.Data()) > 0 {
+				// This is a contract creation transaction
+				receipt, err := ethClient.TransactionReceipt(ctx, tx.Hash())
+				if err != nil {
+					continue
+				}
+
+				// Check if the created contract address matches
+				if receipt.ContractAddress == contractAddress {
+					// Get sender address
+					sender, err := ethClient.TransactionSender(ctx, tx, block.Hash(), 0)
+					if err != nil {
+						log.Warning("Failed to get transaction sender", "error", err)
+						continue
+					}
+
+					log.Success("Found contract creation transaction",
+						"txHash", tx.Hash().Hex(),
+						"block", blockNum.Uint64(),
+						"from", sender.Hex())
+
+					// Create creation info
+					creationInfo := &ContractCreationInfo{
+						Hash:        tx.Hash(),
+						From:        sender,
+						BlockNumber: blockNum.Uint64(),
+						Time:        block.Time(),
+						GasUsed:     receipt.GasUsed,
+					}
+					return creationInfo, nil
+				}
+			}
+		}
+	}
+
+	return nil, fmt.Errorf("contract creation transaction not found in scanned blocks")
+}
+
+// getTransactionInfo fetches transaction details from blockchain
+func getTransactionInfo(client *blockchain.Client, txHash common.Hash) (*ContractCreationInfo, error) {
+	ctx := context.Background()
+	ethClient := client.GetClient()
+
+	// Get transaction
+	tx, isPending, err := ethClient.TransactionByHash(ctx, txHash)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get transaction: %w", err)
+	}
+
+	if isPending {
+		return nil, fmt.Errorf("transaction is still pending")
+	}
+
+	// Get transaction receipt
+	receipt, err := ethClient.TransactionReceipt(ctx, txHash)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get transaction receipt: %w", err)
+	}
+
+	// Get block info
+	block, err := ethClient.BlockByNumber(ctx, receipt.BlockNumber)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get block: %w", err)
+	}
+
+	// Get sender address
+	sender, err := ethClient.TransactionSender(ctx, tx, block.Hash(), receipt.TransactionIndex)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get transaction sender: %w", err)
+	}
+
+	return &ContractCreationInfo{
+		Hash:        txHash,
+		From:        sender,
+		BlockNumber: receipt.BlockNumber.Uint64(),
+		Time:        block.Time(),
+		GasUsed:     receipt.GasUsed,
+	}, nil
 }

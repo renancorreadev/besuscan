@@ -1,0 +1,45 @@
+contract:
+  address: "0x68C01dBd04447C971B4D55b06952348Bc8bFEd82"
+  name: "ChippedReceivablesTracker"
+  symbol: "CRT"
+  description: "Contrato para tokenização de recebíveis físicos com verificação baseada em chip"
+  type: "ERC1155"
+
+deployment:
+  tx_hash: "0xcd1d05e04d9658ef4823589f45921629960ff75cfe21357f2ef56cfe2f049381"
+  creator_address: "0x0d989268a4b52d9c7026fea8b442b5ea7247abd3"
+  block_number: 12345
+  gas_used: 0
+  timestamp: "2025-09-23T05:30:33+00:00"
+
+files:
+  contract: "templates/smart-contracts/Receivables/ChippedReceivablesProtocol/src/ChippedReceivablesTracker.sol"
+  abi: "templates/abis/Receivables/ChippedReceivablesTracker.abi"
+  bytecode: "templates/abis/Receivables/ChippedReceivablesTracker.bin"
+
+constructor_args:
+  - "https://api.example.com/metadata/{id}.json"
+
+compiler:
+  version: "v0.8.24"
+  optimization_enabled: true
+  optimization_runs: 200
+
+metadata:
+  license: "MIT"
+  website_url: "https://example.com"
+  github_url: "https://github.com/user/project"
+  documentation_url: "https://docs.example.com"
+  tags:
+    - "erc1155"
+    - "receivables"
+    - "tokenization"
+    - "physical-assets"
+    - "chip-verification"
+    - "access-control"
+    - "pausable"
+
+register:
+  auto_verify: true
+  register_only_main: false
+  skip_bytecode_check: false

@@ -30,7 +30,7 @@ echo ""
 if [ -z "$CLIENT_ADDRESS" ]; then
     echo "1. Cliente não possui EOA. Criando novo EOA..."
     ./create-eoa-for-client.sh $CLIENT_NAME
-    
+
     # Carregar endereço criado
     source client-keys/$CLIENT_NAME.env
     CLIENT_ADDRESS=$CLIENT_ADDRESS
