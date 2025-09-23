@@ -1,0 +1,139 @@
+{
+    "network": {
+        "name": "Besu Local",
+        "chainId": 1337,
+        "rpcUrl": "http://144.22.179.183",
+        "explorerUrl": "http://144.22.179.183:3000"
+    },
+    "contracts": {
+        "AABankManager": {
+            "address": "0xF60AA2e36e214F457B625e0CF9abd89029A0441e",
+            "txHash": "0x22232a5cab78ddda276b6da1ab3d7712347b7602da4a6fa5ec8d4e5ea17363ac",
+            "blockNumber": 1759016,
+            "gasUsed": 2326717,
+            "flattenedFile": "AABankManager_flattened.sol",
+            "description": "Contrato principal para gerenciamento de contas Account Abstraction",
+            "constructorArgs": [
+                "0xdB226C0C56fDE2A974B11bD3fFc481Da9e803912",
+                "0x524db0420D1B8C3870933D1Fddac6bBaa63C2Ca6",
+                {
+                    "dailyLimit": "10000000000000000000000",
+                    "weeklyLimit": "50000000000000000000000",
+                    "monthlyLimit": "200000000000000000000000",
+                    "transactionLimit": "5000000000000000000000",
+                    "multiSigThreshold": "10000000000000000000000"
+                }
+            ]
+        },
+        "AABankAccount": {
+            "address": "0x524db0420D1B8C3870933D1Fddac6bBaa63C2Ca6",
+            "txHash": "0x614a219265f227b85c71263d0ecc196e6593122a3ec7e6eda5d1df7269999089",
+            "blockNumber": 1759016,
+            "gasUsed": 2406953,
+            "flattenedFile": "AABankAccount_flattened.sol",
+            "description": "Implementação das contas bancárias Account Abstraction",
+            "constructorArgs": [
+                "0xdB226C0C56fDE2A974B11bD3fFc481Da9e803912"
+            ]
+        },
+        "KYCAMLValidator": {
+            "address": "0x8D5C581dEc763184F72E9b49E50F4387D35754D8",
+            "txHash": "0x7b4ab69e1bd820efda1a84a6df49cab9e6c09a7dba30a20d760e0d6e13f8ca3f",
+            "blockNumber": 1759016,
+            "gasUsed": 2339606,
+            "flattenedFile": "KYCAMLValidator_flattened.sol",
+            "description": "Validação KYC/AML e compliance",
+            "constructorArgs": [
+                {
+                    "lowThreshold": 20,
+                    "mediumThreshold": 50,
+                    "highThreshold": 80,
+                    "criticalThreshold": 100
+                },
+                "31536000"
+            ]
+        },
+        "TransactionLimits": {
+            "address": "0x3416B85fDD6cC143AEE2d3cCD7228d7CB22b564a",
+            "txHash": "0x7e1965883ac51c32d618ff145f84abf1954758de3b88cf56effb105731c57ec2",
+            "blockNumber": 1759016,
+            "gasUsed": 3146250,
+            "flattenedFile": "TransactionLimits_flattened.sol",
+            "description": "Controle de limites de transação e velocidade",
+            "constructorArgs": [
+                {
+                    "dailyLimit": "10000000000000000000000",
+                    "weeklyLimit": "50000000000000000000000",
+                    "monthlyLimit": "200000000000000000000000",
+                    "transactionLimit": "5000000000000000000000",
+                    "velocityLimit": 10,
+                    "velocityWindow": 3600,
+                    "isActive": true
+                }
+            ]
+        },
+        "MultiSignatureValidator": {
+            "address": "0x29209C1392b7ebe91934Ee9Ef4C57116761286F8",
+            "txHash": "0x2c6f39cb520d53fe159c643363c108b19c4391b26c7fce4e3ffb475f5d8cc609",
+            "blockNumber": 1759016,
+            "gasUsed": 3393188,
+            "flattenedFile": "MultiSignatureValidator_flattened.sol",
+            "description": "Validação multi-assinatura para transações de alto valor",
+            "constructorArgs": []
+        },
+        "SocialRecovery": {
+            "address": "0xF6757ee0d75AE430Ec148850c16aA1F0e8e35e59",
+            "txHash": "0xf65a8b7567281c5918fe4427e001a61c6ba52a4ffef590daedd4746d56befab7",
+            "blockNumber": 1759016,
+            "gasUsed": 4000922,
+            "flattenedFile": "SocialRecovery_flattened.sol",
+            "description": "Mecanismo de recuperação social para contas",
+            "constructorArgs": []
+        },
+        "AuditLogger": {
+            "address": "0x6C59E8111D3D59512e39552729732bC09549daF8",
+            "txHash": "0x73153f4edcf39fd79e84cc4d3a23f00ede5e2ffa44b77a45bfcf8da7b3afeb32",
+            "blockNumber": 1759016,
+            "gasUsed": 3623382,
+            "flattenedFile": "AuditLogger_flattened.sol",
+            "description": "Sistema de logs de auditoria e compliance",
+            "constructorArgs": []
+        },
+        "EntryPoint": {
+            "address": "0xdB226C0C56fDE2A974B11bD3fFc481Da9e803912",
+            "txHash": "0x0c5cc2ed9764c1489a130fce7d6b8785516523305f89d970bacc1b81f8c92814",
+            "blockNumber": 1759016,
+            "gasUsed": 3725250,
+            "flattenedFile": "EntryPoint_flattened.sol",
+            "description": "EntryPoint para ERC-4337 Account Abstraction",
+            "constructorArgs": []
+        }
+    },
+    "verification": {
+        "compiler": {
+            "version": "v0.8.28+commit.0dd3f301",
+            "optimization": {
+                "enabled": true,
+                "runs": 200
+            },
+            "viaIR": true
+        },
+        "sourceCode": {
+            "AABankManager": "AABankManager_flattened.sol",
+            "AABankAccount": "AABankAccount_flattened.sol",
+            "KYCAMLValidator": "KYCAMLValidator_flattened.sol",
+            "TransactionLimits": "TransactionLimits_flattened.sol",
+            "MultiSignatureValidator": "MultiSignatureValidator_flattened.sol",
+            "SocialRecovery": "SocialRecovery_flattened.sol",
+            "AuditLogger": "AuditLogger_flattened.sol",
+            "EntryPoint": "EntryPoint_flattened.sol"
+        }
+    },
+    "metadata": {
+        "deployer": "0xB40061C7bf8394eb130Fcb5EA06868064593BFAa",
+        "deployedAt": "2025-01-25T00:00:00Z",
+        "totalGasUsed": 25421314,
+        "totalCost": "0 ETH",
+        "successRate": "100%"
+    }
+}

@@ -1,0 +1,35 @@
+contract:
+  address: "0x524db0420D1B8C3870933D1Fddac6bBaa63C2Ca6"
+  name: "AABankAccount"
+  symbol: "AABA"
+  description: "Implementation contract for Account Abstraction bank accounts"
+  type: "AccountAbstraction"
+
+files:
+  contract: "templates/smart-contracts/AA/AAManagment/src/AABankAccount.sol"
+  abi: "templates/abis/AA/AABankAccount.abi"
+  bytecode: "templates/abis/AA/AABankAccount.bin"
+
+
+constructor_args:
+  - "0xdB226C0C56fDE2A974B11bD3fFc481Da9e803912"
+
+compiler:
+  version: "v0.8.28"
+  optimization_enabled: true
+  optimization_runs: 200
+
+metadata:
+  license: "MIT"
+  website_url: "https://example.com"
+  github_url: "https://github.com/user/project"
+  documentation_url: "https://docs.example.com"
+  tags:
+    - "account-abstraction"
+    - "bank-account"
+    - "erc4337"
+
+register:
+  auto_verify: true
+  register_only_main: false
+  skip_bytecode_check: false

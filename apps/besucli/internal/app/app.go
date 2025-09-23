@@ -46,6 +46,11 @@ BesuCLI is a complete and professional tool for:
    • Automatic contract validation
    • Pre-configured templates
 
+📝 Smart Contract Registration
+   • Register contracts deployed by Forge/Hardhat
+   • Automatic blockchain verification
+   • Database integration with BesuScan
+
 🔍 Automatic Verification
    • Verification on BesuScan Explorer
    • Complete and organized metadata
@@ -63,6 +68,7 @@ BesuCLI is a complete and professional tool for:
 
 Usage examples:
   besucli deploy token.yml                    # Deploy via YAML
+  besucli register deployed-token.yml         # Register existing contract
   besucli validate counter.yml               # Validate contract
   besucli interact read 0x123... balanceOf   # Read function
   besucli list --verified                    # List verified contracts
@@ -84,6 +90,7 @@ func (a *App) setupCommands() {
 
 	// Adicionar todos os comandos
 	a.rootCmd.AddCommand(factory.NewDeployCommand())
+	a.rootCmd.AddCommand(factory.NewRegisterCommand())
 	a.rootCmd.AddCommand(factory.NewVerifyCommand())
 	a.rootCmd.AddCommand(factory.NewInteractCommand())
 	a.rootCmd.AddCommand(factory.NewListCommand())

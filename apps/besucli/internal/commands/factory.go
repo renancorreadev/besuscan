@@ -25,6 +25,11 @@ func (f *Factory) NewDeployCommand() *cobra.Command {
 	return NewDeployCommand(f.config)
 }
 
+// NewRegisterCommand cria comando de registro
+func (f *Factory) NewRegisterCommand() *cobra.Command {
+	return NewRegisterCommand(f.config)
+}
+
 // NewVerifyCommand cria comando de verificação
 func (f *Factory) NewVerifyCommand() *cobra.Command {
 	return NewVerifyCommand()

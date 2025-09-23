@@ -1,0 +1,38 @@
+# BesuCLI - Register Configuration for AuditLogger Contract
+# TODOS OS CAMPOS SÃO OBRIGATÓRIOS para registro completo no PostgreSQL
+
+contract:
+  address: "0x6C59E8111D3D59512e39552729732bC09549daF8"  # OBRIGATÓRIO: Endereço do contrato já deployado
+  name: "AuditLogger"                                    # OBRIGATÓRIO: Nome do contrato
+  symbol: "AUDIT"                                        # OBRIGATÓRIO: Símbolo (mesmo que não seja token)
+  description: "Audit logging for compliance and monitoring" # OBRIGATÓRIO: Descrição do contrato
+  type: "Compliance"                                     # OBRIGATÓRIO: Tipo do contrato
+
+files:
+  contract: "templates/smart-contracts/AA/AAManagment/src/AuditLogger.sol" # OBRIGATÓRIO: Código fonte do contrato
+  abi: "templates/abis/AA/AuditLogger.abi"               # OBRIGATÓRIO: ABI do contrato
+  bytecode: "templates/abis/AA/AuditLogger.bin"          # OBRIGATÓRIO: Bytecode do contrato
+
+# OBRIGATÓRIO: Argumentos usados no deploy original
+constructor_args: []
+
+compiler:
+  version: "v0.8.28"           # OBRIGATÓRIO: Versão do compilador Solidity
+  optimization_enabled: true   # OBRIGATÓRIO: Se otimização estava habilitada
+  optimization_runs: 200       # OBRIGATÓRIO: Número de runs de otimização
+
+metadata:
+  license: "MIT"                                        # OBRIGATÓRIO: Tipo de licença
+  website_url: "https://example.com"                    # OBRIGATÓRIO: URL do website
+  github_url: "https://github.com/user/project"         # OBRIGATÓRIO: URL do GitHub
+  documentation_url: "https://docs.example.com"         # OBRIGATÓRIO: URL da documentação
+  tags:                                                 # OBRIGATÓRIO: Tags para categorização
+    - "compliance"
+    - "audit"
+    - "logging"
+    - "monitoring"
+
+register:
+  auto_verify: true              # Verificar automaticamente após registro
+  register_only_main: false      # Registrar apenas contrato principal
+  skip_bytecode_check: false     # Pular validação de bytecode

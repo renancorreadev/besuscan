@@ -1,0 +1,42 @@
+# BesuCLI - Register Configuration for Existing Contract
+# TODOS OS CAMPOS SÃO OBRIGATÓRIOS para registro completo no PostgreSQL
+
+contract:
+  address: "0x1234567890123456789012345678901234567890"  # OBRIGATÓRIO: Endereço do contrato já deployado
+  name: "Counter"                                        # OBRIGATÓRIO: Nome do contrato
+  symbol: "CNT"                                         # OBRIGATÓRIO: Símbolo (mesmo que não seja token)
+  description: "Contrato contador simples já deployado" # OBRIGATÓRIO: Descrição do contrato
+  type: "Custom"                                        # OBRIGATÓRIO: Tipo do contrato
+
+files:
+  contract: "templates/smart-contracts/Counter.sol"     # OBRIGATÓRIO: Código fonte do contrato
+  abi: "templates/abis/Counter.abi"                     # OBRIGATÓRIO: ABI do contrato
+  bytecode: "templates/abis/Counter.bin"                # OBRIGATÓRIO: Bytecode do contrato
+
+# OBRIGATÓRIO: Argumentos usados no deploy original (mesmo que vazio)
+constructor_args: []
+# Exemplo com argumentos:
+# constructor_args:
+#   - "1000000000000000000000"  # initialSupply (uint256)
+#   - "MyToken"                 # name (string)
+#   - "MTK"                     # symbol (string)
+
+compiler:
+  version: "v0.8.19"           # OBRIGATÓRIO: Versão do compilador Solidity
+  optimization_enabled: true   # OBRIGATÓRIO: Se otimização estava habilitada
+  optimization_runs: 200       # OBRIGATÓRIO: Número de runs de otimização
+
+metadata:
+  license: "MIT"                                        # OBRIGATÓRIO: Tipo de licença
+  website_url: "https://example.com"                    # OBRIGATÓRIO: URL do website
+  github_url: "https://github.com/user/project"         # OBRIGATÓRIO: URL do GitHub
+  documentation_url: "https://docs.example.com"         # OBRIGATÓRIO: URL da documentação
+  tags:                                                 # OBRIGATÓRIO: Tags para categorização
+    - "counter"
+    - "test"
+    - "external-deploy"
+
+register:
+  auto_verify: true              # Verificar automaticamente após registro
+  register_only_main: false      # Registrar apenas contrato principal
+  skip_bytecode_check: false     # Pular validação de bytecode

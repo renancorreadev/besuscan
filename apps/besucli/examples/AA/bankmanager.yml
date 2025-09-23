@@ -1,0 +1,37 @@
+contract:
+  address: "0xF60AA2e36e214F457B625e0CF9abd89029A0441e"  # OBRIGATÓRIO: Endereço do contrato já deployado
+  name: "AABankManager"                                    # OBRIGATÓRIO: Nome do contrato
+  symbol: "AABM"                                          # OBRIGATÓRIO: Símbolo (mesmo que não seja token)
+  description: "Main contract for managing bank accounts and operations" # OBRIGATÓRIO: Descrição do contrato
+  type: "AccountAbstraction"                              # OBRIGATÓRIO: Tipo do contrato
+
+files:
+  contract: "templates/smart-contracts/AA/AAManagment/src/AABankManager.sol" # OBRIGATÓRIO: Código fonte do contrato
+  abi: "templates/abis/AA/AABankManager.abi"              # OBRIGATÓRIO: ABI do contrato
+  bytecode: "templates/abis/AA/AABankManager.bin"         # OBRIGATÓRIO: Bytecode do contrato
+
+# OBRIGATÓRIO: Argumentos usados no deploy original
+constructor_args:
+  - "0xdB226C0C56fDE2A974B11bD3fFc481Da9e803912"  # entryPoint
+  - "0x524db0420D1B8C3870933D1Fddac6bBaa63C2Ca6"  # accountImplementation
+  - '{"dailyLimit": "10000000000000000000000", "weeklyLimit": "50000000000000000000000", "monthlyLimit": "200000000000000000000000", "transactionLimit": "5000000000000000000000", "multiSigThreshold": "10000000000000000000000"}'  # globalLimits tuple
+
+compiler:
+  version: "v0.8.28"           # OBRIGATÓRIO: Versão do compilador Solidity
+  optimization_enabled: true   # OBRIGATÓRIO: Se otimização estava habilitada
+  optimization_runs: 200       # OBRIGATÓRIO: Número de runs de otimização
+
+metadata:
+  license: "MIT"                                        # OBRIGATÓRIO: Tipo de licença
+  website_url: "https://example.com"                    # OBRIGATÓRIO: URL do website
+  github_url: "https://github.com/user/project"         # OBRIGATÓRIO: URL do GitHub
+  documentation_url: "https://docs.example.com"         # OBRIGATÓRIO: URL da documentação
+  tags:                                                 # OBRIGATÓRIO: Tags para categorização
+    - "account-abstraction"
+    - "bank-manager"
+    - "erc4337"
+
+register:
+  auto_verify: true              # Verificar automaticamente após registro
+  register_only_main: false      # Registrar apenas contrato principal
+  skip_bytecode_check: false     # Pular validação de bytecode

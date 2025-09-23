@@ -1,0 +1,90 @@
+{
+    "network": "besu-local",
+    "chainId": 1337,
+    "rpcUrl": "http://144.22.179.183",
+    "deployedAt": "2025-01-25T00:00:00Z",
+    "blockNumber": 1759016,
+    "deployer": "0xB40061C7bf8394eb130Fcb5EA06868064593BFAa",
+    "contracts": {
+        "entryPoint": {
+            "address": "0xdB226C0C56fDE2A974B11bD3fFc481Da9e803912",
+            "txHash": "0x0c5cc2ed9764c1489a130fce7d6b8785516523305f89d970bacc1b81f8c92814",
+            "gasUsed": 3725250,
+            "description": "EntryPoint contract for ERC-4337 account abstraction"
+        },
+        "bankManager": {
+            "address": "0xF60AA2e36e214F457B625e0CF9abd89029A0441e",
+            "txHash": "0x22232a5cab78ddda276b6da1ab3d7712347b7602da4a6fa5ec8d4e5ea17363ac",
+            "gasUsed": 2326717,
+            "description": "Main contract for managing bank accounts and operations"
+        },
+        "accountImplementation": {
+            "address": "0x524db0420D1B8C3870933D1Fddac6bBaa63C2Ca6",
+            "txHash": "0x614a219265f227b85c71263d0ecc196e6593122a3ec7e6eda5d1df7269999089",
+            "gasUsed": 2406953,
+            "description": "Implementation contract for AA bank accounts"
+        },
+        "kycAmlValidator": {
+            "address": "0x8D5C581dEc763184F72E9b49E50F4387D35754D8",
+            "txHash": "0x7b4ab69e1bd820efda1a84a6df49cab9e6c09a7dba30a20d760e0d6e13f8ca3f",
+            "gasUsed": 2339606,
+            "description": "KYC/AML validation and compliance checking"
+        },
+        "transactionLimits": {
+            "address": "0x3416B85fDD6cC143AEE2d3cCD7228d7CB22b564a",
+            "txHash": "0x7e1965883ac51c32d618ff145f84abf1954758de3b88cf56effb105731c57ec2",
+            "gasUsed": 3146250,
+            "description": "Transaction limits and velocity controls"
+        },
+        "multiSigValidator": {
+            "address": "0x29209C1392b7ebe91934Ee9Ef4C57116761286F8",
+            "txHash": "0x2c6f39cb520d53fe159c643363c108b19c4391b26c7fce4e3ffb475f5d8cc609",
+            "gasUsed": 3393188,
+            "description": "Multi-signature validation for high-value transactions"
+        },
+        "socialRecovery": {
+            "address": "0xF6757ee0d75AE430Ec148850c16aA1F0e8e35e59",
+            "txHash": "0xf65a8b7567281c5918fe4427e001a61c6ba52a4ffef590daedd4746d56befab7",
+            "gasUsed": 4000922,
+            "description": "Social recovery mechanism for account recovery"
+        },
+        "auditLogger": {
+            "address": "0x6C59E8111D3D59512e39552729732bC09549daF8",
+            "txHash": "0x73153f4edcf39fd79e84cc4d3a23f00ede5e2ffa44b77a45bfcf8da7b3afeb32",
+            "gasUsed": 3623382,
+            "description": "Audit logging for compliance and monitoring"
+        }
+    },
+    "configuration": {
+        "globalLimits": {
+            "dailyLimit": "10000000000000000000000",
+            "weeklyLimit": "50000000000000000000000",
+            "monthlyLimit": "200000000000000000000000",
+            "transactionLimit": "5000000000000000000000",
+            "multiSigThreshold": "10000000000000000000000"
+        },
+        "riskThresholds": {
+            "lowThreshold": 20,
+            "mediumThreshold": 50,
+            "highThreshold": 80,
+            "criticalThreshold": 100
+        },
+        "velocityLimits": {
+            "velocityLimit": 10,
+            "velocityWindow": 3600,
+            "kycValidity": 31536000
+        }
+    },
+    "roles": {
+        "deployer": "0xB40061C7bf8394eb130Fcb5EA06868064593BFAa",
+        "bankAdmin": "0xB40061C7bf8394eb130Fcb5EA06868064593BFAa",
+        "complianceOfficer": "0xB40061C7bf8394eb130Fcb5EA06868064593BFAa",
+        "riskManager": "0xB40061C7bf8394eb130Fcb5EA06868064593BFAa"
+    },
+    "statistics": {
+        "totalTransactions": 20,
+        "totalGasUsed": 25421314,
+        "deploymentCost": "0 ETH",
+        "successRate": "100%"
+    }
+}

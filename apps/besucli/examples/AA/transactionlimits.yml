@@ -1,0 +1,39 @@
+# BesuCLI - Register Configuration for TransactionLimits Contract
+# TODOS OS CAMPOS SÃO OBRIGATÓRIOS para registro completo no PostgreSQL
+
+contract:
+  address: "0x3416B85fDD6cC143AEE2d3cCD7228d7CB22b564a"  # OBRIGATÓRIO: Endereço do contrato já deployado
+  name: "TransactionLimits"                              # OBRIGATÓRIO: Nome do contrato
+  symbol: "TXLIM"                                        # OBRIGATÓRIO: Símbolo (mesmo que não seja token)
+  description: "Transaction limits and velocity controls" # OBRIGATÓRIO: Descrição do contrato
+  type: "Security"                                       # OBRIGATÓRIO: Tipo do contrato
+
+files:
+  contract: "templates/smart-contracts/AA/AAManagment/src/TransactionLimits.sol" # OBRIGATÓRIO: Código fonte do contrato
+  abi: "templates/abis/AA/TransactionLimits.abi"         # OBRIGATÓRIO: ABI do contrato
+  bytecode: "templates/abis/AA/TransactionLimits.bin"    # OBRIGATÓRIO: Bytecode do contrato
+
+# OBRIGATÓRIO: Argumentos usados no deploy original
+constructor_args:
+  - '{"dailyLimit": "10000000000000000000000", "weeklyLimit": "50000000000000000000000", "monthlyLimit": "200000000000000000000000", "transactionLimit": "5000000000000000000000", "velocityLimit": 10, "velocityWindow": 3600, "enabled": true}'  # velocityLimits tuple
+
+compiler:
+  version: "v0.8.28"           # OBRIGATÓRIO: Versão do compilador Solidity
+  optimization_enabled: true   # OBRIGATÓRIO: Se otimização estava habilitada
+  optimization_runs: 200       # OBRIGATÓRIO: Número de runs de otimização
+
+metadata:
+  license: "MIT"                                        # OBRIGATÓRIO: Tipo de licença
+  website_url: "https://example.com"                    # OBRIGATÓRIO: URL do website
+  github_url: "https://github.com/user/project"         # OBRIGATÓRIO: URL do GitHub
+  documentation_url: "https://docs.example.com"         # OBRIGATÓRIO: URL da documentação
+  tags:                                                 # OBRIGATÓRIO: Tags para categorização
+    - "security"
+    - "limits"
+    - "velocity"
+    - "controls"
+
+register:
+  auto_verify: true              # Verificar automaticamente após registro
+  register_only_main: false      # Registrar apenas contrato principal
+  skip_bytecode_check: false     # Pular validação de bytecode

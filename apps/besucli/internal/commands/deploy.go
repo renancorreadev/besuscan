@@ -577,23 +577,45 @@ func parseArgumentByType(argType abi.Type, value string) (interface{}, error) {
 		return result, nil
 
 	case abi.TupleTy:
-		// Handle structs/tuples - expect JSON format: {"field1": "value1", "field2": "value2"}
-		var tupleData map[string]string
+		// Handle structs/tuples - support both named and unnamed tuples
+		var tupleData map[string]interface{}
+
+		// Try to parse as JSON object first
 		if err := json.Unmarshal([]byte(value), &tupleData); err != nil {
-			return nil, fmt.Errorf("failed to parse tuple: %w", err)
+			// If that fails, try to parse as array for unnamed tuples
+			var arrayData []interface{}
+			if err2 := json.Unmarshal([]byte(value), &arrayData); err2 != nil {
+				return nil, fmt.Errorf("failed to parse tuple as object or array: %w", err)
+			}
+
+			// Convert array to map with indices as keys
+			tupleData = make(map[string]interface{})
+			for i, val := range arrayData {
+				tupleData[fmt.Sprintf("%d", i)] = val
+			}
 		}
 
 		var result []interface{}
 		for i, field := range argType.TupleElems {
-			fieldName := argType.TupleRawNames[i]
-			fieldValue, exists := tupleData[fieldName]
+			var fieldValue interface{}
+			var exists bool
+
+			// Try named field first, then index
+			if len(argType.TupleRawNames) > i && argType.TupleRawNames[i] != "" {
+				fieldValue, exists = tupleData[argType.TupleRawNames[i]]
+			}
 			if !exists {
-				return nil, fmt.Errorf("missing field %s in tuple", fieldName)
+				fieldValue, exists = tupleData[fmt.Sprintf("%d", i)]
+			}
+			if !exists {
+				return nil, fmt.Errorf("missing field %d in tuple", i)
 			}
 
-			parsedField, err := parseArgumentByType(*field, fieldValue)
+			// Convert to string for recursive parsing
+			fieldValueStr := fmt.Sprintf("%v", fieldValue)
+			parsedField, err := parseArgumentByType(*field, fieldValueStr)
 			if err != nil {
-				return nil, fmt.Errorf("failed to parse tuple field %s: %w", fieldName, err)
+				return nil, fmt.Errorf("failed to parse tuple field %d: %w", i, err)
 			}
 			result = append(result, parsedField)
 		}

@@ -1,0 +1,38 @@
+contract:
+  address: "0x8D5C581dEc763184F72E9b49E50F4387D35754D8"  # OBRIGATÓRIO: Endereço do contrato já deployado
+  name: "KYCAMLValidator"                                # OBRIGATÓRIO: Nome do contrato
+  symbol: "KYCAML"                                       # OBRIGATÓRIO: Símbolo (mesmo que não seja token)
+  description: "KYC/AML validation and compliance checking" # OBRIGATÓRIO: Descrição do contrato
+  type: "Compliance"                                     # OBRIGATÓRIO: Tipo do contrato
+
+files:
+  contract: "templates/smart-contracts/AA/AAManagment/src/KYCAMLValidator.sol" # OBRIGATÓRIO: Código fonte do contrato
+  abi: "templates/abis/AA/KYCAMLValidator.abi"           # OBRIGATÓRIO: ABI do contrato
+  bytecode: "templates/abis/AA/KYCAMLValidator.bin"      # OBRIGATÓRIO: Bytecode do contrato
+
+# OBRIGATÓRIO: Argumentos usados no deploy original
+constructor_args:
+  - '{"lowThreshold": 20, "mediumThreshold": 50, "highThreshold": 80, "criticalThreshold": 100}'  # riskThresholds tuple
+  - "31536000" # kycValidity (1 year in seconds)
+
+
+compiler:
+  version: "v0.8.28"           # OBRIGATÓRIO: Versão do compilador Solidity
+  optimization_enabled: true   # OBRIGATÓRIO: Se otimização estava habilitada
+  optimization_runs: 200       # OBRIGATÓRIO: Número de runs de otimização
+
+metadata:
+  license: "MIT"                                        # OBRIGATÓRIO: Tipo de licença
+  website_url: "https://example.com"                    # OBRIGATÓRIO: URL do website
+  github_url: "https://github.com/user/project"         # OBRIGATÓRIO: URL do GitHub
+  documentation_url: "https://docs.example.com"         # OBRIGATÓRIO: URL da documentação
+  tags:                                                 # OBRIGATÓRIO: Tags para categorização
+    - "compliance"
+    - "kyc"
+    - "aml"
+    - "validation"
+
+register:
+  auto_verify: true              # Verificar automaticamente após registro
+  register_only_main: false      # Registrar apenas contrato principal
+  skip_bytecode_check: false

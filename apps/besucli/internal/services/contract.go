@@ -169,6 +169,45 @@ func (s *ContractService) ParseConstructorArgs(contractABI abi.ABI, args []strin
 			} else {
 				parsedArgs[i] = []byte(arg)
 			}
+		case abi.TupleTy:
+			// Handle tuples - expect JSON format
+			var tupleData map[string]interface{}
+			if err := json.Unmarshal([]byte(arg), &tupleData); err != nil {
+				// Try array format for unnamed tuples
+				var arrayData []interface{}
+				if err2 := json.Unmarshal([]byte(arg), &arrayData); err2 != nil {
+					return nil, fmt.Errorf("failed to parse tuple: %w", err)
+				}
+				tupleData = make(map[string]interface{})
+				for idx, val := range arrayData {
+					tupleData[fmt.Sprintf("%d", idx)] = val
+				}
+			}
+
+			var tupleResult []interface{}
+			for j, field := range input.Type.TupleElems {
+				var fieldValue interface{}
+				var exists bool
+
+				if len(input.Type.TupleRawNames) > j && input.Type.TupleRawNames[j] != "" {
+					fieldValue, exists = tupleData[input.Type.TupleRawNames[j]]
+				}
+				if !exists {
+					fieldValue, exists = tupleData[fmt.Sprintf("%d", j)]
+				}
+				if !exists {
+					return nil, fmt.Errorf("missing field %d in tuple", j)
+				}
+
+				fieldStr := fmt.Sprintf("%v", fieldValue)
+				parsedField, err := s.parseFieldByType(*field, fieldStr)
+				if err != nil {
+					return nil, fmt.Errorf("failed to parse tuple field %d: %w", j, err)
+				}
+				tupleResult = append(tupleResult, parsedField)
+			}
+
+			parsedArgs[i] = tupleResult
 		default:
 			return nil, fmt.Errorf("unsupported argument type %s for argument %d", input.Type.String(), i)
 		}
@@ -330,6 +369,44 @@ func (s *ContractService) parseMethodArgs(method abi.Method, args []string) ([]i
 			} else {
 				parsedArgs[i] = []byte(arg)
 			}
+		case abi.TupleTy:
+			// Handle tuples in method arguments
+			var tupleData map[string]interface{}
+			if err := json.Unmarshal([]byte(arg), &tupleData); err != nil {
+				var arrayData []interface{}
+				if err2 := json.Unmarshal([]byte(arg), &arrayData); err2 != nil {
+					return nil, fmt.Errorf("failed to parse tuple: %w", err)
+				}
+				tupleData = make(map[string]interface{})
+				for idx, val := range arrayData {
+					tupleData[fmt.Sprintf("%d", idx)] = val
+				}
+			}
+
+			var tupleResult []interface{}
+			for j, field := range input.Type.TupleElems {
+				var fieldValue interface{}
+				var exists bool
+
+				if len(input.Type.TupleRawNames) > j && input.Type.TupleRawNames[j] != "" {
+					fieldValue, exists = tupleData[input.Type.TupleRawNames[j]]
+				}
+				if !exists {
+					fieldValue, exists = tupleData[fmt.Sprintf("%d", j)]
+				}
+				if !exists {
+					return nil, fmt.Errorf("missing field %d in tuple", j)
+				}
+
+				fieldStr := fmt.Sprintf("%v", fieldValue)
+				parsedField, err := s.parseFieldByType(*field, fieldStr)
+				if err != nil {
+					return nil, fmt.Errorf("failed to parse tuple field %d: %w", j, err)
+				}
+				tupleResult = append(tupleResult, parsedField)
+			}
+
+			parsedArgs[i] = tupleResult
 		default:
 			return nil, fmt.Errorf("unsupported argument type %s for argument %d", input.Type.String(), i)
 		}
@@ -489,4 +566,69 @@ func parseGasPrice(gasPrice string) (*big.Int, error) {
 	// Convert to big.Int
 	result, _ := weiValue.Int(nil)
 	return result, nil
+}
+
+func (s *ContractService) GetAPIURL() string {
+	return s.apiURL
+}
+
+func (s *ContractService) parseFieldByType(fieldType abi.Type, value string) (interface{}, error) {
+	switch fieldType.T {
+	case abi.UintTy:
+		if strings.HasPrefix(value, "0x") {
+			bigVal := new(big.Int)
+			bigVal.SetString(value[2:], 16)
+			return bigVal, nil
+		}
+		val, err := strconv.ParseUint(value, 10, int(fieldType.Size))
+		if err != nil {
+			bigVal := new(big.Int)
+			if _, ok := bigVal.SetString(value, 10); !ok {
+				return nil, fmt.Errorf("invalid uint value: %s", value)
+			}
+			return bigVal, nil
+		}
+		if fieldType.Size <= 64 {
+			return val, nil
+		}
+		bigVal := new(big.Int)
+		bigVal.SetUint64(val)
+		return bigVal, nil
+	case abi.IntTy:
+		if strings.HasPrefix(value, "0x") {
+			bigVal := new(big.Int)
+			bigVal.SetString(value[2:], 16)
+			return bigVal, nil
+		}
+		val, err := strconv.ParseInt(value, 10, int(fieldType.Size))
+		if err != nil {
+			bigVal := new(big.Int)
+			if _, ok := bigVal.SetString(value, 10); !ok {
+				return nil, fmt.Errorf("invalid int value: %s", value)
+			}
+			return bigVal, nil
+		}
+		if fieldType.Size <= 64 {
+			return val, nil
+		}
+		bigVal := new(big.Int)
+		bigVal.SetInt64(val)
+		return bigVal, nil
+	case abi.BoolTy:
+		return strconv.ParseBool(value)
+	case abi.AddressTy:
+		if !common.IsHexAddress(value) {
+			return nil, fmt.Errorf("invalid address: %s", value)
+		}
+		return common.HexToAddress(value), nil
+	case abi.StringTy:
+		return value, nil
+	case abi.BytesTy:
+		if strings.HasPrefix(value, "0x") {
+			return common.FromHex(value), nil
+		}
+		return []byte(value), nil
+	default:
+		return nil, fmt.Errorf("unsupported field type: %s", fieldType.String())
+	}
 }

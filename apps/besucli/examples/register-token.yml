@@ -1,0 +1,42 @@
+# BesuCLI - Register Configuration for ERC-20 Token with Constructor Arguments
+# TODOS OS CAMPOS SÃO OBRIGATÓRIOS para registro completo no PostgreSQL
+
+contract:
+  address: "0x742d35Cc6634C0532925a3b8D55d4df207e38e38"  # OBRIGATÓRIO: Endereço do token deployado
+  name: "MyCustomToken"                                  # OBRIGATÓRIO: Nome do contrato
+  symbol: "MCT"                                         # OBRIGATÓRIO: Símbolo do token
+  description: "Token ERC-20 customizado deployado via Hardhat" # OBRIGATÓRIO: Descrição
+  type: "ERC-20"                                        # OBRIGATÓRIO: Tipo do contrato
+
+files:
+  contract: "contracts/MyCustomToken.sol"               # OBRIGATÓRIO: Código fonte
+  abi: "artifacts/contracts/MyCustomToken.sol/MyCustomToken.json" # OBRIGATÓRIO: ABI
+  bytecode: "artifacts/contracts/MyCustomToken.sol/MyCustomToken.bin" # OBRIGATÓRIO: Bytecode
+
+# OBRIGATÓRIO: Argumentos do constructor usados no deploy original
+constructor_args:
+  - "1000000000000000000000000"  # initialSupply (uint256) - 1M tokens
+  - "MyCustomToken"              # name (string)
+  - "MCT"                        # symbol (string)
+  - "18"                         # decimals (uint8)
+
+compiler:
+  version: "v0.8.19"           # OBRIGATÓRIO: Versão do compilador
+  optimization_enabled: true   # OBRIGATÓRIO: Otimização habilitada
+  optimization_runs: 200       # OBRIGATÓRIO: Runs de otimização
+
+metadata:
+  license: "MIT"                                        # OBRIGATÓRIO: Tipo de licença
+  website_url: "https://mycustomtoken.com"              # OBRIGATÓRIO: Website
+  github_url: "https://github.com/user/mycustomtoken"   # OBRIGATÓRIO: GitHub
+  documentation_url: "https://docs.mycustomtoken.com"   # OBRIGATÓRIO: Documentação
+  tags:                                                 # OBRIGATÓRIO: Tags (mínimo 1)
+    - "erc20"
+    - "token"
+    - "defi"
+    - "hardhat-deploy"
+
+register:
+  auto_verify: true              # Verificar automaticamente após registro
+  register_only_main: false      # Registrar apenas contrato principal
+  skip_bytecode_check: false     # Pular validação de bytecode

@@ -13,8 +13,8 @@ import "../src/AuditLogger.sol";
 
 /**
  * @title DeployAABankingScript
- * @dev Script para deploy completo do sistema AA Banking para instituiçoes financeiras
- * @notice Deploy otimizado para ambiente de producao com configuraçoes de segurança
+ * @dev Script para deploy completo do sistema AA Banking para instituicoes financeiras
+ * @notice Deploy otimizado para ambiente de producao com configuracoes de seguranca
  */
 contract DeployAABankingScript is Script {
     // ============= DEPLOYMENT ADDRESSES =============
@@ -64,11 +64,11 @@ contract DeployAABankingScript is Script {
 
         vm.stopBroadcast();
 
-        _saveDeploymentAddresses(addresses);
+        // Deployment addresses saved to console output above
     }
 
     function _getDeploymentConfig() internal view returns (DeploymentConfig memory) {
-        // Configuracao baseada em variáveis de ambiente ou valores padrão
+        // Configuracao baseada em variaveis de ambiente ou valores padrao
         address deployer = vm.envOr("DEPLOYER", msg.sender);
         address superAdmin = vm.envOr("SUPER_ADMIN", deployer);
         address bankAdmin = vm.envOr("BANK_ADMIN", deployer);
@@ -126,43 +126,43 @@ contract DeployAABankingScript is Script {
             entryPoint = new EntryPoint();
             addresses.entryPoint = address(entryPoint);
         } else {
-            console.log(" Using existing EntryPoint at:", entryPointAddr);
+            console.log("Using existing EntryPoint at:", entryPointAddr);
             entryPoint = EntryPoint(payable(entryPointAddr));
             addresses.entryPoint = entryPointAddr;
         }
 
         // 2. Deploy validation contracts
-        console.log(" Deploying validation contracts...");
+        console.log("Deploying validation contracts...");
 
         kycAmlValidator = new KYCAMLValidator(
             config.riskThresholds,
             config.kycValidityPeriod
         );
         addresses.kycAmlValidator = address(kycAmlValidator);
-        console.log(" KYCAMLValidator deployed at:", addresses.kycAmlValidator);
+        console.log("KYCAMLValidator deployed at:", addresses.kycAmlValidator);
 
         transactionLimits = new TransactionLimits(config.defaultLimits);
         addresses.transactionLimits = address(transactionLimits);
-        console.log(" TransactionLimits deployed at:", addresses.transactionLimits);
+        console.log("TransactionLimits deployed at:", addresses.transactionLimits);
 
         multiSigValidator = new MultiSignatureValidator();
         addresses.multiSigValidator = address(multiSigValidator);
-        console.log(" MultiSignatureValidator deployed at:", addresses.multiSigValidator);
+        console.log("MultiSignatureValidator deployed at:", addresses.multiSigValidator);
 
         socialRecovery = new SocialRecovery();
         addresses.socialRecovery = address(socialRecovery);
-        console.log(" SocialRecovery deployed at:", addresses.socialRecovery);
+        console.log("SocialRecovery deployed at:", addresses.socialRecovery);
 
         auditLogger = new AuditLogger();
         addresses.auditLogger = address(auditLogger);
-        console.log(" AuditLogger deployed at:", addresses.auditLogger);
+        console.log("AuditLogger deployed at:", addresses.auditLogger);
 
         // 3. Deploy core contracts
-        console.log(" Deploying core contracts...");
+        console.log("Deploying core contracts...");
 
         accountImplementation = new AABankAccount(entryPoint);
         addresses.accountImplementation = address(accountImplementation);
-        console.log(" AABankAccount implementation deployed at:", addresses.accountImplementation);
+        console.log("AABankAccount implementation deployed at:", addresses.accountImplementation);
 
         bankManager = new AABankManager(
             entryPoint,
@@ -170,9 +170,9 @@ contract DeployAABankingScript is Script {
             config.globalLimits
         );
         addresses.bankManager = address(bankManager);
-        console.log(" AABankManager deployed at:", addresses.bankManager);
+        console.log("AABankManager deployed at:", addresses.bankManager);
 
-        console.log(" Todos os contratos deployados com sucesso!");
+        console.log("Todos os contratos deployados com sucesso!");
         return addresses;
     }
 
@@ -209,11 +209,11 @@ contract DeployAABankingScript is Script {
         auditLogger.grantRole(auditLogger.VIEWER(), config.complianceOfficer);
         auditLogger.grantRole(auditLogger.COMPLIANCE_OFFICER(), config.complianceOfficer);
 
-        console.log(" Configuracao de roles concluida!");
+        console.log("Configuracao de roles concluida!");
     }
 
     function _verifyDeployment(DeploymentAddresses memory addresses) internal view {
-        console.log(" Verificando deployment...");
+        console.log("Verificando deployment...");
 
         require(addresses.entryPoint != address(0), "EntryPoint not deployed");
         require(addresses.bankManager != address(0), "BankManager not deployed");
@@ -228,11 +228,11 @@ contract DeployAABankingScript is Script {
         require(bankManager.totalAccounts() == 0, "BankManager should start with 0 accounts");
         require(bankManager.activeAccounts() == 0, "BankManager should start with 0 active accounts");
 
-        console.log(" Deployment verification passed!");
+        console.log("Deployment verification passed!");
     }
 
     function _logDeploymentSummary(DeploymentAddresses memory addresses) internal view {
-        console.log("\n DEPLOYMENT SUMMARY");
+        console.log("\nDEPLOYMENT SUMMARY");
         console.log("======================");
         console.log("EntryPoint:              ", addresses.entryPoint);
         console.log("AABankManager:           ", addresses.bankManager);
@@ -245,31 +245,6 @@ contract DeployAABankingScript is Script {
         console.log("======================\n");
     }
 
-    function _saveDeploymentAddresses(DeploymentAddresses memory addresses) internal {
-        string memory deploymentJson = string.concat(
-            '{\n',
-            '  "entryPoint": "', vm.toString(addresses.entryPoint), '",\n',
-            '  "bankManager": "', vm.toString(addresses.bankManager), '",\n',
-            '  "accountImplementation": "', vm.toString(addresses.accountImplementation), '",\n',
-            '  "kycAmlValidator": "', vm.toString(addresses.kycAmlValidator), '",\n',
-            '  "transactionLimits": "', vm.toString(addresses.transactionLimits), '",\n',
-            '  "multiSigValidator": "', vm.toString(addresses.multiSigValidator), '",\n',
-            '  "socialRecovery": "', vm.toString(addresses.socialRecovery), '",\n',
-            '  "auditLogger": "', vm.toString(addresses.auditLogger), '",\n',
-            '  "network": "', vm.envOr("NETWORK", string("localhost")), '",\n',
-            '  "deployedAt": ', vm.toString(block.timestamp), '\n',
-            '}'
-        );
-
-        string memory fileName = string.concat(
-            "deployment-",
-            vm.envOr("NETWORK", string("localhost")),
-            ".json"
-        );
-
-        vm.writeFile(fileName, deploymentJson);
-        console.log(" Deployment addresses saved to:", fileName);
-    }
 }
 
 /**
@@ -285,43 +260,22 @@ contract SetupBanksScript is Script {
 
         vm.startBroadcast(bankAdmin);
 
-        console.log(" Setting up initial banks...");
+        console.log("Setting up Bradesco bank...");
 
-        // Setup major Brazilian banks
-        bytes32 santanderId = keccak256("SANTANDER");
-        bytes32 itauId = keccak256("ITAU");
-        bytes32 caixaId = keccak256("CAIXA");
+        // Setup apenas Bradesco
         bytes32 bradescoId = keccak256("BRADESCO");
-        bytes32 bbId = keccak256("BANCO_DO_BRASIL");
-
-        if (!_bankExists(bankManager, santanderId)) {
-            bankManager.registerBank(santanderId, "Banco Santander", bankAdmin);
-            console.log(" Banco Santander registered");
-        }
-
-        if (!_bankExists(bankManager, itauId)) {
-            bankManager.registerBank(itauId, "Banco Itau", bankAdmin);
-            console.log(" Banco Itau registered");
-        }
-
-        if (!_bankExists(bankManager, caixaId)) {
-            bankManager.registerBank(caixaId, "Caixa Economica Federal", bankAdmin);
-            console.log(" Caixa Economica Federal registered");
-        }
 
         if (!_bankExists(bankManager, bradescoId)) {
             bankManager.registerBank(bradescoId, "Banco Bradesco", bankAdmin);
-            console.log(" Banco Bradesco registered");
-        }
-
-        if (!_bankExists(bankManager, bbId)) {
-            bankManager.registerBank(bbId, "Banco do Brasil", bankAdmin);
-            console.log(" Banco do Brasil registered");
+            console.log("Banco Bradesco registered");
+        } else {
+            console.log("Banco Bradesco already exists");
         }
 
         vm.stopBroadcast();
 
-        console.log(" Initial banks setup completed!");
+        console.log("Bradesco bank setup completed!");
+        console.log("Bank ID: 0x42524144455343550000000s00000000000000000000000000000000000000000");
     }
 
     function _bankExists(AABankManager bankManager, bytes32 bankId) internal view returns (bool) {
@@ -339,7 +293,7 @@ contract SetupBanksScript is Script {
  */
 contract VerifySystemScript is Script {
     function run() external view {
-        console.log(" Verifying AA Banking System...");
+        console.log("Verifying AA Banking System...");
 
         address bankManagerAddr = vm.envAddress("BANK_MANAGER");
         AABankManager bankManager = AABankManager(bankManagerAddr);
@@ -373,6 +327,6 @@ contract VerifySystemScript is Script {
         console.log("- Transaction Limit:", transactionLimit / 1 ether, "ETH");
         console.log("- MultiSig Threshold:", multiSigThreshold / 1 ether, "ETH");
 
-        console.log("\n System verification completed!");
+        console.log("\nSystem verification completed!");
     }
 }
